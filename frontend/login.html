@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+        }
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 32px;
+            width: 100%;
+        }
+        .login-title {
+            font-size: 32px;
+            font-weight: 500;
+            color: #333333;
+            text-align: center;
+            width: 100%;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 100%;
+        }
+        .form-group label {
+            font-size: 16px;
+            color: #666666;
+            font-weight: 400;
+        }
+        .form-group input {
+            width: 100%;
+            height: 56px;
+            border-radius: 12px;
+            border: 1px solid rgba(102, 102, 102, 0.35);
+            padding: 0 16px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+        }
+        .password-group {
+            position: relative;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(102, 102, 102, 0.8);
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+        }
+        .checkbox-group label {
+            font-size: 16px;
+            color: #333333;
+            margin: 0;
+        }
+        .terms {
+            font-size: 16px;
+            color: #333333;
+            line-height: 1.5;
+        }
+        .terms a {
+            color: #111111;
+            text-decoration: underline;
+        }
+        .login-button {
+            width: 100%;
+            height: 64px;
+            background: #111111;
+            color: white;
+            border: none;
+            border-radius: 32px;
+            font-size: 22px;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .login-button:hover {
+            opacity: 0.8;
+        }
+        .links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+        .links a {
+            color: #111111;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .signup-text {
+            font-size: 16px;
+            color: #666666;
+        }
+        .signup-text a {
+            color: #111111;
+            font-weight: 500;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <form class="login-form" action="#" method="post">
+            <h1 class="login-title">Log In</h1>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-group">
+                    <input type="password" id="password" name="password" required>
+                    <div class="password-toggle">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19.8825 4.88128L19.1465 4.14533C18.9385 3.93734 18.5545 3.96935 18.3145 4.2573L15.7543 6.80126C14.6023 6.30532 13.3384 6.06532 12.0103 6.06532C8.05822 6.08126 4.63444 8.38523 2.98633 11.6974C2.8903 11.9054 2.8903 12.1614 2.98633 12.3373C3.75426 13.9054 4.90633 15.2014 6.34633 16.1773L4.25034 18.3053C4.01034 18.5453 3.97833 18.9293 4.13838 19.1373L4.87432 19.8732C5.08231 20.0812 5.4663 20.0492 5.7063 19.7613L19.7542 5.71339C20.0582 5.47352 20.0902 5.08956 19.8822 4.88155L19.8825 4.88128ZM12.8583 9.71316C12.5863 9.64914 12.2984 9.56919 12.0264 9.56919C10.6663 9.56919 9.57842 10.6572 9.57842 12.0171C9.57842 12.2891 9.64244 12.5771 9.72239 12.8491L8.65028 13.9051C8.33032 13.3452 8.15433 12.7211 8.15433 12.0172C8.15433 9.88918 9.86636 8.17715 11.9943 8.17715C12.6984 8.17715 13.3224 8.35314 13.8823 8.6731L12.8583 9.71316Z" fill="#666666" fill-opacity="0.8"/>
+                            <path d="M21.0345 11.6974C20.4745 10.5773 19.7384 9.56939 18.8265 8.75336L15.8505 11.6974V12.0173C15.8505 14.1453 14.1385 15.8573 12.0105 15.8573H11.6905L9.80255 17.7453C10.5066 17.8893 11.2426 17.9853 11.9626 17.9853C15.9147 17.9853 19.3385 15.6813 20.9866 12.3532C21.1306 12.1291 21.1306 11.9052 21.0345 11.6972L21.0345 11.6974Z" fill="#666666" fill-opacity="0.8"/>
+                        </svg>
+                        <span>Hide</span>
+                    </div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">Remember me</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <p class="terms">
+                    By continuing, you agree to the <a href="#">Terms of use</a> and <a href="#">Privacy Policy</a>.
+                </p>
+                <button type="submit" class="login-button">Log in</button>
+            </div>
+        </form>
+        <div class="links">
+            <a href="#">Forgot Password?</a>
+            <p class="signup-text">Don't have an account? <a href="signup.html">Sign up</a></p>
+        </div>
+    </div>
+</body>
+</html>
