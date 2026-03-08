@@ -239,10 +239,11 @@ TERMS & PRIVACY PAGES
 ================================
 */
 
-.container{
-    max-width:900px;
-    margin:auto;
-    background:white;
-    padding:40px;
-    border-radius:12px;
+.container {
+    max-width: 900px;
+    margin: 2rem auto;
+    background: white;
+    padding: 2rem 3rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
