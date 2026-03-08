@@ -38,4 +38,4 @@ ADD this line
 127.0.0.1 hms.local
 ```
 
-Restrat XAMPP
+RESTART XAMPP
