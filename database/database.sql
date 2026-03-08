@@ -19,14 +19,23 @@ INSERT INTO Roles (RoleName) VALUES
 CREATE TABLE IF NOT EXISTS Users (
     UserID INT AUTO_INCREMENT PRIMARY KEY,
     RoleID INT NOT NULL,
-    FirstName VARCHAR(100) NOT NULL,
-    LastName VARCHAR(100) NOT NULL,
     Email VARCHAR(150) NOT NULL UNIQUE,
     PasswordHash VARCHAR(255) NOT NULL,
-    PhoneContact VARCHAR(20),
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID)
+);
+
+CREATE TABLE Guests (
+    GuestID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT NULL,
+    FirstName VARCHAR(100) NOT NULL,
+    LastName VARCHAR(100) NOT NULL,
+    Email VARCHAR(150) NOT NULL,
+    PhoneContact VARCHAR(20),
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 
 -- =========================
@@ -99,7 +108,7 @@ INSERT INTO ReservationStatus (StatusName) VALUES
 -- =========================
 CREATE TABLE IF NOT EXISTS Reservations (
     ReservationID INT AUTO_INCREMENT PRIMARY KEY,
-    UserID INT NOT NULL,
+    GuestID INT NOT NULL,
     StatusID INT NOT NULL,
     CheckInDate DATE NOT NULL,
     CheckOutDate DATE NOT NULL,
