@@ -7,50 +7,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
+<body>
+    <form action="/signup-submit" method="post">
+        <label for="fname">First Name: </label>
+        <input type="text" name="fname" required>
+        <br>
+        <label for="lname">Last Name: </label>
+        <input type="text" name="lname" required>
+        <br>
+        <label for="phone">Phone Contact: </label>
+        <input type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" name="phone" placeholder="000-000-0000" required>
+        <br>
+        <label for="email">Email: </label>
+        <input type="email" name="email" required>
+        <br>
+        <label for="password">Password: </label>
+        <input type="password" name="password" required>
+        <br>
+        <label for="passwordr">Retype Password: </label>
+        <input type="password" name="passwordr" required>
+        <br>
 
-<body class="auth-page">
-    <div class="signup-container">
-        <div class="signup-header">
-            <h1 class="signup-title">Create an account</h1>
-            <p class="login-link">Already have an account? <a href="/login">Log in</a></p>
-        </div>
-        <form class="signup-form" action="#" method="post">
-            <div class="form-group-2">
-                <div class="form-group">
-                    <label for="FirstName">First Name</label>
-                    <input type="text" id="FirstName" FirstName="FirstName" placeholder="Enter your First Name" required>
-                </div>
-                <div class="form-group">
-                    <label for="LastName">Last Name</label>
-                    <input type="text" id="LastName" LastName="LastName" placeholder="Enter your Last Name" required>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="phone">What's your contact number?</label>
-                <input type="tel" id="phone" name="phone" placeholder="09XXXXXXXXX" pattern="[0-9]{11}" required>
-            </div>
-            <div class="form-group">
-                <label for="email">What's your email?</label>
-                <input type="email" id="email" name="email" placeholder="Enter your email address" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Create a password</label>
-                <div class="password-group">
-                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                    <div class="password-toggle">
-                        <img src="/assets/icons/eye-off.svg">
-                        <span>Hide</span>
-                    </div>
-                </div>
-                <p class="password-hint">Use 8 or more characters with a mix of letters, numbers & symbols</p>
-            </div>
-            <div class="form-group">
-                <p class="terms">
-                    By creating an account, you agree to the <a href="/terms">Terms of use</a> and <a href="/privacy">Privacy Policy</a>.
-                </p>
-                <button type="submit" class="signup-button">Create an account</button>
-            </div>
-        </form>
-    </div>
+        <input type="submit" value="signup">
+    </form>
 </body>
 </html>

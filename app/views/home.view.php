@@ -7,5 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Login</h1>
+    <a href="/login">login</a>
+    <br>
+    <a href="/signup">signup</a>
+    <br>
+    <a href="/reservation">reservation</a>
 </body>
