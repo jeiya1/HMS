@@ -31,7 +31,6 @@ CREATE TABLE Guests (
     UserID INT NULL,
     FirstName VARCHAR(100) NOT NULL,
     LastName VARCHAR(100) NOT NULL,
-    Email VARCHAR(150) NOT NULL,
     PhoneContact VARCHAR(20),
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -116,7 +115,7 @@ CREATE TABLE IF NOT EXISTS Reservations (
     NumChildren INT DEFAULT 0,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (GuestID) REFERENCES Guests(GuestID),
     FOREIGN KEY (StatusID) REFERENCES ReservationStatus(StatusID)
 );
 
@@ -175,8 +174,8 @@ ON Rooms(RoomTypeID);
 -- =========================
 -- Admin User
 -- =========================
-INSERT INTO Users (RoleID, FirstName, LastName, Email, PasswordHash, PhoneContact) VALUES
-(1, 'admin', 'admin', 'admin@hotel.com', 'password', '092584577102');
+INSERT INTO Users (RoleID, Email, PasswordHash) VALUES
+(1, 'admin@hotel.com', 'password');
 
 -- =========================
 -- Hotel Layout
@@ -207,10 +206,13 @@ INSERT INTO Rooms (RoomNumber, FloorID, RoomTypeID) VALUES
 -- =========================
 -- Test Reservation
 -- =========================
-INSERT INTO Users (RoleID, FirstName, LastName, Email, PasswordHash, PhoneContact) VALUES
-(2, 'Joseph', 'Aniag', 'aniagjoseph593@gmail.com', 'password', '092584577102');
+INSERT INTO Users (RoleID, Email, PasswordHash) VALUES
+(2, 'aniagjoseph593@gmail.com', 'password');
 
-INSERT INTO Reservations (UserID, StatusID, CheckInDate, CheckOutDate, NumAdults, NumChildren) VALUES
+INSERT INTO Guests (UserID, FirstName, LastName, PhoneContact) VALUES
+(2, 'Aniag', 'Joseph', '092584577102');
+
+INSERT INTO Reservations (GuestID, StatusID, CheckInDate, CheckOutDate, NumAdults, NumChildren) VALUES
 (1, 2, '2026-04-08', '2026-04-10', 1, 0);
 
 INSERT INTO ReservationRooms (ReservationID, RoomID) VALUES
