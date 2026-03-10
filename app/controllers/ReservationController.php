@@ -33,7 +33,7 @@ class ReservationController {
             if(!$available){
                 echo "Room is already booked for selected dates.";
                 return;
-            }
+            }//Prevents double booking by checking if a room is already reserved during the selected dates
 
             $reservationModel = new Reservation($GLOBALS['conn']);
 
