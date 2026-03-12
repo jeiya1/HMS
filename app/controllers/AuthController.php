@@ -19,8 +19,7 @@ class AuthController {
             $user = $userModel->getUserByEmail($email);
 
             if ($user && password_verify($password, $user->PasswordHash)) {
-                $_SESSION['user_id'] = $user->UserID;
-                $_SESSION['role'] = $user->RoleName;
+                $_SESSION['logged_in_user_id'] = $user->UserID;
                 header('Location: /home');
                 exit;
             } else {
