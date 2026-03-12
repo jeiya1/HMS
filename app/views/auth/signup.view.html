@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <form action="/signup-submit" method="post">
+    <form id="signup-form" action="/signup-submit" method="POST">
         <label for="fname">First Name: </label>
         <input type="text" name="fname" required>
         <br>
@@ -21,14 +21,18 @@
         <label for="email">Email: </label>
         <input type="email" name="email" required>
         <br>
-        <label for="password">Password: </label>
-        <input type="password" name="password" required>
-        <br>
+        <div class="form-group">
+            <label for="password">Create Password</label>
+            <input type="password" id="password" name="password" required>
+
+            <div id="password-error" class="error-message"></div>
+        </div>
         <label for="passwordr">Retype Password: </label>
-        <input type="password" name="passwordr" required>
+        <input type="password" id="passwordr" name="passwordr" required>
         <br>
 
         <input type="submit" value="signup">
     </form>
+    <script src="/js/signup.js"></script>
 </body>
 </html>

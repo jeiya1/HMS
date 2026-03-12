@@ -35,12 +35,45 @@ class AuthController {
             $lname = trim($_POST['lname']);
             $phone = trim($_POST['phone']);
             $email = trim($_POST['email']);
-            $password = password_hash(trim($_POST['password']), PASSWORD_DEFAULT);
-            $passwordr = password_hash(trim($_POST['passwordr']), PASSWORD_DEFAULT);
+            $password = trim($_POST['password']);
+            $passwordr = trim($_POST['passwordr']);
+
+            if ($password !== $passwordr) {
+                echo "Passwords do not match.";
+                return;
+            }
+
+            if (strlen($password) < 8) {
+                echo "Password must be at least 8 characters long.";
+                return;
+            }
+    
+            if (!preg_match('/[A-Z]/', $password)) {
+                echo "Password must contain at least one uppercase letter.";
+                return;
+            }
+    
+            if (!preg_match('/[a-z]/', $password)) {
+                echo "Password must contain at least one lowercase letter.";
+                return;
+            }
+    
+            if (!preg_match('/[0-9]/', $password)) {
+                echo "Password must contain at least one number.";
+                return;
+            }
+    
+            if (!preg_match('/[\W]/', $password)) {
+                echo "Password must contain at least one special character.";
+                return;
+            }
+            
+
+            $hash = password_hash($password, PASSWORD_DEFAULT);
             // TODO: Verify all the fields 
 
             $userModel = new User($GLOBALS['conn']);
-            $userModel->createUser($email, $password);
+            $userModel->createUser($email, $hash);
 
             $userModel->createGuest($userModel->getUserByEmail($email)->UserID, $fname, $lname, $phone);
 
