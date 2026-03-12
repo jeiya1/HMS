@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation</title>
+</head>
+<body>
+    <form method="POST" action="/booking/createReservation.php">
+    
+        <label for="guest_id">Guest ID:</label>
+        <input type="number" id="guest_id" name="guest_id"><br>
+        <label for="checkin_date">Check-in:</label>
+        <input type="date" id="checkin_date" name="checkin"><br>
+        <label for="checkout_date">Check-out:</label>
+        <input type="date" id="checkout_date" name="checkout"><br>
+        <label for="num_adults">Adults:</label>
+        <input type="number" id="num_adults" name="num_adults" min="1"><br>
+        <label for="num_children">Children:</label>
+        <input type="number" id="num_children" name="num_children" min="0"><br>
+        <label for="room_id">Room ID:</label>
+        <input type="number" id="room_id" name="room_id"><br>
+        <button type="submit">Book Room</button>
+
+    </form>
+</body>
+</html>
