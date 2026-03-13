@@ -1,3 +1,5 @@
+USE HMS;
+
 INSERT INTO Roles (RoleName) VALUES
 ('admin'),
 ('guest');

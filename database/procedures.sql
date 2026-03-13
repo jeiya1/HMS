@@ -1,6 +1,10 @@
+USE HMS;
+
 -- =========================
 -- USERS
 -- =========================
+
+DELIMITER $$
 
 CREATE PROCEDURE CreateGuestUser(
     IN pEmail VARCHAR(150),
@@ -29,7 +33,11 @@ BEGIN
 
     COMMIT;
 
-END
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
 
 CREATE PROCEDURE CreateUser(
     IN pEmail VARCHAR(150),
@@ -48,7 +56,11 @@ BEGIN
 
     COMMIT;
 
-END
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
 
 CREATE PROCEDURE CreateGuest(
     IN pFirstName VARCHAR(100),
@@ -66,11 +78,15 @@ BEGIN
 
     COMMIT;
 
-END
+END$$
+
+DELIMITER ;
 
 -- =========================
 -- ROOMS
 -- =========================
+
+DELIMITER $$
 
 CREATE PROCEDURE GetAvailableRooms(
     IN pCheckIn DATE,
@@ -100,11 +116,15 @@ BEGIN
 
     );
 
-END
+END$$
+
+DELIMITER ;
 
 -- =========================
 -- RESERVATION
 -- =========================
+
+DELIMITER $$
 
 CREATE PROCEDURE CreateReservation(
     IN pGuestID INT,
@@ -163,7 +183,11 @@ BEGIN
 
     END IF;
 
-END
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
 
 CREATE PROCEDURE CancelReservation(
     IN pReservationID INT
@@ -192,7 +216,11 @@ BEGIN
     WHERE ReservationID = pReservationID;
 
     COMMIT;
-END
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
 
 CREATE PROCEDURE CheckInGuest(
     IN pReservationID INT
@@ -219,7 +247,11 @@ BEGIN
 
     COMMIT;
 
-END
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
 
 CREATE PROCEDURE CheckOutGuest(
     IN pReservationID INT
@@ -246,10 +278,13 @@ BEGIN
 
     COMMIT;
 
-END
+END$$
 
+DELIMITER ;
 
 -- COMPLETE PAYMENT
+
+DELIMITER $$
 
 CREATE PROCEDURE CompletePayment(
     IN pReservationID INT,
@@ -271,9 +306,13 @@ BEGIN
 
     COMMIT;
 
-END
+END$$
+
+DELIMITER ;
 
 -- FAILED PAYMENT
+
+DELIMITER $$
 
 CREATE PROCEDURE FailPayment(
     IN pReservationID INT
@@ -292,4 +331,6 @@ BEGIN
 
     COMMIT;
 
-END
+END$$
+
+DELIMITER ;
