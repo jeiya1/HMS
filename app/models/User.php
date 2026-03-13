@@ -21,25 +21,23 @@ class User {
         }
     }
 
-    public function createUser($email, $password) {
-        $roleID = 2;
+    public function createGuest($firstName, $lastName, $phone) {
         $result = $this->conn->execute_query(
-            "INSERT INTO Users (RoleID, Email, PasswordHash) 
-            VALUES (?, ?, ?)",
-            [$roleID, $email, $password]
+            "CALL CreateGuest(?, ?, ?, ?)",
+            [$firstName, $lastName, $phone]
         );
 
         if ($result) {
-            echo "Insert successful!";
+            echo "Guest created successfully!";
         } else {
-            echo "Insert failed: " . $this->conn->error;
+            echo "Failed to create guest: " . $this->conn->error;
         }
     }
 
-    public function createGuest($userID, $firstName, $lastName, $phone) {
+    public function createGuestUser($email, $password, $firstName, $lastName, $phone) {
         $result = $this->conn->execute_query(
-            "INSERT INTO Guests (UserID, FirstName, LastName, PhoneContact) VALUES (?, ?, ?, ?)",
-            [$userID, $firstName, $lastName, $phone]
+            "CALL CreateGuestUser(?, ?, ?, ?, ?)",
+            [$email, $password, $firstName, $lastName, $phone]
         );
 
         if ($result) {

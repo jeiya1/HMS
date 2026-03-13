@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 errors.push("Must contain special character");
             }
 
-            if (password != passwordr) {
+            if (password.value !== passwordr.value) {
                 errors.push("Passwords do not match");
             }
 

@@ -67,14 +67,11 @@ class AuthController {
                 return;
             }
             
-
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            // TODO: Verify all the fields 
 
             $userModel = new User($GLOBALS['conn']);
-            $userModel->createUser($email, $hash);
 
-            $userModel->createGuest($userModel->getUserByEmail($email)->UserID, $fname, $lname, $phone);
+            $userModel->createGuestUSER($email, $hash, $fname, $lname, $phone);
 
             header('Location: /login');
             exit;
