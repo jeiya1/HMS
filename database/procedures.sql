@@ -19,17 +19,11 @@ BEGIN
 
     START TRANSACTION;
 
-    INSERT INTO Users
-    (RoleID,Email,PasswordHash)
-    VALUES
-    (2,pEmail,pPasswordHash);
+    CALL CreateUser (pEmail, pPasswordHash, 2);
 
     SET newUserID = LAST_INSERT_ID();
 
-    INSERT INTO Guests
-    (UserID,FirstName,LastName,PhoneContact)
-    VALUES
-    (newUserID,pFirstName,pLastName,pPhone);
+    CALL CreateGuest (newUserID, pFirstName, pLastName, pPhone);
 
     COMMIT;
 
@@ -40,19 +34,18 @@ DELIMITER ;
 DELIMITER $$
 
 CREATE PROCEDURE CreateUser(
+    IN pRoleID INT,
     IN pEmail VARCHAR(150),
     IN pPasswordHash VARCHAR(255)
 )
 BEGIN
-
-    DECLARE newUserID INT;
 
     START TRANSACTION;
 
     INSERT INTO Users
     (RoleID,Email,PasswordHash)
     VALUES
-    (2,pEmail,pPasswordHash);
+    (pRoleID,pEmail,pPasswordHash);
 
     COMMIT;
 
@@ -63,6 +56,7 @@ DELIMITER ;
 DELIMITER $$
 
 CREATE PROCEDURE CreateGuest(
+    IN pUserID INT,
     IN pFirstName VARCHAR(100),
     IN pLastName VARCHAR(100),
     IN pPhone VARCHAR(20)
@@ -72,9 +66,9 @@ BEGIN
     START TRANSACTION;
 
     INSERT INTO Guests
-    (FirstName,LastName,PhoneContact)
+    (UserID, FirstName,LastName,PhoneContact)
     VALUES
-    (pFirstName,pLastName,pPhone);
+    (pUserID, pFirstName,pLastName,pPhone);
 
     COMMIT;
 
@@ -120,6 +114,33 @@ END$$
 
 DELIMITER ;
 
+DELIMITER $$
+
+CREATE PROCEDURE CheckRoomAvailability(
+    IN pRoomID INT,
+    IN pCheckIn DATE,
+    IN pCheckOut DATE,
+    OUT isAvailable BOOLEAN
+)
+BEGIN
+    DECLARE overlapCount INT;
+
+    SELECT COUNT(*) INTO overlapCount
+    FROM ReservationRooms rr
+    JOIN Reservations r ON rr.ReservationID = r.ReservationID
+    WHERE rr.RoomID = pRoomID
+      AND r.StatusID IN (1,2,3)
+      AND NOT (r.CheckOutDate <= pCheckIn OR r.CheckInDate >= pCheckOut)
+
+    IF overlapCount = 0 THEN
+        SET isAvailable = TRUE;
+    ELSE
+        SET isAvailable = FALSE;
+    END IF;
+END$$
+
+DELIMITER ;
+
 -- =========================
 -- RESERVATION
 -- =========================
@@ -137,9 +158,12 @@ CREATE PROCEDURE CreateReservation(
     IN pAmount DECIMAL(10,2)
 )
 BEGIN
-
     DECLARE reservationID INT;
-    DECLARE conflictCount INT;
+
+    IF pCheckIn > pCheckOut THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Check-in date must be before or on check-out date';
+    END IF;
 
     START TRANSACTION;
 
@@ -148,19 +172,10 @@ BEGIN
     WHERE RoomID = pRoomID
     FOR UPDATE;
 
-    SELECT COUNT(*)
-    INTO conflictCount
-    FROM Reservations r
-    JOIN ReservationRooms rr ON r.ReservationID = rr.ReservationID
-    WHERE rr.RoomID = pRoomID
-    AND r.StatusID NOT IN (4,5)
-    AND r.CheckInDate < pCheckOut
-    AND r.CheckOutDate > pCheckIn;
+    CALL CheckRoomAvailability(pRoomID, pCheckIn, pCheckOut, isAvailable);
 
-    IF conflictCount > 0 THEN
-
+    IF isAvailable = 0 THEN
         ROLLBACK;
-
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Room already booked for these dates';
 
@@ -180,9 +195,43 @@ BEGIN
         VALUES (reservationID, pPaymentMethodID, pAmount, 'pending');
 
         COMMIT;
+        SELECT reservationID AS ReservationID;
 
     END IF;
 
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE AddRoomToReservation(
+    IN pReservationID INT,
+    IN pRoomID INT
+)
+BEGIN
+    DECLARE isAvailable BOOLEAN;
+    DECLARE checkIn DATE;
+    DECLARE checkOut DATE;
+
+    SELECT CheckInDate, CheckOutDate
+    INTO checkIn, checkOut
+    FROM Reservations
+    WHERE ReservationID = pReservationID
+    FOR UPDATE;
+
+    IF checkIn IS NULL OR checkOut IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Reservation not found';
+    END IF;
+
+    CALL CheckRoomAvailability(pRoomID, checkIn, checkOut, isAvailable);
+
+    IF isAvailable = FALSE THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Room not available for these dates';
+    ELSE
+        INSERT INTO ReservationRooms (ReservationID, RoomID)
+        VALUES (pReservationID, pRoomID);
+    END IF;
 END$$
 
 DELIMITER ;
@@ -194,18 +243,26 @@ CREATE PROCEDURE CancelReservation(
 )
 BEGIN
     DECLARE roomID INT;
+    DECLARE done INT DEFAULT 0;
+
+    DECLARE roomCursor CURSOR FOR
+        SELECT RoomID FROM ReservationRooms WHERE ReservationID = pReservationID;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
     START TRANSACTION;
 
-    SELECT RoomID 
-    INTO roomID
-    FROM ReservationRooms
-    WHERE ReservationID = pReservationID
-    FOR UPDATE;
+    OPEN roomCursor;
+    read_loop: LOOP
+        FETCH roomCursor INTO roomID;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
 
-    UPDATE Rooms
-    SET Status = 'available'
-    WHERE RoomID = roomID;
+        UPDATE Rooms
+        SET Status = 'available'
+        WHERE RoomID = roomID;
+    END LOOP;
+    CLOSE roomCursor;
 
     UPDATE Reservations
     SET StatusID = 5
@@ -228,6 +285,17 @@ CREATE PROCEDURE CheckInGuest(
 BEGIN
 
     DECLARE roomID INT;
+    DECLARE done INT DEFAULT 0;
+    DECLARE currentStatus INT;
+
+    SELECT StatusID INTO currentStatus
+    FROM Reservations
+    WHERE ReservationID = pReservationID;
+
+    IF currentStatus != 2 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = "Only confirmed reservations can be checked in";
+    ELSE
 
     START TRANSACTION;
 
@@ -235,15 +303,22 @@ BEGIN
     SET StatusID = 3
     WHERE ReservationID = pReservationID;
 
-    SELECT RoomID
-    INTO roomID
-    FROM ReservationRooms
-    WHERE ReservationID = pReservationID
-    LIMIT 1;
+    DECLARE roomCursor CURSOR FOR
+        SELECT RoomID FROM ReservationRooms WHERE ReservationID = pReservationID;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
-    UPDATE Rooms
-    SET Status = 'occupied'
-    WHERE RoomID = roomID;
+    OPEN roomCursor;
+    read_loop: LOOP
+        FETCH roomCursor INTO roomID;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        UPDATE Rooms
+        SET Status = 'occupied'
+        WHERE RoomID = roomID;
+    END LOOP;
+    CLOSE roomCursor;
 
     COMMIT;
 
@@ -259,6 +334,17 @@ CREATE PROCEDURE CheckOutGuest(
 BEGIN
 
     DECLARE roomID INT;
+    DECLARE done INT DEFAULT 0;
+    DECLARE currentStatus INT;
+
+    SELECT StatusID INTO currentStatus
+    FROM Reservations
+    WHERE ReservationID = pReservationID;
+
+    IF currentStatus != 3 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = "Only checked-in reservations can be checked out";
+    ELSE
 
     START TRANSACTION;
 
@@ -266,15 +352,22 @@ BEGIN
     SET StatusID = 4
     WHERE ReservationID = pReservationID;
 
-    SELECT RoomID
-    INTO roomID
-    FROM ReservationRooms
-    WHERE ReservationID = pReservationID
-    LIMIT 1;
+    DECLARE roomCursor CURSOR FOR
+        SELECT RoomID FROM ReservationRooms WHERE ReservationID = pReservationID;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
-    UPDATE Rooms
-    SET Status = 'available'
-    WHERE RoomID = roomID;
+    OPEN roomCursor;
+    read_loop: LOOP
+        FETCH roomCursor INTO roomID;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        UPDATE Rooms
+        SET Status = 'available'
+        WHERE RoomID = roomID;
+    END LOOP;
+    CLOSE roomCursor;
 
     COMMIT;
 
