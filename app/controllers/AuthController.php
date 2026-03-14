@@ -15,6 +15,11 @@ class AuthController {
             $email = trim($_POST['email']);
             $password = trim($_POST['password']);
 
+            if (empty($email) || empty($password)) {
+                echo "Please enter both email and password.";
+                return;
+            }
+
             $userModel = new User($GLOBALS['conn']);
             $user = $userModel->getUserByEmail($email);
 
@@ -36,6 +41,11 @@ class AuthController {
             $email = trim($_POST['email']);
             $password = trim($_POST['password']);
             $passwordr = trim($_POST['passwordr']);
+            
+            if (empty($fname) || empty($lname) || empty($email) || empty($password) || empty($passwordr)) {
+                echo "Please fill in all fields.";
+                return;
+            }
 
             if ($password !== $passwordr) {
                 echo "Passwords do not match.";

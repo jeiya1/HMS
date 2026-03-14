@@ -8,46 +8,25 @@ class Reservation {
         $this->conn = $db;
     }
 
-    public function createReservation($guestID, $statusID, $checkin, $checkout, $adults, $children) {
+    public function createReservation($guestID, $checkin, $checkout, $adults, $children, $roomID, $paymentMethod, $totalAmount) {
+        try {
+            $result = $this->conn->execute_query(
+                "CALL CreateReservation(?, ?, ?, ?, ?, ?, ?, ?)",
+                [$guestID, $checkin, $checkout, $adults, $children, $roomID, $paymentMethod, $totalAmount]
+            );
 
-        $result = $this->conn->execute_query(
-            "INSERT INTO Reservations
-            (GuestID, StatusID, CheckInDate, CheckOutDate, NumAdults, NumChildren)
-            VALUES (?, ?, ?, ?, ?, ?)",
-            [$guestID, $statusID, $checkin, $checkout, $adults, $children]
-        );
-
-        if ($result) {
-
-            $reservationID = $this->conn->insert_id;
-
-            echo "Reservation created successfully!";
-            return $reservationID;
-
-        } else {
-
-            echo "Failed to create reservation: " . $this->conn->error;
+            if ($result) {
+                $row = $result->fetch_assoc();
+                $reservationID = $row['ReservationID'] ?? null;
+                $result->free();
+                return $reservationID;
+            } else {
+                throw new Exception("Failed to create reservation: " . $this->conn->error);
+            }
+        } catch (Exception $e) {
+            echo $e->getMessage();
             return null;
-
         }
     }
-
-
-    public function assignRoom($reservationID, $roomID){//For reservation room transaction
-
-        $result = $this->conn->execute_query(
-            "INSERT INTO ReservationRooms (ReservationID, RoomID)
-            VALUES (?, ?)",
-            [$reservationID, $roomID]
-        );
-
-        if ($result) {
-            echo "Room assigned successfully!";
-        } else {
-            echo "Failed to assign room: " . $this->conn->error;
-        }
-
-    }
-
 }
 ?>
