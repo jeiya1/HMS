@@ -87,16 +87,15 @@ class ReservationController {
                 $totalAmount
             );
             // DEBUG: show input values and their data types
-            echo "Debugging input values:\n";
-
-                echo "guestID: " . $guestID . " (Type: " . gettype($guestID) . ")\n";
-                echo "checkin: " . $checkin . " (Type: " . gettype($checkin) . ")\n";
-                echo "checkout: " . $checkout . " (Type: " . gettype($checkout) . ")\n";
-                echo "adults: " . $adults . " (Type: " . gettype($adults) . ")\n";
-                echo "children: " . $children . " (Type: " . gettype($children) . ")\n";
-                echo "roomID: " . $roomID . " (Type: " . gettype($roomID) . ")\n";
-                echo "paymentMethod: " . $paymentMethod . " (Type: " . gettype($paymentMethod) . ")\n";
-                echo "totalAmount: " . $totalAmount . " (Type: " . gettype($totalAmount) . ")\n";
+            // echo "Debugging input values:<br>";
+            // echo "guestID: " . $guestID . " (Type: " . gettype($guestID) . ")<br>";
+            // echo "checkin: " . $checkin . " (Type: " . gettype($checkin) . ")<br>";
+            // echo "checkout: " . $checkout . " (Type: " . gettype($checkout) . ")<br>";
+            // echo "adults: " . $adults . " (Type: " . gettype($adults) . ")<br>";
+            // echo "children: " . $children . " (Type: " . gettype($children) . ")<br>";
+            // echo "roomID: " . $roomID . " (Type: " . gettype($roomID) . ")<br>";
+            // echo "paymentMethod: " . $paymentMethod . " (Type: " . gettype($paymentMethod) . ")<br>";
+            // echo "totalAmount: " . $totalAmount . " (Type: " . gettype($totalAmount) . ")<br>";
         } else {
             echo "Invalid request method.";
         }

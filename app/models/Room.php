@@ -49,7 +49,7 @@ class Room {
         // // 3. Calculate total
         $totalAmount = $basePrice * $numNights * $totalMultiplier;
 
-        // return round($totalAmount, 2);
+        return round($totalAmount, 2);
     }
 }
 ?>
