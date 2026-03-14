@@ -22,6 +22,8 @@
 }
 ?>
 
+<br>
+<a href="/reservation">Reserve Now</a>
 
 </body>
 </html>
