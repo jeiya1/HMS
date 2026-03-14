@@ -82,6 +82,62 @@ class AuthController {
         header('Location: /home');
         exit;
     }
+    public function forgotPassword() {
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            $email = $_POST['email'];
+
+            $userModel = new User($GLOBALS['conn']);
+            $user = $userModel->getUserByEmail($email);
+
+            if($user) {
+                header("Location: reset-password?email=".$email);
+                exit();
+            } else {
+                echo "Email not found";
+            }
+        }
+    }
+    public function resetPassword() {
+        $email = $_GET['email'];
+
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            $newPassword = trim($_POST['password']);
+
+            if (strlen($newPassword) < 8) {
+                echo "Password must be at least 8 characters long.";
+                return;
+            }
+    
+            if (!preg_match('/[A-Z]/', $newPassword)) {
+                echo "Password must contain at least one uppercase letter.";
+                return;
+            }
+    
+            if (!preg_match('/[a-z]/', $newPassword)) {
+                echo "Password must contain at least one lowercase letter.";
+                return;
+            }
+    
+            if (!preg_match('/[0-9]/', $newPassword)) {
+                echo "Password must contain at least one number.";
+                return;
+            }
+    
+            if (!preg_match('/[\W]/', $newPassword)) {
+                echo "Password must contain at least one special character.";
+                return;
+            }
+
+            $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+
+            $userModel = new User($GLOBALS['conn']);
+            $userModel->updatePassword($email, $hash);
+
+            echo "Password updated successfully";
+            header('Location: /login');
+            exit;
+        }
+    }
 }
 
 ?>

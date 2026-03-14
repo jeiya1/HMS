@@ -46,6 +46,21 @@ class User {
             echo "Failed to create guest: " . $this->conn->error;
         }
     }
+
+    public function updatePassword($email, $newPassword) {
+        $result = $this->conn->execute_query(
+            "UPDATE Users SET PasswordHash = ? WHERE Email = ?",
+            [$newPassword, $email]
+        );
+
+        if ($result) {
+            echo "Password updated successfully!";
+            return true;
+        } else {
+            echo "Failed to update password: " . $this->conn->error;
+            return false;
+        }
+    }
 }
 
 ?>
