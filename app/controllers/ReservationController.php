@@ -76,6 +76,8 @@ class ReservationController {
                 $guestID = $userModel->createGuest($email, $fname, $lname, $phone);
             }
 
+            // TODO: Check if guest has already made a previous reservation and handle accordingly (e.g., allow multiple reservations or restrict to one)
+
             $reservationModel->createReservation(
                 $guestID,
                 $checkin,
