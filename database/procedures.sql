@@ -130,7 +130,7 @@ BEGIN
     JOIN Reservations r ON rr.ReservationID = r.ReservationID
     WHERE rr.RoomID = pRoomID
       AND r.StatusID IN (1,2,3)
-      AND NOT (r.CheckOutDate <= pCheckIn OR r.CheckInDate >= pCheckOut)
+      AND NOT (r.CheckOutDate <= pCheckIn OR r.CheckInDate >= pCheckOut);
 
     IF overlapCount = 0 THEN
         SET isAvailable = TRUE;
@@ -159,6 +159,7 @@ CREATE PROCEDURE CreateReservation(
 )
 BEGIN
     DECLARE reservationID INT;
+    DECLARE isAvailable BOOLEAN;
 
     IF pCheckIn > pCheckOut THEN
         SIGNAL SQLSTATE '45000'
@@ -246,7 +247,10 @@ BEGIN
     DECLARE done INT DEFAULT 0;
 
     DECLARE roomCursor CURSOR FOR
-        SELECT RoomID FROM ReservationRooms WHERE ReservationID = pReservationID;
+        SELECT RoomID
+        FROM ReservationRooms 
+        WHERE ReservationID = pReservationID;
+
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
     START TRANSACTION;
@@ -288,6 +292,13 @@ BEGIN
     DECLARE done INT DEFAULT 0;
     DECLARE currentStatus INT;
 
+    DECLARE roomCursor CURSOR FOR
+        SELECT RoomID 
+        FROM ReservationRooms 
+        WHERE ReservationID = pReservationID;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
     SELECT StatusID INTO currentStatus
     FROM Reservations
     WHERE ReservationID = pReservationID;
@@ -303,10 +314,6 @@ BEGIN
     SET StatusID = 3
     WHERE ReservationID = pReservationID;
 
-    DECLARE roomCursor CURSOR FOR
-        SELECT RoomID FROM ReservationRooms WHERE ReservationID = pReservationID;
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
-
     OPEN roomCursor;
     read_loop: LOOP
         FETCH roomCursor INTO roomID;
@@ -321,6 +328,7 @@ BEGIN
     CLOSE roomCursor;
 
     COMMIT;
+    END IF;
 
 END$$
 
@@ -337,6 +345,10 @@ BEGIN
     DECLARE done INT DEFAULT 0;
     DECLARE currentStatus INT;
 
+    DECLARE roomCursor CURSOR FOR
+        SELECT RoomID FROM ReservationRooms WHERE ReservationID = pReservationID;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
     SELECT StatusID INTO currentStatus
     FROM Reservations
     WHERE ReservationID = pReservationID;
@@ -352,10 +364,6 @@ BEGIN
     SET StatusID = 4
     WHERE ReservationID = pReservationID;
 
-    DECLARE roomCursor CURSOR FOR
-        SELECT RoomID FROM ReservationRooms WHERE ReservationID = pReservationID;
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
-
     OPEN roomCursor;
     read_loop: LOOP
         FETCH roomCursor INTO roomID;
@@ -370,6 +378,7 @@ BEGIN
     CLOSE roomCursor;
 
     COMMIT;
+    END IF;
 
 END$$
 
