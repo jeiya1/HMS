@@ -4,11 +4,13 @@ session_start();
 require_once '../config/connect.php';
 require_once '../app/controllers/AuthController.php';
 require_once '../app/controllers/PagesController.php';
+require_once '../app/controllers/ReservationController.php';
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 $auth = new AuthController();
 $pages = new PagesController();
+$reservation = new ReservationController();
 
 switch ($uri) {
     case '/':
@@ -42,6 +44,14 @@ switch ($uri) {
 
     case '/terms':
         $pages->terms();
+        break;
+
+    case '/reservation':
+        $reservation->reservation();
+        break;
+    
+    case '/reservation-submit':
+        $reservation->submit();
         break;
 
     default:
