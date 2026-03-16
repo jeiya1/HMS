@@ -77,17 +77,22 @@ class ReservationController {
             }
 
             // TODO: Check if guest has already made a previous reservation and handle accordingly (e.g., allow multiple reservations or restrict to one)
+            $reservations = $reservationModel->getGuestReservations($guestID);
+            if($reservations->num_rows > 0){
+                $reservationModel->addRoomToReservation($reservations->fetch_object()->ReservationID, $roomID);
+            } else {
+                $reservationModel->createReservation(
+                    $guestID,
+                    $checkin,
+                    $checkout,
+                    $adults,
+                    $children,
+                    $roomID,
+                    $paymentMethod,
+                    $totalAmount
+                );
+            }
 
-            $reservationModel->createReservation(
-                $guestID,
-                $checkin,
-                $checkout,
-                $adults,
-                $children,
-                $roomID,
-                $paymentMethod,
-                $totalAmount
-            );
             // DEBUG: show input values and their data types
             // echo "Debugging input values:<br>";
             // echo "guestID: " . $guestID . " (Type: " . gettype($guestID) . ")<br>";

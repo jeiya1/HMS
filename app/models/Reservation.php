@@ -62,5 +62,17 @@ class Reservation {
             echo $e->getMessage();
         }
     }
+
+    public function getGuestReservations($GuestID) {
+        try {
+            $result = $this->conn->execute_query(
+                "SELECT * FROM Reservations WHERE GuestID = ?",
+                [$GuestID]
+            );
+            return $result;
+        } catch (Exception $e) {
+            echo $e->getMessage();
+            return null;
+        }
+    }
 }
-?>

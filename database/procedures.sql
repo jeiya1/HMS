@@ -259,14 +259,8 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Reservation not found';
     END IF;
 
-    CALL CheckRoomAvailability(pRoomID, checkIn, checkOut, isAvailable);
-
-    IF isAvailable = FALSE THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Room not available for these dates';
-    ELSE
-        INSERT INTO ReservationRooms (ReservationID, RoomID)
-        VALUES (pReservationID, pRoomID);
-    END IF;
+    INSERT INTO ReservationRooms (ReservationID, RoomID)
+    VALUES (pReservationID, pRoomID);
 END$$
 
 DELIMITER ;
