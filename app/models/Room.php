@@ -24,6 +24,7 @@ class Room {
         return (float)$row['price'];
     }
 
+    // TODO: redo formula
     function calculateTotalAmount($basePrice, $checkin, $checkout, $numAdults = 1, $numChildren = 0) {
         // 1. Calculate number of nights
         $checkinDate = new DateTime($checkin);
@@ -50,6 +51,14 @@ class Room {
         $totalAmount = $basePrice * $numNights * $totalMultiplier;
 
         return round($totalAmount, 2);
+    }
+
+    function getRoomName($roomID) {
+        $this->conn->execute_query("CALL GetRoomName(?, @name)", [$roomID]);
+        
+        $result = $this->conn->query("SELECT @name AS name;");
+        $row = $result->fetch_assoc();
+        return $row['name'];
     }
 }
 ?>

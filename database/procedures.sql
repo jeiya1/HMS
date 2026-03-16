@@ -100,6 +100,22 @@ DELIMITER ;
 
 DELIMITER $$
 
+CREATE PROCEDURE GetRoomName(
+    IN pRoomID INT,
+    OUT pRoomTypeName VARCHAR(100)
+)
+BEGIN
+    SELECT rt.RoomTypeName
+    INTO pRoomTypeName
+    FROM Rooms r
+    JOIN RoomTypes rt ON r.RoomTypeID = rt.RoomTypeID
+    WHERE r.RoomID = pRoomID;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
 CREATE PROCEDURE GetAvailableRooms(
     IN pCheckIn DATE,
     IN pCheckOut DATE
