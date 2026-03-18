@@ -1,5 +1,10 @@
+@import "tailwindcss";
 .error-message {
     font-size: 0.9rem;
     margin-top: 5px;
     color: red;
+}
+
+@theme {
+  --font-crimson: "Crimson Text", serif;
 }

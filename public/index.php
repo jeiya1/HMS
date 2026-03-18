@@ -15,11 +15,7 @@ $reservation = new ReservationController();
 switch ($uri) {
     case '/':
     case '/home':
-        require_once '../app/views/home.view.php';
-        break;
-
-    case '/frontend-home':
-        require_once '../app/views/frontend-home.view.html';
+        require_once '../app/views/home.view.html';
         break;
 
     case '/login':

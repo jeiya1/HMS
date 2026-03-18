@@ -1,1 +1,10 @@
 .idea/
+
+# Node dependencies
+node_modules/
+
+# npm lock (optional but usually kept)
+# package-lock.json
+
+# Tailwind generated CSS
+public/css/output.css

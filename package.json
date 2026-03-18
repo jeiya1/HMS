@@ -1,0 +1,28 @@
+{
+  "name": "hms",
+  "version": "1.0.0",
+  "description": "EDIT `C:\\xampp\\apache\\conf\\extra\\httpd-vhosts.conf`",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeiya1/HMS.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jeiya1/HMS/issues"
+  },
+  "homepage": "https://github.com/jeiya1/HMS#readme",
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.2.1",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.1"
+  }
+}
