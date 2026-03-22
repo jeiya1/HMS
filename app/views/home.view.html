@@ -320,14 +320,14 @@
         <!-- TODO: add different texts and authors -->
         <!-- Text and Author -->
         <div class="flex flex-col justify-center">
-          <p class="text-neutral-800 mb-4">
+          <p id="testimonial-text" class="text-neutral-800 mb-4 transition-opacity duration-300 opacity-100">
             The hotel exceeded my expectations in so many ways. The deluxe room was spacious and stylish, and all the
             amenities were top-notch. I spent most of my afternoons at the outdoor swimming pool, which was clean and
             very well maintained. The gym was fully equipped, which was a nice bonus since I try to keep up with my
             workouts while traveling.
           </p>
           <div class="flex items-center space-x-2 justify-end">
-            <h6 class="font-semibold">Shan L. —</h6>
+            <h6 class="font-semibold" id="testimonial-author">Shan L. —</h6>
             <img src="/assets/icons/star.svg" alt="star" class="w-4 h-4">
             <img src="/assets/icons/star.svg" alt="star" class="w-4 h-4">
             <img src="/assets/icons/star.svg" alt="star" class="w-4 h-4">
@@ -408,10 +408,13 @@
     <p class="w-40 justify-center text-yellow-100 text-[10px] font-light font-['Roboto']">Comfortable rooms and
       suites
       are always ready for your visit.</p>
-    <button class="w-28 h-9 rounded-[30px] border-[0.50px] border-yellow-100 hover:border-yellow-600 hover:bg-yellow-300 text-yellow-100 hover:text-stone-700">
+    <button
+      class="w-28 h-9 rounded-[30px] border-[0.50px] border-yellow-100 hover:border-yellow-600 hover:bg-yellow-300 text-yellow-100 hover:text-stone-700">
       <p class="justify-center text-xs font-light font-roboto">Booking</p>
     </button>
   </footer>
+
+  <script src="/js/testimonials.js"></script>
 
 </body>
 
