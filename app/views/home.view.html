@@ -9,6 +9,10 @@
   <!-- Link for the CSS files -->
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/output.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 
 </head>
 
@@ -84,21 +88,20 @@
       </div>
     </div>
 
-    <!-- TODO: Customize the checkin and checkout -->
     <!-- TODO: Add rooms button -->
     <footer class="bg-[rgba(0,0,0,0.40)] flex justify-center p-10 gap-8 items-center">
-      <input type="date" id="checkin" name="checkin" placeholder="Select date"
-        class="bg-white rounded-sm p-2 text-crimson-600 font-crimson border border-gray-300 focus:ring-2 focus:ring-yellow-500">
-      <input type="date" id="checkout" name="checkout" placeholder="Select date"
-        class="bg-white rounded-sm p-2 text-crimson-600 font-crimson border border-gray-300 focus:ring-2 focus:ring-yellow-500">
-      <button class="text-white font-roboto text-[16px] font-medium leading-normal rounded-sm bg-[#C39C4D] p-3">
+      <input type="text" name="checkin" id="dateRange" placeholder="Check-in — Check-out"
+        class="bg-white rounded-sm p-2 text-crimson-600 font-crimson border border-gray-300">
+      <button
+        class="text-stone-600 font-roboto font-semibold text-[16px] font-medium leading-normal rounded-sm bg-[#EEE2CB] p-3">
+        ROOMS
+      </button>
+      <button class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3">
         SEARCH ROOMS
       </button>
     </footer>
   </div>
 
-  <!-- TODO: Another set of imges -->
-  <!-- TODO: Clickable images -->
   <!-- Facilities -->
   <div class="bg-[#F9F5ED] flex flex-col justify-center gap-5 pb-5 pt-25" id="gallery">
     <div class="flex flex-col items-center gap-4">
@@ -441,7 +444,19 @@
 
   <script src="/js/testimonials.js"></script>
   <script src="/js/gallery.js"></script>
-
+  <script>
+    flatpickr("#dateRange", {
+      mode: "range",
+      dateFormat: "d/m/Y",
+      allowInput: true,
+      minDate: "today",
+      onChange: function (selectedDates, dateStr, instance) {
+        if (selectedDates.length === 1) {
+            instance.set("minDate", selectedDates[0]);
+        } 
+      }
+    });
+  </script>
 </body>
 
 </html>
