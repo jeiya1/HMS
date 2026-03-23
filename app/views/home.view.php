@@ -76,7 +76,7 @@
 
     <!-- TODO: Add rooms button -->
     <footer class="bg-[rgba(0,0,0,0.40)] flex justify-center p-10 gap-8 items-center">
-      <input type="text" name="checkin" id="dateRange" placeholder="Check-In — Check-Out"
+      <input type="text" name="checkin" id="daterange" placeholder="Check-In — Check-Out"
         class="bg-white rounded-sm p-2 text-crimson-600 font-crimson border border-gray-300">
       <button id="openRooms"
         class="text-stone-600 font-roboto font-semibold text-[16px] leading-normal rounded-sm bg-[#EEE2CB] p-3">
@@ -188,7 +188,7 @@
       </h1>
       <p class="text-center text-neutral-700 text-xl font-light font-roboto mr-90 ml-90">Enjoy a range of thoughtfully
         designed amenities that provide comfort, convenience, and relaxation throughout your stay.</p>
-      <p class="h-1 w-50 bg-gradient-to-r from-yellow-100 to-yellow-800 rounded-lg"></p>
+      <div class="h-1 w-50 bg-gradient-to-r from-yellow-100 to-yellow-800 rounded-lg"></div>
     </div>
 
     <div class="m-20 relative">

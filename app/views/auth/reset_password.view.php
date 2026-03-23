@@ -12,7 +12,7 @@
 <body>
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
 
-    <div class="p-10 flex flex-col gap-5">
+    <div class="py-10 px-30 flex flex-col gap-5">
         <h1 class="font-bold text-3xl">Reset Your Password</h1>
         <div class="mx-auto h-1 w-full bg-yellow-900/60 rounded-lg"></div>
 

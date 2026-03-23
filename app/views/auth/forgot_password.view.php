@@ -12,7 +12,7 @@
 <body>
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
 
-    <div class="p-10 flex flex-col gap-5">
+    <div class="py-10 px-30 flex flex-col gap-5">
 
         <h1 class="font-crimson font-bold text-3xl">ACCOUNT RECOVERY</h1>
 
