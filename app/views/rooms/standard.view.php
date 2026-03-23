@@ -45,7 +45,7 @@
                     </div>
                 </div>
             </div>
-            <form action="/reservation" method="POST"
+            <form action="/cart" method="POST"
                 class="w-1/3 bg-white rounded shadow-[0px_0px_4px_0px_rgba(0,0,0,0.25)] p-6 flex flex-col gap-6">
                 <div class="justify-center text-black text-xl font-normal font-crimson">Check In - Check Out</div>
                 <input type="text" name="checkin" id="daterange" placeholder="Check-In — Check-Out"

@@ -3,6 +3,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 require __DIR__ . '/../../vendor/autoload.php'; // Adjust path to your vendor/autoload.php
+require __DIR__ . '/../../env.php';
 
 class User
 {
@@ -106,10 +107,11 @@ class User
     {
         $token = bin2hex(random_bytes(16)); // secure token
         $expires = date('Y-m-d H:i:s', strtotime('+30 minutes'));
+        $tokenHash = hash('sha256', $token); // store hashed token for security
 
         $result = $this->conn->execute_query(
             "INSERT INTO PasswordResets (UserID, Token, ExpiresAt) VALUES (?, ?, ?)",
-            [$userID, $token, $expires]
+            [$userID, $tokenHash, $expires]
         );
 
         if (!$result) {
@@ -125,14 +127,14 @@ class User
 
         try {
             $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
+            $mail->Host = $_ENV['MAIL_HOST'];
             $mail->SMTPAuth = true;
-            $mail->Username = 'windows105934@gmail.com';       // Your Gmail
-            $mail->Password = 'vrwk plph mpxl bjkq';     // Your Gmail App Password
+            $mail->Username = $_ENV['MAIL_USERNAME'];
+            $mail->Password = $_ENV['MAIL_PASSWORD'];
             $mail->SMTPSecure = 'tls';
-            $mail->Port = 587;
+            $mail->Port = $_ENV['MAIL_PORT'];
 
-            $mail->setFrom('windows105934@gmail.com', 'HMS Project');
+            $mail->setFrom($_ENV['MAIL_FROM'], $_ENV['MAIL_FROM_NAME']);
             $mail->addAddress($toEmail);
 
             $mail->isHTML(true);
@@ -152,11 +154,12 @@ class User
     public function getUserByResetToken($token)
     {
         $now = date('Y-m-d H:i:s');
+        $tokenHash = hash('sha256', $token);
         $result = $this->conn->execute_query(
             "SELECT u.* FROM Users u
          JOIN PasswordResets p ON u.UserID = p.UserID
          WHERE p.Token = ? AND p.ExpiresAt > ?",
-            [$token, $now]
+            [$tokenHash, $now]
         );
 
         if ($result && $result->num_rows > 0) {
