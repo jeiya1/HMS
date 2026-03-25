@@ -204,20 +204,6 @@ BEGIN
             SET MESSAGE_TEXT = 'Room not available for these dates';
     END IF;
 
-    -- Check if room is already in another cart
-    IF EXISTS (
-        SELECT 1 
-        FROM CartRooms cr
-        JOIN ReservationCarts c ON cr.CartID = c.CartID
-        WHERE cr.RoomID = pRoomID
-          AND cr.CheckInDate < pCheckOut
-          AND cr.CheckOutDate > pCheckIn
-          AND c.ExpiresAt > NOW()
-    ) THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Room temporarily held in another cart';
-    END IF;
-
     -- Add room to cart
     INSERT INTO CartRooms (CartID, RoomID, CheckInDate, CheckOutDate)
     VALUES (pCartID, pRoomID, pCheckIn, pCheckOut);
@@ -234,13 +220,14 @@ CREATE PROCEDURE CheckoutCart(
 )
 BEGIN
     DECLARE done INT DEFAULT 0;
-    DECLARE roomID INT;
+    DECLARE vroomID INT;
     DECLARE checkIn DATE;
     DECLARE checkOut DATE;
-    DECLARE guestID INT;
+    DECLARE vguestID INT;
     DECLARE reservationID INT;
     DECLARE isAvailable BOOLEAN;
     DECLARE errMsg VARCHAR(255);
+    DECLARE token CHAR(36);
 
     -- Cursor for rooms in cart
     DECLARE cartCursor CURSOR FOR
@@ -250,35 +237,43 @@ BEGIN
 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
-    -- Get GuestID
-    SELECT GuestID INTO guestID
+    -- Start transaction
+    START TRANSACTION;
+
+    -- Get GuestID into local variable (not @guestID)
+    SELECT GuestID INTO vguestID
     FROM ReservationCarts
     WHERE CartID = pCartID
     FOR UPDATE;
 
-    -- Start transaction
-    START TRANSACTION;
+    IF vguestID IS NULL THEN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid CartID: GuestID not found';
+    END IF;
 
     OPEN cartCursor;
     read_loop: LOOP
-        FETCH cartCursor INTO roomID, checkIn, checkOut;
+        FETCH cartCursor INTO vroomID, checkIn, checkOut;
         IF done THEN
             LEAVE read_loop;
         END IF;
 
         -- Check availability
-        CALL CheckRoomAvailability(roomID, checkIn, checkOut, isAvailable);
+        CALL CheckRoomAvailability(vroomID, checkIn, checkOut, isAvailable);
         IF isAvailable = 0 THEN
-            SET errMsg = CONCAT('Room ', roomID, ' no longer available');
+            SET errMsg = CONCAT('Room ', vroomID, ' no longer available');
             ROLLBACK;
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = errMsg;
         END IF;
     END LOOP;
     CLOSE cartCursor;
 
-    -- Create Reservation
-    INSERT INTO Reservations (GuestID, StatusID, CheckInDate, CheckOutDate, NumAdults)
-    SELECT guestID, 1, MIN(CheckInDate), MAX(CheckOutDate), pNumAdults
+    -- before the insert
+    SET token = UUID();
+
+    -- insert with token
+    INSERT INTO Reservations (GuestID, StatusID, CheckInDate, CheckOutDate, NumAdults, BookingToken)
+    SELECT vguestID, 1, MIN(CheckInDate), MAX(CheckOutDate), pNumAdults, token
     FROM CartRooms
     WHERE CartID = pCartID;
 
@@ -308,6 +303,7 @@ BEGIN
 END$$
 
 DELIMITER ;
+
 
 -- =========================
 -- RESERVATION
