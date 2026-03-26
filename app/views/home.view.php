@@ -278,7 +278,7 @@
                 essential amenities.</p>
               <a href="/standard">
                 <button class="self-start text-stone-800 border border-current px-2 py-1 rounded font-normal font-roboto
-               transition transform hover:bg-stone-200 hover:text-stone-900 hover:scale-105 hover:shadow-md">
+               transition transform hover:text-stone-900 hover:scale-105 hover:shadow-md">
                   Book Now
                 </button>
               </a>
@@ -302,7 +302,7 @@
               </p>
               <a href="/deluxe">
                 <button class="self-start text-stone-800 border border-current px-2 py-1 rounded font-normal font-roboto
-               transition transform hover:bg-stone-200 hover:text-stone-900 hover:scale-105 hover:shadow-md">
+               transition transform hover:text-stone-900 hover:scale-105 hover:shadow-md">
                   Book Now
                 </button>
               </a>
@@ -327,7 +327,7 @@
               </p>
               <a href="/suite">
                 <button class="self-start text-stone-800 border border-current px-2 py-1 rounded font-normal font-roboto
-               transition transform hover:bg-stone-200 hover:text-stone-900 hover:scale-105 hover:shadow-md">
+               transition transform hover:text-stone-900 hover:scale-105 hover:shadow-md">
                   Book Now
                 </button>
               </a>
@@ -438,21 +438,8 @@
       </div>
     </div>
   </div>
-  <!-- Footer -->
-  <footer class=" bg-gradient-to-r from-black/75 to-stone-500/75 flex justify-center p-10 gap-8 items-center">
-    <div
-      class="text-2xl font-crimson italic bg-gradient-to-b from-yellow-100 to-yellow-800 text-transparent bg-clip-text">
-      Find your perfect stay
-    </div>
-    <p class="w-40 justify-center text-yellow-100 text-[10px] font-light font-['Roboto']">Comfortable rooms and
-      suites
-      are always ready for your visit.</p>
-    <!-- TODO: Go to search -->
-    <button
-      class="w-28 h-9 rounded-[30px] border-[0.50px] border-yellow-100 hover:border-yellow-600 hover:bg-yellow-300 text-yellow-100 hover:text-stone-700">
-      <p class="justify-center text-xs font-light font-roboto">Booking</p>
-    </button>
-  </footer>
+
+  <?php require_once __DIR__ . '/components/footer.view.php'; ?>
 
   <script src="/js/testimonials.js"></script>
   <script src="/js/gallery.js"></script>
