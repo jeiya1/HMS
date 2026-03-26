@@ -116,7 +116,7 @@
                 <div>
                     <div class="justify-center text-zinc-500 text-lg font-normal font-crimson">Time-In 12:00 PM –
                         Time-Out
-                        11:00 PM</div>
+                        11:00 AM</div>
                     <p class="text-zinc-500 font-normal text-xs">You qualify for a 15% discount for staying more
                         than 3
                         nights!
@@ -286,6 +286,7 @@
             </div>
         </div>
     </div>
+    <?php require_once __DIR__ . '/../components/footer.view.php'; ?>
     <script src="/js/thumbnail.js"></script>
     <script src="/js/daterange.js"></script>
     <script src="/js/calculateTotalAmount.js"></script>
