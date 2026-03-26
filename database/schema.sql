@@ -99,6 +99,8 @@ CREATE TABLE IF NOT EXISTS ReservationStatus (
 -- =========================
 -- RESERVATIONS
 -- =========================
+
+-- TODO: Add back tehe NumChildren
 CREATE TABLE IF NOT EXISTS Reservations (
     ReservationID INT AUTO_INCREMENT PRIMARY KEY,
     GuestID INT NOT NULL,
