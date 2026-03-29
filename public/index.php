@@ -72,7 +72,15 @@ switch ($uri) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $auth->resetPasswordForm(); // handles sending reset email
         } else {
-            $auth->forgotPasswordForm(); // shows the form
+            $pages->forgotPasswordForm(); // shows the form
+        }
+        break;
+
+    case '/reset-submit':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $auth->resetPassword(); // update password in DB
+        } else {
+            $auth->showResetForm($_GET['token'] ?? null); // show form with token
         }
         break;
 
@@ -102,14 +110,6 @@ switch ($uri) {
 
     case '/reservation-submit':
         $reservation->submit();
-        break;
-
-    case '/reset-submit':
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $auth->resetPassword(); // update password in DB
-        } else {
-            $auth->showResetForm($_GET['token'] ?? null); // show form with token
-        }
         break;
 
     case '/search':

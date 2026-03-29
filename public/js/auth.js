@@ -1,11 +1,4 @@
 $(document).ready(function () {
-
-    // ---------- Helper ----------
-    function showToast(message, type) {
-        const event = new CustomEvent("showToast", { detail: { message, type } });
-        document.dispatchEvent(event);
-    }
-
     // ---------- PASSWORD VALIDATION ----------
     const password = $("#password");
     const errorBox = $("#password-error");
@@ -43,8 +36,7 @@ $(document).ready(function () {
             type: "POST",
             data: $(this).serialize(),
             dataType: "json",
-            success: function (response) { 
-                console.log(response);
+            success: function (response) {
                 if (!response.success) {
                     showToast(response.error, "error");
                 } else {
@@ -108,5 +100,56 @@ $(document).ready(function () {
             }
         });
     });
+    $("#recovery-form").submit(function (e) {
+        e.preventDefault(); // prevent normal form submission
 
+        const email = $(this).find('input[name="email"]').val();
+
+        $.ajax({
+            url: "/forgot-password", // your PHP handler
+            type: "POST",
+            data: { email: email },
+            dataType: "json",
+            success: function (response) {
+                if (response.success) {
+                    showToast(response.message || "Recovery email sent!", "success");
+                } else {
+                    showToast(response.error || "Failed to send recovery email.", "error");
+                }
+            },
+            error: function () {
+                showToast("Server error. Try again.", "error");
+            }
+        });
+    });
+    $("#reset-form").submit(function (e) {
+        e.preventDefault();
+
+        if (!validatePassword()) {
+            showToast("Please fix password errors before submitting.", "error");
+            return;
+        }
+        console.log($(this).serialize()); // <- check token is included
+
+
+        $.ajax({
+            url: "/reset-submit",
+            type: "POST",
+            data: $(this).serialize(),
+            dataType: "json",
+            success: function (response) {
+                if (!response.success) {
+                    showToast(response.error, "error");
+                } else {
+                    showToast("Password Reset successful!", "success");
+                    setTimeout(() => {
+                        window.location.href = response.redirect || "/registration";
+                    }, 1000);
+                }
+            },
+            error: function () {
+                showToast("Server error. Try again.", "error");
+            }
+        });
+    });
 });

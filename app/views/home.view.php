@@ -15,6 +15,7 @@
 </head>
 
 <body>
+  <?php require_once __DIR__ . '/components/toast.view.php'; ?>
   <!-- Header -->
   <nav
     class="fixed top-0 z-50 bg-[rgba(0,0,0,0.40)] flex justify-end items-center gap-10 pr-16 p-4 text-white font-crimson text-[20px] font-normal leading-normal w-full">
@@ -443,7 +444,6 @@
 
   <script src="/js/testimonials.js"></script>
   <script src="/js/gallery.js"></script>
-  <script src="/js/auth.js"></script>
   <script src="/js/daterange.js"></script>
   <script>
     const openBtn = document.getElementById("openRooms");

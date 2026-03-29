@@ -38,7 +38,7 @@ class User
         if ($result) {
             return $result->fetch_object();
         } else {
-            throw new Exception("Query failed " . $this->conn->error);
+            return false;
         }
     }
 
@@ -139,7 +139,7 @@ class User
 
             $mail->isHTML(true);
             $mail->Subject = 'Password Reset Request';
-            $resetLink = "http://hms.local/password-reset?token=$token";
+            $resetLink = "http://hms.local/reset-submit?token=$token";
             $mail->Body = "Click this link to reset your password (valid 30 min): <a href='$resetLink'>$resetLink</a>";
             $mail->AltBody = "Click this link to reset your password (valid 30 min): $resetLink";
 

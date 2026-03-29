@@ -64,6 +64,11 @@ class PagesController
         require_once '../app/views/auth/auth.view.php';
     }
 
+    public function forgotPasswordForm() {
+        $logged_in = $this->getAuthState();
+        require_once '../app/views/auth/forgot_password.view.php';
+    }
+
     public function notFound()
     {
         $logged_in = $this->getAuthState();

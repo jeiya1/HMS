@@ -9,7 +9,7 @@ class AuthController
             // Render the auth view and show toast for invalid token
             require_once '../app/views/auth/auth.view.php';
             echo "<script>showToast('Invalid or missing token.', 'error');</script>";
-            return;
+            exit;
         }
 
         $userModel = new User($GLOBALS['conn']);
@@ -18,7 +18,7 @@ class AuthController
         if (!$user) {
             require_once '../app/views/auth/auth.view.php';
             echo "<script>showToast('Token is invalid or expired.', 'error');</script>";
-            return;
+            exit;
         }
 
         // Token is valid — show reset password form
@@ -27,6 +27,7 @@ class AuthController
 
     public function login()
     {
+        header('Content-Type: application/json');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = trim($_POST['email']);
             $password = trim($_POST['password']);
@@ -36,7 +37,7 @@ class AuthController
                     "success" => false,
                     "error" => "Please enter both email and password."
                 ]);
-                return;
+                exit;
             }
 
             try {
@@ -52,12 +53,13 @@ class AuthController
                         "message" => "Login successful!",
                         "redirect" => "/home"
                     ]);
-                    return;
+                    exit;
                 } else {
                     echo json_encode([
                         "success" => false,
                         "error" => "Invalid email or password."
                     ]);
+                    exit;
                 }
             } catch (Exception $e) {
                 error_log($e->getMessage());
@@ -66,12 +68,14 @@ class AuthController
                     "success" => false,
                     "error" => "Something went wrong. Please try again."
                 ]);
+                exit;
             }
         }
     }
 
     public function signup()
     {
+        header('Content-Type: application/json');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fname = trim($_POST['fname']);
             $lname = trim($_POST['lname']);
@@ -82,7 +86,7 @@ class AuthController
 
             if (empty($fname) || empty($lname) || empty($email) || empty($password) || empty($birthDate)) {
                 echo json_encode(["success" => false, "error" => "Please fill in all fields."]);
-                return;
+                exit;
             }
 
             // Check if underage
@@ -91,11 +95,19 @@ class AuthController
             $age = $today->diff($dob)->y;
             if ($age < 18) {
                 echo json_encode(["success" => false, "error" => "You must be at least 18 years old to register."]);
-                return;
+                exit;
             }
 
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $userModel = new User($GLOBALS['conn']);
+
+            if ($userModel->getUserByEmail($email)) {
+                echo json_encode([
+                    "success" => false,
+                    "error" => "Email already exists."
+                ]);
+                exit;
+            }
 
             try {
                 $userModel->createGuestUser($email, $email, $hash, $fname, $lname, $phone, $birthDate);
@@ -111,9 +123,14 @@ class AuthController
                     "message" => "Signup successful!",
                     "redirect" => "/home"
                 ]);
+                exit;
             } catch (Exception $e) {
                 error_log($e->getMessage());
-                echo json_encode(["success" => false, "error" => "Failed to create account."]);
+                echo json_encode([
+                    "success" => false,
+                    "error" => $e->getMessage()
+                ]);
+                exit;
             }
         }
     }
@@ -121,7 +138,7 @@ class AuthController
     {
         session_destroy();
         echo json_encode(["success" => true, "redirect" => "/home"]);
-        return;
+        exit;
     }
 
 
@@ -167,11 +184,11 @@ class AuthController
     }
     public function resetPassword()
     {
-        $token = $_GET['token'] ?? null;
+        $token = $_POST['token'] ?? null;
 
         if (!$token) {
             echo json_encode(["success" => false, "error" => "Missing token."]);
-            return;
+            exit;
         }
 
         $userModel = new User($GLOBALS['conn']);
@@ -179,7 +196,7 @@ class AuthController
 
         if (!$user) {
             echo json_encode(["success" => false, "error" => "Invalid or expired token."]);
-            return;
+            exit;
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -193,15 +210,15 @@ class AuthController
                 || !preg_match('/[\W]/', $newPassword)
             ) {
                 echo json_encode(["success" => false, "error" => "Password must be at least 8 chars, include upper/lowercase, number, and special char."]);
-                return;
+                exit;
             }
 
             $hash = password_hash($newPassword, PASSWORD_DEFAULT);
             $userModel->updatePasswordByID($user->UserID, $hash);
             $userModel->deleteResetToken($token);
 
-            echo json_encode(["success" => true, "message" => "Password updated successfully!", "redirect" => "/login"]);
-            return;
+            echo json_encode(["success" => true, "message" => "Password updated successfully!", "redirect" => "/registration"]);
+            exit;
         }
     }
 }
