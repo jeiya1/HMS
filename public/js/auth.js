@@ -8,7 +8,6 @@ $(document).ready(function () {
 
     // ---------- PASSWORD VALIDATION ----------
     const password = $("#password");
-    const passwordr = $("#passwordr");
     const errorBox = $("#password-error");
     let timer;
 
@@ -21,7 +20,6 @@ $(document).ready(function () {
         if (!/[a-z]/.test(pass)) errors.push("Must contain lowercase letter");
         if (!/[0-9]/.test(pass)) errors.push("Must contain number");
         if (!/[\W]/.test(pass)) errors.push("Must contain special character");
-        if (pass !== passwordr.val()) errors.push("Passwords do not match");
 
         if (errors.length > 0) {
             errorBox.html(errors.join("<br>"));
@@ -33,11 +31,6 @@ $(document).ready(function () {
     }
 
     password.on("input", function () {
-        clearTimeout(timer);
-        timer = setTimeout(validatePassword, 500);
-    });
-
-    passwordr.on("input", function () {
         clearTimeout(timer);
         timer = setTimeout(validatePassword, 500);
     });

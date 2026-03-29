@@ -45,7 +45,7 @@
                         required class="border border-gray-300 p-2 rounded w-full text-black bg-white">
                     <br>
                     <label for="birthDate">Birthday: </label>
-                    <input type="text" id="birthDate" name="birthDate" placeholder="Select your birthdate"
+                    <input type="text" id="birthDate" name="birthDate" placeholder="Select your birthdate" required
                         class="border border-gray-300 p-2 rounded w-full text-black bg-white">
                     <br>
                     <label for="email">Email: </label>
@@ -54,15 +54,11 @@
                     <br>
                     <div class="form-group">
                         <label for="password">Create Password</label>
-                        <input type="password" id="password" name="password" required
+                        <input type="password" id="password" name="password" autocomplete="new-password" required
                             class="border border-gray-300 p-2 rounded w-full text-black bg-white">
 
-                        <div id="password-error" class="error-message"></div>
+                        <div id="password-error" class="text-red-600 text-sm min-h-1 pointer-events-none"></div>
                     </div>
-                    <label for="passwordr">Retype Password: </label>
-                    <input type="password" id="passwordr" name="passwordr" required
-                        class="border border-gray-300 p-2 rounded w-full text-black bg-white">
-                    <br>
 
                     <!-- Terms & Privacy Links -->
                     <p class="text-sm text-gray-600 mt-2">
@@ -85,11 +81,7 @@
                         class="border border-gray-300 p-2 rounded w-full text-black bg-white">
                     <br>
                     <label for="password">Password: </label>
-                    <input type="password" name="password" required
-                        class="border border-gray-300 p-2 rounded w-full text-black bg-white">
-                    <br>
-                    <label for="passwordr">Retype Password: </label>
-                    <input type="password" name="passwordr" required
+                    <input type="password" name="password" autocomplete="current-password" required
                         class="border border-gray-300 p-2 rounded w-full text-black bg-white">
                     <br>
 
@@ -109,8 +101,6 @@
     </div>
 
     <?php require_once __DIR__ . '/../components/footer.view.php'; ?>
-    <script src="/js/signup.js"></script>
-    <script src="/js/login.js"></script>
     <script src="/js/flatpickr.js"></script>
 </body>
 

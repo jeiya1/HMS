@@ -99,9 +99,8 @@ class AuthController
             $birthDate = trim($_POST['birthDate']);
             $email = trim($_POST['email']);
             $password = trim($_POST['password']);
-            $passwordr = trim($_POST['passwordr']);
 
-            if (empty($fname) || empty($lname) || empty($email) || empty($password) || empty($passwordr) || empty($birthDate)) {
+            if (empty($fname) || empty($lname) || empty($email) || empty($password) || empty($birthDate)) {
                 echo json_encode(["success" => false, "error" => "Please fill in all fields."]);
                 return;
             }
@@ -115,21 +114,23 @@ class AuthController
                 return;
             }
 
-            if ($password !== $passwordr) {
-                echo json_encode(["success" => false, "error" => "Passwords do not match."]);
-                return;
-            }
-
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $userModel = new User($GLOBALS['conn']);
 
             try {
                 $userModel->createGuestUser($email, $email, $hash, $fname, $lname, $phone, $birthDate);
 
-                // Auto-login after signup
-                $_POST['email'] = $email;
-                $_POST['password'] = $password;
-                $this->login();
+                $user = $userModel->getUserByEmail($email);
+
+                // Auto-login
+                $_SESSION['logged_in_user_id'] = $user->UserID;
+                $_SESSION['logged_in_user_name'] = $user->FirstName;
+
+                echo json_encode([
+                    "success" => true,
+                    "message" => "Signup successful!",
+                    "redirect" => "/home"
+                ]);
             } catch (Exception $e) {
                 error_log($e->getMessage());
                 echo json_encode(["success" => false, "error" => "Failed to create account."]);
