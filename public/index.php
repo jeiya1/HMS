@@ -60,16 +60,12 @@ switch ($uri) {
         $pages->home();
         break;
 
-    case '/login':
-        $auth->loginForm();
-        break;
-
     case '/profile':
-        $auth->profile();
+        $pages->account();
         break;
 
-    case '/signup':
-        $auth->signupForm();
+    case '/registration':
+        $pages->registration();
         break;
 
     case '/forgot-password':
@@ -108,7 +104,7 @@ switch ($uri) {
         $reservation->submit();
         break;
 
-    case '/password-reset':
+    case '/reset-submit':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $auth->resetPassword(); // update password in DB
         } else {

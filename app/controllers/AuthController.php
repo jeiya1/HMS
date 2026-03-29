@@ -3,26 +3,6 @@ require_once '../app/models/User.php';
 
 class AuthController
 {
-    public function loginForm()
-    {
-        require_once '../app/views/auth/auth.view.php';
-    }
-
-    public function signupForm()
-    {
-        require_once '../app/views/auth/auth.view.php';
-    }
-
-    public function forgotPasswordForm()
-    {
-        require_once '../app/views/auth/forgot_password.view.php';
-    }
-
-    public function profile()
-    {
-        require_once '../app/views/auth/profile.view.php';
-    }
-
     public function showResetForm($token = null)
     {
         if (!$token) {

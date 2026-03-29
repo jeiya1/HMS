@@ -19,6 +19,10 @@ class PagesController
 
         require_once '../app/views/home.view.php';
     }
+    public function account() {
+        $logged_in = $this->getAuthState();
+        require_once '../app/views/auth/account.view.php';
+    }
 
     public function search()
     {
@@ -53,6 +57,11 @@ class PagesController
     {
         $logged_in = $this->getAuthState();
         require_once '../app/views/reservations/reservation.view.html';
+    }
+
+    public function registration() {
+        $logged_in = $this->getAuthState();
+        require_once '../app/views/auth/auth.view.php';
     }
 
     public function notFound()

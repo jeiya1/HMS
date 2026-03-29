@@ -32,8 +32,7 @@ class Reservation
                 throw new Exception("Failed to create reservation: " . $this->conn->error);
             }
         } catch (Exception $e) {
-            echo $e->getMessage();
-            return null;
+            throw new Exception("Failed to create reservation: " . $e->getMessage());
         }
     }
 
@@ -54,13 +53,11 @@ class Reservation
                 throw new Exception("Either reservation ID or booking token must be provided.");
             }
 
-            if ($result) {
-                echo "Reservation cancelled successfully.";
-            } else {
+            if (!$result) {
                 throw new Exception("Failed to cancel reservation: " . $this->conn->error);
             }
         } catch (Exception $e) {
-            echo $e->getMessage();
+            throw new Exception("Failed to cancel reservation: " . $e->getMessage());
         }
     }
 
@@ -72,13 +69,11 @@ class Reservation
                 [$reservationID, $roomID]
             );
 
-            if ($result) {
-                echo "Room added to reservation successfully.";
-            } else {
+            if (!$result) {
                 throw new Exception("Failed to add room to reservation: " . $this->conn->error);
             }
         } catch (Exception $e) {
-            echo $e->getMessage();
+            throw new Exception("Failed to cancel reservation: " . $e->getMessage());
         }
     }
 
@@ -91,8 +86,7 @@ class Reservation
             );
             return $result;
         } catch (Exception $e) {
-            echo $e->getMessage();
-            return null;
+            throw new Exception("Failed to cancel reservation: " . $e->getMessage());
         }
     }
 
@@ -105,8 +99,7 @@ class Reservation
             );
             return $result;
         } catch (Exception $e) {
-            echo $e->getMessage();
-            return null;
+            throw new Exception("Failed to cancel reservation: " . $e->getMessage());
         }
     }
 
@@ -118,14 +111,11 @@ class Reservation
                 [$roomID, $checkin, $checkout, $adults]
             );
 
-            if ($result) {
-                echo "Room added to cart successfully.";
-            } else {
+            if (!$result) {
                 throw new Exception("Failed to add room to cart: " . $this->conn->error);
             }
         } catch (Exception $e) {
-            echo $e->getMessage();
+            throw new Exception("Failed to cancel reservation: " . $e->getMessage());
         }
     }
-
 }

@@ -24,8 +24,7 @@ class User
         if ($result) {
             return $result->fetch_object();
         } else {
-            echo "Query failed: " . $this->conn->error;
-            return null;
+            throw new Exception("Query failed " . $this->conn->error);
         }
     }
 
@@ -39,8 +38,7 @@ class User
         if ($result) {
             return $result->fetch_object();
         } else {
-            echo "Query failed: " . $this->conn->error;
-            return null;
+            throw new Exception("Query failed " . $this->conn->error);
         }
     }
 
@@ -65,16 +63,20 @@ class User
 
     public function createGuestUser($email, $emailGuest, $password, $firstName, $lastName, $phone, $birthDate)
     {
+        $existingGuest = $this->getGuestByEmail($email);
+
+        if ($existingGuest) {
+            throw new Exception("Email already exists. Please log in instead.");
+        }
+
         $result = $this->conn->execute_query(
             "CALL CreateGuestUser(?, ?, ?, ?, ?, ?, ?)",
             [$email, $emailGuest, $password, $firstName, $lastName, $phone, $birthDate]
         );
 
         if (!$result) {
-            throw new Exception("Failed to create user: " . $this->conn->error);
+            throw new Exception("Failed to create account. Please try again.");
         }
-
-        return true;
     }
 
     public function updatePassword($email, $newPassword)
@@ -84,12 +86,8 @@ class User
             [$newPassword, $email]
         );
 
-        if ($result) {
-            echo "Password updated successfully!";
-            return true;
-        } else {
-            echo "Failed to update password: " . $this->conn->error;
-            return false;
+        if (!$result) {
+            throw new Exception("Failed to update password " . $this->conn->error);
         }
     }
 
@@ -148,9 +146,7 @@ class User
             $mail->send();
             return true;
         } catch (Exception $e) {
-            // log or display error
-            error_log("Mailer Error: {$mail->ErrorInfo}");
-            return false;
+            throw new Exception("Mailer: " . $mail->ErrorInfo);
         }
     }
     public function getUserByResetToken($token)

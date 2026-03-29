@@ -43,7 +43,8 @@ $(document).ready(function () {
             type: "POST",
             data: $(this).serialize(),
             dataType: "json",
-            success: function (response) {
+            success: function (response) { 
+                console.log(response);
                 if (!response.success) {
                     showToast(response.error, "error");
                 } else {

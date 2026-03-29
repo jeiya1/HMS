@@ -8,131 +8,145 @@ class ReservationController
 {
     public function submit()
     {
+        header('Content-Type: application/json');
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(["success" => false, "error" => "Invalid request method."]);
+            return;
+        }
 
-            $email = $_POST['email'];
-            $checkin = $_POST['checkin'];
-            $checkout = $_POST['checkout'];
-            $adults = (int) $_POST['adults'];
-            $roomID = (int) $_POST['roomID'];
-            $paymentMethod = (int) $_POST['paymentMethod'];
-            $fname = $_POST['fname'];
-            $lname = $_POST['lname'];
-            $phone = $_POST['phone'];
-            $birthDate = $_POST['birthDate'];
+        $email = $_POST['email'];
+        $checkin = $_POST['checkin'];
+        $checkout = $_POST['checkout'];
+        $adults = (int) $_POST['adults'];
+        $roomID = (int) $_POST['roomID'];
+        $paymentMethod = (int) $_POST['paymentMethod'];
+        $fname = $_POST['fname'];
+        $lname = $_POST['lname'];
+        $phone = $_POST['phone'];
+        $birthDate = $_POST['birthDate'];
 
-            if (empty($email) || empty($fname) || empty($lname) || empty($phone) || empty($birthDate)) {
-                echo "Please fill in all required fields.";
-                return;
-            }
+        // ---------- VALIDATION ----------
+        if (empty($email) || empty($fname) || empty($lname) || empty($phone) || empty($birthDate)) {
+            echo json_encode(["success" => false, "error" => "Please fill in all required fields."]);
+            return;
+        }
 
-            if (empty($checkin) || empty($checkout)) {
-                echo "Please select check-in and check-out dates.";
-                return;
-            } else if (strtotime($checkin) > strtotime($checkout)) {
-                echo "Check-out date must be after check-in date.";
-                return;
-            } else if (strtotime($checkin) < strtotime(date('Y-m-d'))) {
-                echo "Check-in date cannot be in the past.";
-                return;
-            }
+        if (empty($checkin) || empty($checkout)) {
+            echo json_encode(["success" => false, "error" => "Please select check-in and check-out dates."]);
+            return;
+        }
 
-            if ($adults < 1) {
-                echo "At least 1 adult is required.";
-                return;
-            }
+        if (strtotime($checkin) > strtotime($checkout)) {
+            echo json_encode(["success" => false, "error" => "Check-out must be after check-in."]);
+            return;
+        }
 
-            $roomModel = new Room($GLOBALS['conn']);
+        if (strtotime($checkin) < strtotime(date('Y-m-d'))) {
+            echo json_encode(["success" => false, "error" => "Check-in cannot be in the past."]);
+            return;
+        }
 
-            $available = $roomModel->checkRoomAvailability($roomID, $checkin, $checkout);
+        if ($adults < 1) {
+            echo json_encode(["success" => false, "error" => "At least 1 adult required."]);
+            return;
+        }
 
-            if (!$available) {
-                echo "Room is already booked for selected dates.";
-                return;
-            }
+        // ---------- ROOM CHECK ----------
+        $roomModel = new Room($GLOBALS['conn']);
+        $available = $roomModel->checkRoomAvailability($roomID, $checkin, $checkout);
 
-            $totalAmount = $roomModel->calculateTotalAmount(
-                $roomModel->getRoomTypeName($roomID),
-                $roomModel->getRoomPrice($roomID),
-                $checkin,
-                $checkout,
-                $adults
+        if (!$available) {
+            echo json_encode(["success" => false, "error" => "Room is already booked for selected dates."]);
+            return;
+        }
+
+        // ---------- COMPUTE ----------
+        $totalAmount = $roomModel->calculateTotalAmount(
+            $roomModel->getRoomTypeName($roomID),
+            $roomModel->getRoomPrice($roomID),
+            $checkin,
+            $checkout,
+            $adults
+        );
+
+        $reservationModel = new Reservation($GLOBALS['conn']);
+        $userModel = new User($GLOBALS['conn']);
+
+        $guest = $userModel->getGuestByEmail($email);
+        $guestID = $guest ? $guest->GuestID : null;
+
+        if (!$guestID) {
+            $guestID = $userModel->createGuest($email, $fname, $lname, $phone, $birthDate);
+        }
+
+        $reservations = $reservationModel->getGuestReservations($guestID);
+
+        if ($reservations->num_rows > 0) {
+            $reservationModel->addRoomToReservation(
+                $reservations->fetch_object()->ReservationID,
+                $roomID
             );
 
-            $reservationModel = new Reservation($GLOBALS['conn']);
+            echo json_encode([
+                "success" => true,
+                "message" => "Room added to existing reservation."
+            ]);
+            return;
+        }
 
-            $userModel = new User($GLOBALS['conn']);
+        $res = $reservationModel->createReservation(
+            $guestID,
+            $checkin,
+            $checkout,
+            $adults,
+            $roomID,
+            $paymentMethod,
+            $totalAmount
+        );
 
-            $guestID = $userModel->getGuestByEmail($email)->GuestID;
+        if ($res) {
+            $bookingToken = $res['BookingToken'] ?? 'N/A';
 
-            if (!$guestID) {
-                $guestID = $userModel->createGuest($email, $fname, $lname, $phone);
-            }
-
-            $reservations = $reservationModel->getGuestReservations($guestID);
-            if ($reservations->num_rows > 0) {
-                // Guest already has a reservation, add the room
-                $reservationModel->addRoomToReservation($reservations->fetch_object()->ReservationID, $roomID);
-                echo "Room added to existing reservation.";
-            } else {
-                // Guest has no reservation, create a new one
-                $res = $reservationModel->createReservation(
-                    $guestID,
-                    $checkin,
-                    $checkout,
-                    $adults,
-                    $roomID,
-                    $paymentMethod,
-                    $totalAmount
-                );
-
-                if ($res) {
-                    $bookingToken = $res['BookingToken'] ?? 'N/A';
-                    echo "Reservation created successfully! Your Booking Token: $bookingToken";
-                } else {
-                    echo "Failed to create reservation.";
-                }
-            }
-
-            // DEBUG: show input values and their data types
-            // echo "Debugging input values:<br>";
-            // echo "guestID: " . $guestID . " (Type: " . gettype($guestID) . ")<br>";
-            // echo "checkin: " . $checkin . " (Type: " . gettype($checkin) . ")<br>";
-            // echo "checkout: " . $checkout . " (Type: " . gettype($checkout) . ")<br>";
-            // echo "adults: " . $adults . " (Type: " . gettype($adults) . ")<br>";
-            // echo "roomID: " . $roomID . " (Type: " . gettype($roomID) . ")<br>";
-            // echo "paymentMethod: " . $paymentMethod . " (Type: " . gettype($paymentMethod) . ")<br>";
-            // echo "totalAmount: " . $totalAmount . " (Type: " . gettype($totalAmount) . ")<br>";
+            echo json_encode([
+                "success" => true,
+                "message" => "Reservation created!",
+                "bookingToken" => $bookingToken
+            ]);
         } else {
-            echo "Invalid request method.";
+            echo json_encode([
+                "success" => false,
+                "error" => "Failed to create reservation."
+            ]);
         }
     }
 
     public function cart_submit()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $roomID = (int) $_POST['roomID'];
-            $guests = (int) $_POST['guests'];
-            $checkin = $_POST['checkin'];
-            $checkout = $_POST['checkout'];
+        header('Content-Type: application/json');
 
-            // DEBUG: show input values and their data types
-            // echo "roomID: " . $roomID . " (Type: " . gettype($roomID) . ")";
-            // echo "guests: " . $guests . " (Type: " . gettype($guests) . ")";
-            // echo "checkin: " . $checkin . " (Type: " . gettype($checkin) . ")";
-            // echo "checkout: " . $checkout . " (Type: " . gettype($checkout) . ")";
-
-            if (!$roomID || !$guests || !$checkin || !$checkout) {
-                echo "All fields are required.";
-                return;
-            }
-
-            $reservationModel = new Reservation($GLOBALS['conn']);
-            $reservationModel->addRoomToCart($roomID, $checkin, $checkout, $guests);
-        } else {
-            echo "Invalid request method.";
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(["success" => false, "error" => "Invalid request method."]);
+            return;
         }
+
+        $roomID = (int) $_POST['roomID'];
+        $guests = (int) $_POST['guests'];
+        $checkin = $_POST['checkin'];
+        $checkout = $_POST['checkout'];
+
+        if (!$roomID || !$guests || !$checkin || !$checkout) {
+            echo json_encode(["success" => false, "error" => "All fields are required."]);
+            return;
+        }
+
+        $reservationModel = new Reservation($GLOBALS['conn']);
+        $reservationModel->addRoomToCart($roomID, $checkin, $checkout, $guests);
+
+        echo json_encode([
+            "success" => true,
+            "message" => "Room added to cart!"
+        ]);
     }
 }
 ?>

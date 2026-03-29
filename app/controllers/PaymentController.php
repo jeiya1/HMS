@@ -6,32 +6,64 @@ class PaymentController {
 
     public function payReservation() {
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        header('Content-Type: application/json');
 
-            $reservationID = $_POST['reservationID'];
-            $methodID = $_POST['methodID'];
-            $amount = $_POST['amount'];
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode([
+                "success" => false,
+                "error" => "Invalid request method."
+            ]);
+            return;
+        }
 
-            if(empty($reservationID) || empty($methodID)){//check missing input
-                echo "Missing payment information.";
-                return;
-            }
+        $reservationID = $_POST['reservationID'] ?? null;
+        $methodID = $_POST['methodID'] ?? null;
+        $amount = $_POST['amount'] ?? null;
 
+        // ---------- VALIDATION ----------
+        if (empty($reservationID) || empty($methodID)) {
+            echo json_encode([
+                "success" => false,
+                "error" => "Missing payment information."
+            ]);
+            return;
+        }
+
+        if ($amount <= 0) {
+            echo json_encode([
+                "success" => false,
+                "error" => "Invalid payment amount."
+            ]);
+            return;
+        }
+
+        try {
             $paymentModel = new Payment($GLOBALS['conn']);
 
-            $paymentModel->createPayment(
+            $result = $paymentModel->createPayment(
                 $reservationID,
                 $methodID,
                 $amount
             );
 
-        } else {
+            if ($result) {
+                echo json_encode([
+                    "success" => true,
+                    "message" => "Payment successful!"
+                ]);
+            } else {
+                echo json_encode([
+                    "success" => false,
+                    "error" => "Payment failed. Try again."
+                ]);
+            }
 
-            echo "Invalid request method.";
-
+        } catch (Exception $e) {
+            echo json_encode([
+                "success" => false,
+                "error" => "Server error: " . $e->getMessage()
+            ]);
         }
-
     }
-
 }
 ?>

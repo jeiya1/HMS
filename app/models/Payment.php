@@ -10,9 +10,8 @@ class Payment {
 
     public function createPayment($reservationID, $methodID, $amount) {
 
-        if($amount <= 0){//Handling Negative input
-            echo "Invalid payment amount.";
-            return;
+        if($amount <= 0){
+            throw new Exception("Invalid payment amount");
         }
 
         $result = $this->conn->execute_query(
@@ -22,10 +21,8 @@ class Payment {
             [$reservationID, $methodID, $amount]
         );
 
-        if ($result) {
-            echo "Payment successful!";
-        } else {
-            echo "Payment failed: " . $this->conn->error;
+        if (!$result) {
+            throw new Exception("Failed to add to cart" . $this->conn->error);
         }
 
     }

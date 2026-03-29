@@ -24,7 +24,7 @@ class ReservationCart
         if ($result) {
             return $this->conn->insert_id;
         } else {
-            return false;
+            throw new Exception("Failed to create cart " . $this->conn->error);
         }
     }
 
@@ -43,9 +43,9 @@ class ReservationCart
 
         if ($result->num_rows > 0) {
             return $result->fetch_assoc();
+        } else {
+            return null;
         }
-
-        return null;
     }
 
 
@@ -63,7 +63,7 @@ class ReservationCart
             [$sessionGuestID]
         );
 
-        if ($result ->num_rows > 0) {
+        if ($result->num_rows > 0) {
             $cart = $this->getActiveCart($sessionGuestID);
 
             if ($cart) {
@@ -88,8 +88,9 @@ class ReservationCart
         );
         if ($result->num_rows > 0) {
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
 
@@ -101,8 +102,9 @@ class ReservationCart
         );
         if ($result->num_rows > 0) {
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     public function extendCart($cartID)
@@ -115,8 +117,9 @@ class ReservationCart
         );
         if ($result->num_rows > 0) {
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     public function getSessionGuestByToken($sessionToken)
@@ -130,7 +133,8 @@ class ReservationCart
         );
         if ($result->num_rows > 0) {
             return $result->fetch_assoc()['SessionGuestID'];
+        } else {
+            return null;
         }
-        return null;
     }
 }

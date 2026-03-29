@@ -1,6 +1,7 @@
 <?php
 
-class SessionGuest {
+class SessionGuest
+{
 
     private $conn;
 
@@ -9,7 +10,8 @@ class SessionGuest {
         $this->conn = $db;
     }
 
-    public function findOrCreate($token) {
+    public function findOrCreate($token)
+    {
         $result = $this->conn->execute_query(
             "SELECT SessionGuestID 
              FROM SessionGuests 
@@ -40,7 +42,8 @@ class SessionGuest {
 
     }
 
-    public function getById($id) {
+    public function getById($id)
+    {
         $result = $this->conn->execute_query(
             "SELECT * 
              FROM SessionGuests 
@@ -53,8 +56,8 @@ class SessionGuest {
             $row = $result->fetch_assoc();
             return $row["SessionGuestID"];
 
+        } else {
+            return null;
         }
-
-        return null;
     }
 }

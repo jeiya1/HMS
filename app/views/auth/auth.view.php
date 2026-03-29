@@ -69,7 +69,7 @@
 
                     <br>
                     <input type="submit" value="Signup"
-                        class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3">
+                        class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3 hover:text-white hover:[text-shadow:0_0_8px_rgba(255,255,255,0.9)] hover:bg-[#3F321F] transition-colors">
                 </form>
             </div>
 
@@ -93,7 +93,7 @@
                     <br>
                     <br>
                     <input type="submit" value="Login"
-                        class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3">
+                        class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3 hover:text-white hover:[text-shadow:0_0_8px_rgba(255,255,255,0.9)] hover:bg-[#3F321F] transition-colors">
                 </form>
             </div>
         </div>

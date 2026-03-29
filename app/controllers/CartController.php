@@ -7,75 +7,110 @@ require_once '../app/models/Cart.php';
 
 class CartController
 {
-    public function initCart()
-    {
-
-    }
-
     public function submit()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        header('Content-Type: application/json');
 
-            // This adds the room to the cart, but doesn't actually create a reservation until the user clicks "Submit Reservation"
-            $adults = (int) $_POST['adults'];
-            $roomID = (int) $_POST['room'];
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode([
+                "success" => false,
+                "error" => "Invalid request method."
+            ]);
+            return;
+        }
 
-            $dateRange = $_POST['checkin'];
+        $adults = (int) $_POST['adults'];
+        $roomID = (int) $_POST['room'];
+        $dateRange = $_POST['checkin'];
 
-            if (empty($dateRange)) {
-                echo "Please select check-in and check-out dates.";
-                return;
-            }
+        // ---------- VALIDATION ----------
+        if (empty($dateRange)) {
+            echo json_encode([
+                "success" => false,
+                "error" => "Please select check-in and check-out dates."
+            ]);
+            return;
+        }
 
-            // Split the range
-            $dates = explode(" to ", $dateRange);
+        $dates = explode(" to ", $dateRange);
 
-            if (count($dates) !== 2) {
-                echo "Invalid date range.";
-                return;
-            }
+        if (count($dates) !== 2) {
+            echo json_encode([
+                "success" => false,
+                "error" => "Invalid date range."
+            ]);
+            return;
+        }
 
-            // Convert using DateTime (SAFE for d/m/Y)
-            $checkinObj = DateTime::createFromFormat('d/m/Y', trim($dates[0]));
-            $checkoutObj = DateTime::createFromFormat('d/m/Y', trim($dates[1]));
+        $checkinObj = DateTime::createFromFormat('d/m/Y', trim($dates[0]));
+        $checkoutObj = DateTime::createFromFormat('d/m/Y', trim($dates[1]));
 
-            if (!$checkinObj || !$checkoutObj) {
-                echo "Invalid date format.";
-                return;
-            }
+        if (!$checkinObj || !$checkoutObj) {
+            echo json_encode([
+                "success" => false,
+                "error" => "Invalid date format."
+            ]);
+            return;
+        }
 
-            // Convert to Y-m-d (for DB or comparisons)
-            $checkin = $checkinObj->format('Y-m-d');
-            $checkout = $checkoutObj->format('Y-m-d');
+        $checkin = $checkinObj->format('Y-m-d');
+        $checkout = $checkoutObj->format('Y-m-d');
 
-            $today = new DateTime();
-            $today->setTime(0, 0, 0); // Set to midnight for accurate comparison
-            $checkinObj->setTime(0, 0, 0);
-            $checkoutObj->setTime(0, 0, 0);
+        $today = new DateTime();
+        $today->setTime(0, 0, 0);
+        $checkinObj->setTime(0, 0, 0);
+        $checkoutObj->setTime(0, 0, 0);
 
-            if ($checkinObj > $checkoutObj) {
-                echo "Check-out date must be after check-in date.";
-                return;
-            }
+        if ($checkinObj > $checkoutObj) {
+            echo json_encode([
+                "success" => false,
+                "error" => "Check-out date must be after check-in date."
+            ]);
+            return;
+        }
 
-            if ($checkinObj < $today) {
-                echo "Check-in date cannot be in the past.";
-                return;
-            }
+        if ($checkinObj < $today) {
+            echo json_encode([
+                "success" => false,
+                "error" => "Check-in date cannot be in the past."
+            ]);
+            return;
+        }
 
-            if (empty($adults)) {
-                echo "Please input at least 1 guest.";
-                return;
-            }
+        if ($adults < 1) {
+            echo json_encode([
+                "success" => false,
+                "error" => "Please input at least 1 guest."
+            ]);
+            return;
+        }
 
-            if (empty($roomID)) {
-                echo "Please select a room.";
-                return;
-            }
+        if (empty($roomID)) {
+            echo json_encode([
+                "success" => false,
+                "error" => "Please select a room."
+            ]);
+            return;
+        }
 
+        // ---------- ADD TO CART ----------
+        try {
             $cart = new Cart($GLOBALS['conn']);
 
+            $cart->addToCart($roomID, $checkin, $checkout, $adults);
+
+            echo json_encode([
+                "success" => true,
+                "message" => "Room added to cart!"
+            ]);
+
+        } catch (Exception $e) {
+            echo json_encode([
+                "success" => false,
+                "error" => "Failed to add to cart."
+            ]);
         }
     }
+
 }
 ?>

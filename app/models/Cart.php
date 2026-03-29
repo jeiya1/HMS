@@ -18,7 +18,7 @@ class Cart {
         if ($result) {
             return true;
         } else {
-            return false;
+            throw new Exception("Failed to add to cart.");
         }
     }
 }
