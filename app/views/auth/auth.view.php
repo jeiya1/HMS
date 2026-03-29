@@ -4,12 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>Accounts</title>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/output.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 
 <body>
+    <?php require_once __DIR__ . '/../components/toast.view.php'; ?>
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
 
     <div class="py-10 px-30 flex flex-col gap-5">
@@ -71,7 +73,7 @@
 
             <div class="flex flex-col border rounded p-2 shadow-[0px_0px_4px_0px_rgba(0,0,0,0.25)] w-full">
                 <h1 class="font-bold">ALREADY REGISTERED?</h1>
-                <form action="/login-submit" method="post">
+                <form id="loginForm" action="/login-submit" method="POST">
                     <label for="email">Email: </label>
                     <input type="email" name="email" required
                         class="border border-gray-300 p-2 rounded w-full text-black bg-white">
@@ -102,6 +104,7 @@
 
     <?php require_once __DIR__ . '/../components/footer.view.php'; ?>
     <script src="/js/signup.js"></script>
+    <script src="/js/login.js"></script>
 </body>
 
 </html>

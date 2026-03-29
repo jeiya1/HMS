@@ -1,8 +1,8 @@
 <?php
 // DEBUG LINES
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 // echo "<script>alert('$var');</script>";
 
 $lifetime = 60 * 60 * 24 * 30; // 30 days
