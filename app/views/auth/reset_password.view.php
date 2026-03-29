@@ -36,6 +36,7 @@
                         class="border p-2 rounded w-full mb-2">
                     <div id="password-error" class="error-message mb-2 text-red-600"></div>
 
+                    <!-- TODO: add hover animation to button -->
                     <input type="submit" value="Reset Password" class="bg-[#C39C4D] text-white p-3 rounded mt-2">
                 </form>
             </div>

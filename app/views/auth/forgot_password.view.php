@@ -37,6 +37,8 @@
                         class="border border-gray-300 p-2 rounded w-full text-black bg-white">
                     <br>
                     <br>
+                    <!-- TODO: add a wait for .. message since creating the recovery link takes a while
+                    TODO: add hover animation to button -->
                     <input type="submit" value="Send Recovery Link"
                         class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3">
                 </form>
