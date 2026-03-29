@@ -34,8 +34,8 @@ class SessionGuest {
             [$token, date('Y-m-d H:i:s', strtotime('+1 day'))]
         );
 
-        if ($result->num_rows > 0) {
-            return $this->conn->insert_id();
+        if ($result === true) {
+            return $this->conn->insert_id;
         }
 
     }
