@@ -309,7 +309,7 @@
               <p class="text-white text-sm font-light font-roboto [text-shadow:0px_1px_1px_rgb(0_0_0/0.25)]">
                 A comfortable and cozy room designed for guests seeking a simple yet relaxing stay, complete with
                 essential amenities.</p>
-              <a href="/standard">
+              <a href="/search?room_type=standard&auto=1">
                 <button class="self-start text-stone-800 border border-current px-2 py-1 rounded font-normal font-roboto
                transition transform hover:text-stone-900 hover:scale-105 hover:shadow-md">
                   Book Now
@@ -333,7 +333,7 @@
                 Enjoy extra space and enhanced comfort in our deluxe rooms, featuring stylish interiors and upgraded
                 amenities.
               </p>
-              <a href="/deluxe">
+              <a href="/search?room_type=deluxe&auto=1">
                 <button class="self-start text-stone-800 border border-current px-2 py-1 rounded font-normal font-roboto
                transition transform hover:text-stone-900 hover:scale-105 hover:shadow-md">
                   Book Now
@@ -358,7 +358,7 @@
                 the
                 perfect space to unwind.
               </p>
-              <a href="/suite">
+              <a href="/search?room_type=suite&auto=1">
                 <button class="self-start text-stone-800 border border-current px-2 py-1 rounded font-normal font-roboto
                transition transform hover:text-stone-900 hover:scale-105 hover:shadow-md">
                   Book Now
@@ -390,7 +390,7 @@
           “
         </div>
 
-        <!-- Text and Author -->
+        <!-- Text and autor -->
         <div class="flex flex-col justify-center">
           <p id="testimonial-text" class="text-neutral-800 mb-4 transition-opacity duration-300 opacity-100">
             The hotel exceeded my expectations in so many ways. The deluxe room was spacious and stylish, and all the
@@ -399,7 +399,7 @@
             workouts while traveling.
           </p>
           <div class="flex items-center space-x-2 justify-end">
-            <h6 class="font-semibold" id="testimonial-author">Shan L. —</h6>
+            <h6 class="font-semibold" id="testimonial-autor">Shan L. —</h6>
             <img src="/assets/icons/star.svg" alt="star" class="w-4 h-4">
             <img src="/assets/icons/star.svg" alt="star" class="w-4 h-4">
             <img src="/assets/icons/star.svg" alt="star" class="w-4 h-4">

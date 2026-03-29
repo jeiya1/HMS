@@ -14,6 +14,8 @@ class SearchController
         // $room_type = $_POST['room_type'] ?? '';
         $roomTypes = $roomTypeModel->getAllRoomTypes();
 
+        $filters = $filters ?? [];
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $checkin = $_POST['checkin'] ?? null;
             $checkout = null;
@@ -41,6 +43,35 @@ class SearchController
                 'room_type' => !empty($_POST['room_type']) ? $_POST['room_type'] : null,
                 'beds' => !empty($_POST['beds']) ? $_POST['beds'] : null,
             ];
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['auto'])) {
+            $typeMap = [
+                'standard' => 1,
+                'deluxe' => 2,
+                'suite' => 3
+            ];
+            $roomTypeId = $typeMap[$_GET['room_type']] ?? null;
+
+            $today = new DateTime();
+            $tomorrow = (new DateTime())->modify('+1 day');
+
+            $checkin = $today->format('Y-m-d');
+            $checkout = $tomorrow->format('Y-m-d');
+
+            $filters = [
+                'checkin' => $checkin,
+                'checkout' => $checkout,
+                'adults' => null,
+                'children' => null,
+                'room' => null,
+                'room_type' => $roomTypeId,
+                'beds' => null,
+            ];
+
+            // Pre-fill form display format (important)
+            $_POST['checkin'] = $today->format('d/m/Y') . ' to ' . $tomorrow->format('d/m/Y');
+            $_POST['room_type'] = $roomTypeId;
         }
 
         $rooms = $roomModel->searchAvailable($filters);

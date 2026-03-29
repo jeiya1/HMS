@@ -8,8 +8,10 @@
     suites
     are always ready for your visit.</p>
   <!-- TODO: Go to search -->
-  <button
-    class="w-28 h-9 rounded-[30px] border-[0.50px] border-yellow-100 hover:border-yellow-600 hover:bg-yellow-300 text-yellow-100 hover:text-stone-700">
-    <p class="justify-center text-xs font-light font-roboto">Booking</p>
-  </button>
+  <a href="/search">
+    <button
+      class="w-28 h-9 rounded-[30px] border-[0.50px] border-yellow-100 hover:border-yellow-600 hover:bg-yellow-300 text-yellow-100 hover:text-stone-700">
+      <p class="justify-center text-xs font-light font-roboto">Booking</p>
+    </button>
+  </a>
 </footer>
