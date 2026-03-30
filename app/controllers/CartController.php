@@ -117,5 +117,22 @@ class CartController
             exit;
         }
     }
+
+    public function getSessionCarts()
+    {
+        $logged_in = $this->getAuthState();
+        $cartModel = new Cart($GLOBALS['conn']);
+
+        $carts = $cartModel->getCartRows();
+
+        $cartCount = $cartModel->getCartAmount();
+
+        require_once __DIR__ . '/../views/cart/cart.view.php';
+    }
+
+    public function getAuthState()
+    {
+        return isset($_SESSION['logged_in_user_id']);
+    }
 }
 ?>

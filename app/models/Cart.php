@@ -58,6 +58,22 @@ class Cart
 
         return $result->fetch_assoc()['total'] ?? 0;
     }
+
+    public function getCartRows() {
+        $CartID = $_SESSION["cart_id"];
+
+        if (!$CartID) {
+            return 0;
+        }
+
+        $result = $this->conn->execute_query(
+            "SELECT * FROM CartRooms WHERE CartID = ?",
+            [$CartID]
+        );
+
+        return $result->fetch_all(MYSQLI_ASSOC);
+
+    }
 }
 
 ?>

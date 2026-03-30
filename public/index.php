@@ -131,7 +131,7 @@ switch ($uri) {
         break;
 
     case '/cart':
-        $pages->cart();
+        $cart->getSessionCarts();
         break;
 
     case '/cart-submit':

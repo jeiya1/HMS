@@ -56,12 +56,6 @@ class PagesController
         require_once '../app/views/rooms/suite.view.php';
     }
 
-    public function cart()
-    {
-        $logged_in = $this->getAuthState();
-        $cartCount = $this->getCartCount();
-        require_once '../app/views/cart/cart.view.php';
-    }
     public function reservation()
     {
         $logged_in = $this->getAuthState();

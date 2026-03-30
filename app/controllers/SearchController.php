@@ -83,6 +83,7 @@ class SearchController
     {
         return isset($_SESSION['logged_in_user_id']);
     }
+
     function convertDate($range, $isCheckout = false)
     {
         $dates = explode(" to ", $range);
