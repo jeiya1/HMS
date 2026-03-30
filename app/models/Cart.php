@@ -59,7 +59,8 @@ class Cart
         return $result->fetch_assoc()['total'] ?? 0;
     }
 
-    public function getCartRows() {
+    public function getCartRows()
+    {
         $CartID = $_SESSION["cart_id"];
 
         if (!$CartID) {
@@ -67,7 +68,11 @@ class Cart
         }
 
         $result = $this->conn->execute_query(
-            "SELECT * FROM CartRooms WHERE CartID = ?",
+            "SELECT r.RoomID, r.RoomNumber, rt.RoomTypeName, rt.BasePrice, cr.NumAdults, cr.CheckInDate, cr.CheckOutDate
+            FROM CartRooms cr
+            INNER JOIN Rooms r ON cr.RoomID = r.RoomID
+            INNER JOIN RoomTypes rt ON r.RoomTypeID = rt.RoomTypeID
+            WHERE cr.CartID = ?",
             [$CartID]
         );
 

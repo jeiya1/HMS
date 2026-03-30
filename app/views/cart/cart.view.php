@@ -30,10 +30,12 @@
             <?php if (!empty($carts)): ?>
                 <?php foreach ($carts as $cart): ?>
                     <div class="flex flex-col border rounded p-2 shadow w-full gap-2">
-                        <h2 class="font-bold"><?php echo htmlspecialchars($cart['RoomID']); ?></h2>
+                        <h2 class="font-bold"><?php echo htmlspecialchars($cart['RoomTypeName']); ?></h2>
+                        <p>Room #: <?php echo htmlspecialchars($cart['RoomNumber']); ?></p>
+                        <p>Price: $<?php echo htmlspecialchars($cart['BasePrice']); ?></p>
+                        <p>Guests: <?php echo htmlspecialchars($cart['NumAdults']); ?></p>
                         <p>Check-in: <?php echo htmlspecialchars($cart['CheckInDate']); ?></p>
                         <p>Check-out: <?php echo htmlspecialchars($cart['CheckOutDate']); ?></p>
-                        <p>Guests: <?php echo htmlspecialchars($cart['NumAdults']); ?></p>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
