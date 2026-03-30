@@ -25,14 +25,19 @@ class Cart
 
         $roomID = $row['RoomID'];
 
-        $result = $this->conn->execute_query(
-            "CALL AddRoomToCart(?, ?, ?, ?, ?)",
-            [$CartID, $roomID, $checkin, $checkout, $adults]
-        );
-
-        if ($result) {
+        try {
+            $result = $this->conn->execute_query(
+                "CALL AddRoomToCart(?, ?, ?, ?, ?)",
+                [$CartID, $roomID, $checkin, $checkout, $adults]
+            );
             return true;
-        } else {
+        } catch (mysqli_sql_exception $e) {
+            // Duplicate key error
+            if ($e->getCode() === 1062) {
+                throw new Exception("This room is already in your cart.");
+            }
+
+            // Other errors
             throw new Exception("Failed to add to cart.");
         }
     }

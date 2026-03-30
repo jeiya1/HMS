@@ -108,12 +108,10 @@ class CartController
         } catch (Exception $e) {
             echo json_encode([
                 "success" => false,
-                "error" => "Failed to add to cart."
-                // "error" => $e->getMessage()
+                "error" => $e->getMessage()
             ]);
             exit;
         }
     }
-
 }
 ?>
