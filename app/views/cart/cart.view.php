@@ -10,6 +10,7 @@
 </head>
 
 <body class="min-h-screen flex flex-col">
+    <?php require_once __DIR__ . '/../components/toast.view.php'; ?>
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
 
 

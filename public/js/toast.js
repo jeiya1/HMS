@@ -40,5 +40,5 @@ function showToast(message, type = "error") {
     setTimeout(() => {
         toast.classList.add("opacity-0", "translate-x-10");
         toast.addEventListener("transitionend", () => toast.remove());
-    }, 60000);
+    }, 15000);
 }

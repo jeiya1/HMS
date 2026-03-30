@@ -12,11 +12,11 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 
-<body>
+<body class="min-h-screen flex flex-col">
     <?php require_once __DIR__ . '/../components/toast.view.php'; ?>
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
 
-    <div class="py-10 px-30 flex flex-col gap-5">
+    <div class="flex-1 py-10 px-30 flex flex-col gap-5">
         <div class="justify-start text-black text-lg font-normal font-crimson">
             <a href="/home" class="hover:underline">Home</a> <a href="/signup" class="hover:underline">&gt;
                 Authentication</a> &gt; Account Recovery

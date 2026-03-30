@@ -35,9 +35,7 @@ $sessionToken = $_SESSION['session_token'];
 $sessionGuestModel = new SessionGuest($GLOBALS['conn']);
 $sessionGuestID = $sessionGuestModel->findOrCreate($sessionToken);
 
-// TODO
 $cartModel = new ReservationCart($GLOBALS['conn']);
-// TODO
 $cartID = $cartModel->findOrCreateCart($sessionToken);
 
 $_SESSION['session_guest_id'] = $sessionGuestID;

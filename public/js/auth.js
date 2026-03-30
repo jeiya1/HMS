@@ -105,6 +105,8 @@ $(document).ready(function () {
 
         const email = $(this).find('input[name="email"]').val();
 
+        showToast("Generating reset token, please wait...", "info");
+
         $.ajax({
             url: "/forgot-password", // your PHP handler
             type: "POST",
@@ -129,8 +131,8 @@ $(document).ready(function () {
             showToast("Please fix password errors before submitting.", "error");
             return;
         }
-        console.log($(this).serialize()); // <- check token is included
 
+        console.log($(this).serialize()); // <- check token is included
 
         $.ajax({
             url: "/reset-submit",
