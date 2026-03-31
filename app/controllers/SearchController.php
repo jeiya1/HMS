@@ -10,73 +10,73 @@ class SearchController
 
         $roomModel = new Room($GLOBALS['conn']);
         $roomTypeModel = new RoomType($GLOBALS['conn']);
-
-        $rooms = [];
-        // $room_type = $_POST['room_type'] ?? '';
         $roomTypes = $roomTypeModel->getAllRoomTypes();
 
-        $filters = $filters ?? [];
+        $filters = [];
 
+        // Handle POST: redirect to GET with query params
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $checkin = $_POST['checkin'] ?? null;
-            $checkout = null;
+            $checkinStr = $_POST['checkin'] ?? null; // <-- use POST here
+            list($checkin, $checkout) = $this->parseCheckinCheckout($checkinStr);
 
-            if (!empty($checkin)) {
-                $dates = explode(" to ", $checkin);
-                if (count($dates) === 2) {
-                    $checkinObj = DateTime::createFromFormat('d/m/Y', trim($dates[0]));
-                    $checkoutObj = DateTime::createFromFormat('d/m/Y', trim($dates[1]));
-                    if ($checkinObj && $checkoutObj) {
-                        $checkin = $checkinObj->format('Y-m-d');
-                        $checkout = $checkoutObj->format('Y-m-d');
-                    } else {
-                        $checkin = $checkout = null; // fallback
-                    }
-                }
+            $filters = [
+                'checkin' => $checkin,
+                'checkout' => $checkout,
+                'adults' => !empty($_POST['adults']) ? (int) $_POST['adults'] : null,
+                'children' => !empty($_POST['children']) ? (int) $_POST['children'] : null,
+                'room' => $_POST['room'] ?? null,            // single/double
+                'room_type' => $_POST['room_type'] ?? null,      // string: Standard/Deluxe/Suite
+            ];
+
+            // Redirect to GET with query parameters
+            $query = http_build_query($filters);
+            header("Location: /search?$query");
+            exit;
+        }
+
+        // Handle GET (from redirect or direct URL)
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            if (isset($_GET['auto'])) {
+                $typeMap = [
+                    'standard' => 1,
+                    'deluxe' => 2,
+                    'suite' => 3
+                ];
+                $roomTypeId = $typeMap[$_GET['room_type']] ?? null;
+
+                $today = new DateTime();
+                $tomorrow = (new DateTime())->modify('+1 day');
+
+                $filters = [
+                    'checkin' => $today->format('Y-m-d'),
+                    'checkout' => $tomorrow->format('Y-m-d'),
+                    'adults' => '',
+                    'children' => '',
+                    'room' => '',
+                    'room_type' => $roomTypeId,
+                ];
+
+                // For form prefill
+                $_GET['checkin'] = $today->format('d/m/Y') . ' to ' . $tomorrow->format('d/m/Y');
+                $_GET['room_type'] = $roomTypeId;
+            } else {
+                $checkinStr = $_GET['checkin'] ?? null;
+                list($checkin, $checkout) = $this->parseCheckinCheckout($checkinStr);
+
+                // GET
+                $filters = [
+                    'checkin' => $checkin,
+                    'checkout' => $checkout,
+                    'adults' => !empty($_GET['adults']) ? (int) $_GET['adults'] : null,
+                    'children' => !empty($_GET['children']) ? (int) $_GET['children'] : null,
+                    'room' => $_GET['room'] ?? null,
+                    'room_type' => $_GET['room_type'] ?? null,        // string
+                ];
             }
-
-            $filters = [
-                'checkin' => $checkin,
-                'checkout' => $checkout,
-                'adults' => !empty($_POST['adults']) ? $_POST['adults'] : null,
-                'children' => !empty($_POST['children']) ? $_POST['children'] : null,
-                'room' => !empty($_POST['room']) ? $_POST['room'] : null,
-                'room_type' => !empty($_POST['room_type']) ? $_POST['room_type'] : null,
-                'beds' => !empty($_POST['beds']) ? $_POST['beds'] : null,
-            ];
         }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['auto'])) {
-            $typeMap = [
-                'standard' => 1,
-                'deluxe' => 2,
-                'suite' => 3
-            ];
-            $roomTypeId = $typeMap[$_GET['room_type']] ?? null;
-
-            $today = new DateTime();
-            $tomorrow = (new DateTime())->modify('+1 day');
-
-            $checkin = $today->format('Y-m-d');
-            $checkout = $tomorrow->format('Y-m-d');
-
-            $filters = [
-                'checkin' => $checkin,
-                'checkout' => $checkout,
-                'adults' => null,
-                'children' => null,
-                'room' => null,
-                'room_type' => $roomTypeId,
-                'beds' => null,
-            ];
-
-            // Pre-fill form display format (important)
-            $_POST['checkin'] = $today->format('d/m/Y') . ' to ' . $tomorrow->format('d/m/Y');
-            $_POST['room_type'] = $roomTypeId;
-        }
-
+        // Fetch rooms
         $rooms = $roomModel->searchAvailable($filters);
-        $logged_in = $this->getAuthState();
         $cartCount = $this->getCartCount();
 
         require_once __DIR__ . '/../views/rooms/search.view.php';
@@ -100,6 +100,24 @@ class SearchController
             return null;
         $dateObj = DateTime::createFromFormat('d/m/Y', trim($dates[$isCheckout ? 1 : 0]));
         return $dateObj ? $dateObj->format('Y-m-d') : null;
+    }
+
+    // Helper function (can reuse convertDate)
+    function parseCheckinCheckout($range)
+    {
+        if (!$range)
+            return [null, null];
+        $dates = explode(" to ", $range);
+        if (count($dates) !== 2)
+            return [null, null];
+        $checkinObj = DateTime::createFromFormat('d/m/Y', trim($dates[0]));
+        $checkoutObj = DateTime::createFromFormat('d/m/Y', trim($dates[1]));
+        if (!$checkinObj || !$checkoutObj)
+            return [null, null];
+        return [
+            $checkinObj->format('Y-m-d'),
+            $checkoutObj->format('Y-m-d')
+        ];
     }
 }
 ?>

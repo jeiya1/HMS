@@ -91,27 +91,27 @@ class Room
 
     public function searchAvailable($filters)
     {
-        $stmt = $this->conn->prepare("CALL SearchAvailableRooms(?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param(
-            "sssssss",
-            $filters['checkin'],
-            $filters['checkout'],
-            $filters['adults'],
-            $filters['children'],
-            $filters['room'],
-            $filters['room_type'],
-            $filters['beds']
+        $result = $this->conn->execute_query(
+            "CALL SearchAvailableRooms(?, ?, ?, ?, ?, ?)",
+            [
+                $filters['checkin'] ?? null,
+                $filters['checkout'] ?? null,
+                $filters['adults'] ?? null,
+                $filters['children'] ?? null,
+                $filters['room'] ?? null,       // single/double
+                $filters['room_type'] ?? null   // Standard/Deluxe/Suite
+            ]
         );
 
-        $stmt->execute();
-        $result = $stmt->get_result();
-
         $rooms = [];
-        while ($row = $result->fetch_assoc()) {
-            $rooms[] = $row;
+        if ($result instanceof mysqli_result) {
+            while ($row = $result->fetch_assoc()) {
+                $rooms[] = $row;
+            }
+            $result->free();
         }
 
-        // Clear any remaining result sets — prevents "second call works" problem
+        // Clear remaining result sets
         while ($this->conn->more_results() && $this->conn->next_result()) {
             $extraResult = $this->conn->use_result();
             if ($extraResult instanceof mysqli_result) {
@@ -121,6 +121,5 @@ class Room
 
         return $rooms;
     }
-
 }
 ?>

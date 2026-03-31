@@ -16,6 +16,19 @@ $maxGuests = $roomType === 'single' ? 2 : 3;
 
 $singleChecked = $roomType === 'single' ? 'checked' : '';
 $doubleChecked = $roomType === 'double' ? 'checked' : '';
+
+$checkin = $_GET['checkin'] ?? '';
+$checkout = $_GET['checkout'] ?? '';
+$checkinStr = "$checkin to $checkout";
+
+if (!empty($checkinStr)) {
+    // Expecting format "dd/mm/yyyy to dd/mm/yyyy"
+    $dates = explode(' to ', $checkinStr);
+    if (count($dates) === 2) {
+        $checkin = $dates[0];
+        $checkout = $dates[1];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -49,8 +62,9 @@ $doubleChecked = $roomType === 'double' ? 'checked' : '';
                 <div class="flex flex-col gap-2">
                     <h5 id="modal-room-type" class="font-crimson font-semibold text-black">Standard Room</h5>
                     <h5 class="font-roboto font-semibold text-black">Time Duration:
-                        <span id="modal-checkin-checkout" class="font-roboto text-black font-normal">Check-In —
-                            Check-Out</span>
+                        <span id="modal-checkin-checkout">
+                            <?= htmlspecialchars($checkinStr ?: 'Check-In — Check-Out') ?>
+                        </span>
                     </h5>
                     <h5 class="font-roboto font-semibold text-black">Room Occupancy:
                         <span id="modal-guests" class="font-roboto text-black font-normal">1 Guest</span>
@@ -143,7 +157,7 @@ $doubleChecked = $roomType === 'double' ? 'checked' : '';
                 <input type="hidden" name="roomID" id="roomID" value="<?= htmlspecialchars($_GET['room'] ?? '') ?>">
                 <div class="justify-center text-black text-xl font-normal font-crimson">Check In - Check Out</div>
                 <input type="text" name="checkin" id="daterange" placeholder="Check-In — Check-Out"
-                    value="<?= htmlspecialchars($_GET['checkin'] ?? '') ?>" required
+                    value="<?= htmlspecialchars($checkinStr) ?>" required
                     class="bg-white rounded-sm p-2 text-crimson-600 font-crimson border border-gray-300">
                 <div>
                     <div class="justify-center text-zinc-500 text-lg font-normal font-crimson">Time-In 12:00 PM –

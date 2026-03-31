@@ -184,8 +184,7 @@ CREATE PROCEDURE SearchAvailableRooms(
     IN pAdults INT,
     IN pChildren INT,
     IN pRoom VARCHAR(50),
-    IN pRoomType INT,
-    IN pBeds INT
+    IN pRoomType VARCHAR(50)  -- now a string like 'Standard', 'Deluxe', 'Suite'
 )
 BEGIN
     SELECT r.RoomNumber, rt.RoomTypeName, rt.BasePrice,
@@ -202,12 +201,9 @@ BEGIN
     )
 
     -- Room type (dropdown)
-    AND (pRoomType IS NULL OR rt.RoomTypeID = pRoomType)
+    AND (pRoomType IS NULL OR rt.RoomTypeName LIKE CONCAT(pRoomType, '%'))
 
-    -- Beds filter
-    AND (pBeds IS NULL OR rt.BedCount >= pBeds)
-
-    -- Room radio (example mapping)
+    -- Room radio (single/double)
     AND (
         pRoom IS NULL OR
         (pRoom = 'single' AND rt.BedCount = 1) OR
@@ -229,7 +225,6 @@ BEGIN
     )
 
     ORDER BY rt.BasePrice ASC;
-
 END$$
 
 DELIMITER ;

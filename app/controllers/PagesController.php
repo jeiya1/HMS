@@ -41,6 +41,19 @@ class PagesController
     {
         $logged_in = $this->getAuthState();
         $cartCount = $this->getCartCount();
+
+        // Parse check-in and check-out from GET
+        $checkinStr = $_GET['checkin'] ?? '';
+        $checkin = '';
+        $checkout = '';
+        if (!empty($checkinStr)) {
+            $dates = explode(' to ', $checkinStr);
+            if (count($dates) === 2) {
+                $checkin = $dates[0];
+                $checkout = $dates[1];
+            }
+        }
+
         require_once '../app/views/rooms/standard.view.php';
     }
 
