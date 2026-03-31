@@ -30,10 +30,10 @@
             <div id="cart-summary-section" class="flex justify-center gap-5 font-roboto">
                 <div class="flex flex-col w-3/5 gap-4">
                     <div id="rooms-section" class="section flex flex-col border-[0.3px] border-zinc-300 rounded p-8">
-                        <div class="section-header flex justify-between cursor-pointer">
+                        <div class="section-header flex justify-between">
                             <h1 class="font-semibold font-crimson text-3xl mb-1">Rooms & Price Summary</h1>
                             <button class="toggle-btn">
-                                <img src="/assets/icons/left-arrow-black.svg" alt="Back" class="w-5 h-5">
+                                <img src="/assets/icons/left-arrow-black.svg" alt="Back" class="w-5 h-5 cursor-pointer">
                             </button>
                         </div>
                         <p class="text-neutral-700 font-light font-crimson">Rooms information.</p>
@@ -57,7 +57,7 @@
                                                     class="font-roboto text-neutral-700 px-3 py-1 rounded mt-2 delete-cart-item flex items-center gap-2"
                                                     data-cartroomid="<?php echo $cart['CartRoomID']; ?>"> <span
                                                         class="inline-flex items-center"> <img src="/assets/icons/delete.svg"
-                                                            alt="Delete" class="w-4 h-4"> </span> Remove </button> </div>
+                                                            alt="Delete" class="w-4 h-4 cursor-pointer"> </span> <p class="cursor-pointer">Remove </p> </button> </div>
                                             <div class="flex-5 flex flex-col gap-3">
                                                 <h2 class="font-bold font-crimson text-xl">
                                                     <?php echo htmlspecialchars($cart['RoomTypeName']); ?> Room #
@@ -112,7 +112,9 @@
                                                 </div>
                                                 <div class="flex justify-end">
                                                     <div class="w-48 h-22 bg-black/5 rounded-[3px] p-2">
-                                                        <p class="flex justify-end text-black text-2xl font-normal font-roboto mt-2">₱
+                                                        <p
+                                                            class="flex justify-end text-black text-2xl font-normal font-roboto mt-2">
+                                                            ₱
                                                             <?php echo htmlspecialchars($cart['BasePrice']); ?>
                                                         </p>
                                                         <p
@@ -122,9 +124,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <?php if ($index < count($carts) - 1): ?>
-                                            <div class="h-0.5 w-full bg-zinc-300/40 rounded-lg"></div>
-                                        <?php endif; ?>
                                     <?php endforeach; ?>
                                 </div>
                             </div>
@@ -132,7 +131,10 @@
                             <div class="flex justify-end mt-3">
                                 <button id="to-guest"
                                     class="flex items-center justify-center gap-2 text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3 w-40 align-middle">
-                                    PROCEED
+                                    <p
+                                        class="transition-all duration-300 text-white hover:text-white hover:[text-shadow:0_0_8px_rgba(255,255,255,0.9)] cursor-pointer">
+                                        PROCEED
+                                    </p>
                                 </button>
                             </div>
                         </div>
@@ -144,7 +146,7 @@
                             <div class="section-header flex justify-between">
                                 <h1 class="font-bold font-crimson text-3xl mb-1">Guest Information</h1>
                                 <button class="toggle-btn">
-                                    <img src="/assets/icons/left-arrow-black.svg" alt="Back" class="w-5 h-5">
+                                    <img src="/assets/icons/left-arrow-black.svg" alt="Back" class="w-5 h-5 cursor-pointer">
                                 </button>
                             </div>
                             <div class="section-content hidden mt-2">
@@ -160,7 +162,7 @@
                                         };
                                     </script>
                                     <div class="form-group mb-4">
-                                        <input type="checkbox" id="use-account-details"
+                                        <input type="checkbox" id="use-account-details" class="cursor-pointer"
                                             data-user-id="<?= $_SESSION['logged_in_user_id'] ?? '' ?>">
                                         <span>Use my account details</span>
                                     </div>
@@ -241,7 +243,7 @@
                             <div class="section-header flex justify-between">
                                 <h1 class="font-bold font-crimson text-3xl mb-1">Payment Information</h1>
                                 <button class="toggle-btn">
-                                    <img src="/assets/icons/left-arrow-black.svg" alt="Back" class="w-5 h-5">
+                                    <img src="/assets/icons/left-arrow-black.svg" alt="Back" class="w-5 h-5 cursor-pointer">
                                 </button>
                             </div>
                             <div class="section-content hidden my-2">
@@ -317,8 +319,8 @@
                 <!-- Dynamic content will be injected here -->
             </div>
             <div class="flex justify-end mt-4">
-                <button id="modal-pay"
-                    class="bg-yellow-900 text-white px-4 py-2 rounded hover:bg-yellow-800">Confirm & Pay</button>
+                <button id="modal-pay" class="bg-yellow-900 text-white px-4 py-2 rounded hover:bg-yellow-800">Confirm &
+                    Pay</button>
             </div>
         </div>
     </div>
@@ -345,7 +347,10 @@
             $('.section-header').click(function () {
                 const section = $(this).closest('.section');
                 const content = section.find('.section-content');
-                if (!content.is(':visible')) activateSection('#' + section.attr('id'));
+                const arrow = section.find('.toggle-btn img');
+
+                content.slideToggle(200);
+                arrow.toggleClass('rotate-270');
             });
 
             // ==================== CART TOTAL CALCULATION ====================
@@ -503,8 +508,8 @@
                                 $('#birthDate').flatpickr().setDate(data.BirthDate, true);
                             } else showToast(res.error, 'error');
                         },
-                        error: function () { 
-                            showToast('Failed to load account details', 'error'); 
+                        error: function () {
+                            showToast('Failed to load account details', 'error');
                         }
                     });
                 } else {
@@ -597,9 +602,9 @@
                             setTimeout(() => window.location.href = "/bookings", 1000);
                         } else showToast(response.error || "Reservation failed.", "error");
                     },
-                    error: function (xhr) { 
+                    error: function (xhr) {
                         showToast(xhr.responseText);
-                        showToast('An error occurred during reservation.'); 
+                        showToast('An error occurred during reservation.');
                     }
                 });
             });

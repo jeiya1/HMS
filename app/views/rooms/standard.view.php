@@ -17,12 +17,11 @@ $maxGuests = $roomType === 'single' ? 2 : 3;
 $singleChecked = $roomType === 'single' ? 'checked' : '';
 $doubleChecked = $roomType === 'double' ? 'checked' : '';
 
-$checkin = $_GET['checkin'] ?? '';
-$checkout = $_GET['checkout'] ?? '';
-$checkinStr = "$checkin to $checkout";
+$checkinStr = $_GET['checkin'] ?? '';
+$checkin = '';
+$checkout = '';
 
-if (!empty($checkinStr)) {
-    // Expecting format "dd/mm/yyyy to dd/mm/yyyy"
+if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
     $dates = explode(' to ', $checkinStr);
     if (count($dates) === 2) {
         $checkin = $dates[0];
@@ -79,7 +78,7 @@ if (!empty($checkinStr)) {
         <!-- Right Side -->
         <div class="bg-[#F7F7F7] rounded-r-sm shadow-lg w-150 p-6 flex flex-col gap-4 relative">
             <button id="close-modal"
-                class="absolute top-1 right-2 text-gray-500 hover:text-gray-800 font-bold">×</button>
+                class="absolute top-1 right-2 text-gray-500 hover:text-gray-800 font-bold cursor-pointer">×</button>
             <div class="text-black text-xl font-normal font-crimson">1 item in your cart</div>
             <div class="h-0.5 w-full bg-linear-to-r from-yellow-100 to-yellow-800 rounded-lg"></div>
             <div class="flex flex-col gap-2">
@@ -102,11 +101,15 @@ if (!empty($checkinStr)) {
             </div>
             <div class="flex justify-end gap-3 mt-4">
                 <button id="continue-browsing"
-                    class="bg-gray-300 hover:bg-gray-400 text-black font-semibold px-4 py-2 rounded">Continue
+                    class="bg-gray-300 hover:bg-gray-400 text-black font-semibold px-4 py-2 rounded cursor-pointer">Continue
                     Browsing</button>
-                <button id="proceed-checkout"
-                    class="bg-[#c39c4d] hover:bg-[#b28a44] text-white font-semibold px-4 py-2 rounded">Proceed to
-                    Checkout</button>
+                <button id="proceed-checkout" class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#c39c4d] p-3 
+           hover:bg-[#3F321F] transition-colors duration-300 cursor-point">
+                    <p
+                        class="transition-all duration-300 text-white hover:text-white hover:[text-shadow:0_0_8px_rgba(255,255,255,0.9)] cursor-pointer">
+                        Proceed to Checkout
+                    </p>
+                </button>
             </div>
         </div>
     </div>
@@ -157,7 +160,7 @@ if (!empty($checkinStr)) {
                 <input type="hidden" name="roomID" id="roomID" value="<?= htmlspecialchars($_GET['room'] ?? '') ?>">
                 <div class="justify-center text-black text-xl font-normal font-crimson">Check In - Check Out</div>
                 <input type="text" name="checkin" id="daterange" placeholder="Check-In — Check-Out"
-                    value="<?= htmlspecialchars($checkinStr) ?>" required
+                    value="<?= htmlspecialchars($checkinStr ?: '') ?>" required
                     class="bg-white rounded-sm p-2 text-crimson-600 font-crimson border border-gray-300">
                 <div>
                     <div class="justify-center text-zinc-500 text-lg font-normal font-crimson">Time-In 12:00 PM –
@@ -212,8 +215,11 @@ if (!empty($checkinStr)) {
                     ₱<?= number_format($roomBasePrice) ?>
                 </div>
                 <button type="submit" class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#c39c4d] p-3 
-           hover:bg-[#b28a44] transition-colors duration-300">
-                    BOOK NOW
+           hover:bg-[#3F321F] transition-colors duration-300 cursor-pointer">
+                    <p
+                        class="transition-all duration-300 text-white hover:text-white hover:[text-shadow:0_0_8px_rgba(255,255,255,0.9)] cursor-pointer">
+                        BOOK NOW
+                    </p>
                 </button>
             </form>
         </div>

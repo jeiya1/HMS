@@ -334,7 +334,7 @@
               <p class="text-white text-sm font-light font-roboto [text-shadow:0px_1px_1px_rgb(0_0_0/0.25)]">
                 A comfortable and cozy room designed for guests seeking a simple yet relaxing stay, complete with
                 essential amenities.</p>
-              <a href="/search?room_type=standard&auto=1">
+              <a href="/search?room_type=standard">
                 <button
                   class="self-start text-stone-800 border border-stone-800 px-2 py-1 rounded font-normal font-roboto transition duration-300 ease-in-out transform hover:bg-stone-800 hover:text-white hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
                   Book Now
@@ -358,7 +358,7 @@
                 Enjoy extra space and enhanced comfort in our deluxe rooms, featuring stylish interiors and upgraded
                 amenities.
               </p>
-              <a href="/search?room_type=deluxe&auto=1">
+              <a href="/search?room_type=deluxe">
                 <button
                   class="self-start text-stone-800 border border-stone-800 px-2 py-1 rounded font-normal font-roboto transition duration-300 ease-in-out transform hover:bg-stone-800 hover:text-white hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
                   Book Now
@@ -383,7 +383,7 @@
                 the
                 perfect space to unwind.
               </p>
-              <a href="/search?room_type=suite&auto=1">
+              <a href="/search?room_type=suite">
                 <button
                   class="self-start text-stone-800 border border-stone-800 px-2 py-1 rounded font-normal font-roboto transition duration-300 ease-in-out transform hover:bg-stone-800 hover:text-white hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
                   Book Now
