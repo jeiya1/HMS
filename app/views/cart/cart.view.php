@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart</title>
+    <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/output.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -12,7 +13,6 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 
-<!-- TODO: Do not allow to add to cart if already booked -->
 <body class="min-h-screen flex flex-col">
     <?php require_once __DIR__ . '/../components/toast.view.php'; ?>
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
@@ -491,7 +491,7 @@
 
                     $.ajax({
                         url: '/get-profile',
-                        type: 'GET',
+                        type: 'POST',
                         dataType: 'json',
                         success: function (res) {
                             if (res.success) {
@@ -503,7 +503,9 @@
                                 $('#birthDate').flatpickr().setDate(data.BirthDate, true);
                             } else showToast(res.error, 'error');
                         },
-                        error: function () { showToast('Failed to load account details', 'error'); }
+                        error: function () { 
+                            showToast('Failed to load account details', 'error'); 
+                        }
                     });
                 } else {
                     $('input[name="fname"], input[name="lname"], input[name="phone"], input[name="email"]').val('');

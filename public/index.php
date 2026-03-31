@@ -83,22 +83,42 @@ switch ($uri) {
         break;
 
     case '/login-submit':
-        $auth->login();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $auth->login();
+        } else {
+            $pages->registration();
+        }
         break;
 
     case '/signup-submit':
-        $auth->signup();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $auth->signup();
+        } else {
+            $pages->registration();
+        }
         break;
 
     case '/update-submit':
-        $auth->updateProfile();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $auth->updateProfile();
+        } else {
+            $pages->account();
+        }
         break;
 
     case '/get-profile':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $pages->account();
+            exit;
+        }
         $auth->getProfile();
         break;
 
     case '/logout':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $pages->account();
+            exit;
+        }
         $auth->logout();
         break;
 
@@ -108,10 +128,6 @@ switch ($uri) {
 
     case '/terms':
         $pages->terms();
-        break;
-
-    case '/reservation':
-        $pages->reservation();
         break;
 
     case '/search':
@@ -135,23 +151,31 @@ switch ($uri) {
         break;
 
     case '/cart-remove':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $cart->getSessionCarts();
+            exit;
+        }
         $cart->remove();
         break;
 
     case '/cart-submit':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $cart->getSessionCarts();
+            exit;
+        }
         $cart->submit();
         break;
 
     case '/reservation-submit':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $pages->bookings();
+            exit;
+        }
         $reservation->submit();
         break;
 
     case '/bookings':
         $pages->bookings();
-        break;
-
-    case '/test':
-        require_once '../app/views/static/test.view.php';
         break;
 
     default:

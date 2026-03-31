@@ -5,8 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hotel Rivera</title>
-
-  <!-- Link for the CSS files -->
+  <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/output.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -94,7 +93,7 @@
               <img src="/assets/icons/calendar.svg" alt="calendar">
             </span>
             <input type="text" name="checkin" id="daterange" placeholder="Check-In — Check-Out" required
-              class="bg-white rounded-sm p-2 pl-9 text-crimson-600 font-crimson border border-gray-300 "
+              class="bg-white rounded-sm p-2 pl-9 text-crimson-600 font-crimson border border-gray-300 cursor-pointer"
               value="<?= isset($_POST['checkin']) ? htmlspecialchars($_POST['checkin']) : '' ?>">
           </div>
 
@@ -122,7 +121,7 @@
           <!-- TODO: hover -->
           <div class="flex items-center">
             <button type="submit"
-              class="text-white font-roboto text-[14px] font-semibold leading-normal rounded-sm bg-[#714623] p-2.5">
+              class="text-white font-roboto text-[14px] font-semibold leading-normal rounded-sm bg-[#714623] p-2.5 cursor-pointer hover:bg-[#654022] transition-colors duration-300">
               SEARCH ROOMS
             </button>
           </div>
@@ -318,8 +317,8 @@
                 A comfortable and cozy room designed for guests seeking a simple yet relaxing stay, complete with
                 essential amenities.</p>
               <a href="/search?room_type=standard&auto=1">
-                <button class="self-start text-stone-800 border border-current px-2 py-1 rounded font-normal font-roboto
-               transition transform hover:text-stone-900 hover:scale-105 hover:shadow-md">
+                <button
+                  class="self-start text-stone-800 border border-stone-800 px-2 py-1 rounded font-normal font-roboto transition duration-300 ease-in-out transform hover:bg-stone-800 hover:text-white hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
                   Book Now
                 </button>
               </a>
@@ -342,8 +341,8 @@
                 amenities.
               </p>
               <a href="/search?room_type=deluxe&auto=1">
-                <button class="self-start text-stone-800 border border-current px-2 py-1 rounded font-normal font-roboto
-               transition transform hover:text-stone-900 hover:scale-105 hover:shadow-md">
+                <button
+                  class="self-start text-stone-800 border border-stone-800 px-2 py-1 rounded font-normal font-roboto transition duration-300 ease-in-out transform hover:bg-stone-800 hover:text-white hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
                   Book Now
                 </button>
               </a>
@@ -367,8 +366,8 @@
                 perfect space to unwind.
               </p>
               <a href="/search?room_type=suite&auto=1">
-                <button class="self-start text-stone-800 border border-current px-2 py-1 rounded font-normal font-roboto
-               transition transform hover:text-stone-900 hover:scale-105 hover:shadow-md">
+                <button
+                  class="self-start text-stone-800 border border-stone-800 px-2 py-1 rounded font-normal font-roboto transition duration-300 ease-in-out transform hover:bg-stone-800 hover:text-white hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
                   Book Now
                 </button>
               </a>
@@ -436,12 +435,13 @@
           <h4 class="text-2xl font-normal font-['Crimson_Text'] text-stone-800">
             Booking & Support
           </h4>
-          <p class="text-xl font-light font-['Roboto'] text-yellow-900 hover:underline">
+          <a href="/bookings" class="text-xl font-light font-['Roboto'] text-yellow-900 hover:underline block">
             &gt; Manage Booking
-          </p>
-          <p class="text-xl font-light font-['Roboto'] text-yellow-900 hover:underline">
+          </a>
+
+          <a href="/terms" class="text-xl font-light font-['Roboto'] text-yellow-900 hover:underline block">
             &gt; Terms & Conditions
-          </p>
+          </a>
         </div>
 
         <!-- Address -->

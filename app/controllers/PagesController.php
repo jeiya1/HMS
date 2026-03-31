@@ -82,8 +82,10 @@ class PagesController
     public function bookings()
     {
         $logged_in = $this->getAuthState();
-        $reservationModel = new Reservation($GLOBALS['conn']);
-        $reservations = $reservationModel->showReservations();
+        if ($logged_in) {
+            $reservationModel = new Reservation($GLOBALS['conn']);
+            $reservations = $reservationModel->showReservations();
+        }
         require_once '../app/views/reservations/bookings.view.php';
     }
 

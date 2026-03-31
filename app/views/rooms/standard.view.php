@@ -25,6 +25,7 @@ $doubleChecked = $roomType === 'double' ? 'checked' : '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Standard Rooms</title>
+    <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/output.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>

@@ -2,7 +2,7 @@
     <div class="relative group inline-block">
 
         <!-- Trigger -->
-        <button class="flex items-center text-white focus:outline-none">
+        <button class="flex items-center text-white focus:outline-none cursor-pointer">
             <span
                 class="after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-500 group-hover:after:w-full">
                 <?php echo htmlspecialchars($_SESSION['logged_in_user_name'] ?? 'Profile'); ?>

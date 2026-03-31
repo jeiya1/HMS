@@ -126,24 +126,20 @@ class Reservation
         try {
             $result = $this->conn->execute_query(
                 "SELECT
+                    r.ReservationID,
                     r.BookingToken,
                     rs.StatusName AS ReservationStatus,
-                    rr.CheckInDate,
-                    rr.CheckOutDate,
-                    rr.NumAdults,
-                    ro.RoomNumber,
                     pm.MethodName AS PaymentMethod,
                     p.Amount,
-                    p.PaymentDate
+                    p.PaymentDate,
+                    r.CreatedAt
                 FROM Users u
                 INNER JOIN Guests g ON u.GuestID = g.GuestID
                 INNER JOIN Reservations r ON g.GuestID = r.GuestID
                 INNER JOIN ReservationStatus rs ON r.StatusID = rs.StatusID
-                INNER JOIN ReservationRooms rr ON r.ReservationID = rr.ReservationID
-                INNER JOIN Rooms ro ON rr.RoomID = ro.RoomID
                 LEFT JOIN Payments p ON r.ReservationID = p.ReservationID
                 LEFT JOIN PaymentMethods pm ON p.MethodID = pm.MethodID
-                WHERE u.UserID = ?;",
+                WHERE u.UserID = ?",
                 [$_SESSION["logged_in_user_id"]]
             );
 
