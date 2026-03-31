@@ -27,7 +27,7 @@
         <div class="mx-auto h-1 w-full bg-yellow-900/60 rounded-lg"></div>
 
         <div class="flex justify-start gap-5 font-roboto">
-            <div class="flex flex-col border rounded p-2 shadow-[0px_0px_4px_0px_rgba(0,0,0,0.25)] w-1/3 gap-2">
+            <div class="flex flex-col border-[0.3px] rounded p-2 w-1/3 gap-2">
                 <h1 class="font-bold">PASSWORD RECOVERY</h1>
                 <p class="italic">Enter your email to receive a recovery link.</p>
 

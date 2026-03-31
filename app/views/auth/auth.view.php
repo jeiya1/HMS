@@ -52,13 +52,17 @@
                     <input type="email" name="email" required
                         class="border border-gray-300 p-2 rounded w-full text-black bg-white">
                     <br>
-                    <div class="form-group">
-                        <label for="password">Create Password</label>
-                        <input type="password" id="password" name="password" autocomplete="new-password" required
-                            class="border border-gray-300 p-2 rounded w-full text-black bg-white">
 
+                    <div class="relative">
+                        <label for="password">Create Password</label>
+                        <input type="password" name="password" autocomplete="new-password" required
+                            class="border border-gray-300 p-2 rounded w-full text-black bg-white password-field">
+                        <span class="absolute right-3 top-9 cursor-pointer toggle-password">
+                            <img src="/assets/icons/eye-off.svg" alt="eye" class="w-5 h-5">
+                        </span>
                         <div id="password-error" class="text-red-600 text-sm min-h-1 pointer-events-none"></div>
                     </div>
+
 
                     <!-- Terms & Privacy Links -->
                     <p class="text-sm text-gray-600 mt-2">
@@ -80,12 +84,15 @@
                     <input type="email" name="email" required
                         class="border border-gray-300 p-2 rounded w-full text-black bg-white">
                     <br>
-                    <label for="password">Password: </label>
-                    <input type="password" name="password" autocomplete="current-password" required
-                        class="border border-gray-300 p-2 rounded w-full text-black bg-white">
-                    <br>
 
-
+                    <div class="relative">
+                        <label for="password">Password: </label>
+                        <input type="password" name="password" autocomplete="current-password" required
+                            class="border border-gray-300 p-2 rounded w-full text-black bg-white password-field">
+                        <span class="absolute right-3 top-9 cursor-pointer toggle-password">
+                            <img src="/assets/icons/eye-off.svg" alt="eye" class="w-5 h-5">
+                        </span>
+                    </div>
                     <br>
                     <a href="/forgot-password" class="text-gray-500 underline text-sm hover:text-gray-700">
                         Forgot Password?

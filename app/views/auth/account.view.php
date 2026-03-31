@@ -62,8 +62,8 @@
                             <label for="password">New Password</label>
                             <div class="relative">
                                 <input type="password" id="password" name="password" autocomplete="new-password"
-                                    class="border border-gray-300 p-2 rounded w-full text-black bg-white">
-                                <span class="absolute right-3 top-3 cursor-pointer" id="togglePassword">
+                                    class="border border-gray-300 p-2 rounded w-full text-black bg-white password-field">
+                                <span class="absolute right-3 top-3 cursor-pointer toggle-password">
                                     <img src="/assets/icons/eye-off.svg" alt="eye" class="w-5 h-5">
                                 </span>
                             </div>

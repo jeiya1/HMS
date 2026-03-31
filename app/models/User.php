@@ -42,19 +42,21 @@ class User
         }
     }
 
-    public function getGuestIDbyUserID($userID) {
+    public function getGuestIDbyUserID($userID)
+    {
         $result = $this->conn->execute_query(
             "SELECT GuestID FROM Users WHERE UserID = ?",
             [$userID]
         );
         if ($result) {
             return $result->fetch_object();
-        } else {    
+        } else {
             return false;
         }
     }
 
-    public function getGuestDetails($userID) {
+    public function getGuestDetails($userID)
+    {
 
         $result = $this->conn->execute_query(
             "SELECT g.FirstName, g.LastName, g.PhoneContact, g.BirthDate, g.Email
@@ -82,7 +84,7 @@ class User
     public function createGuestUser($email, $emailGuest, $password, $firstName, $lastName, $phone, $birthDate)
     {
         $user = $this->getUserByEmail($email);
-        if (!$user) {
+        if ($user) {
             throw new Exception("Account with that email already exists.");
         }
 

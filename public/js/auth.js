@@ -1,12 +1,11 @@
 $(document).ready(function () {
-    // ---------- PASSWORD VALIDATION ----------
-    const password = $("#password");
-    const errorBox = $("#password-error");
+    const signupPassword = $("#signup-form .password-field"); // only the signup password
+    const signupErrorBox = $("#password-error");
     let timer;
 
-    function validatePassword() {
+    function validateSignupPassword() {
         let errors = [];
-        let pass = password.val();
+        let pass = signupPassword.val();
 
         if (pass.length < 8) errors.push("Minimum 8 characters");
         if (!/[A-Z]/.test(pass)) errors.push("Must contain uppercase letter");
@@ -15,17 +14,37 @@ $(document).ready(function () {
         if (!/[\W]/.test(pass)) errors.push("Must contain special character");
 
         if (errors.length > 0) {
-            errorBox.html(errors.join("<br>"));
+            signupErrorBox.html(errors.join("<br>"));
             return false;
         } else {
-            errorBox.html("");
+            signupErrorBox.html("");
             return true;
         }
     }
 
-    password.on("input", function () {
+    function validatePassword() {
+        let errors = [];
+        let pass = $("#password").val(); // the new password field
+
+        if (pass.length < 8) errors.push("Minimum 8 characters");
+        if (!/[A-Z]/.test(pass)) errors.push("Must contain uppercase letter");
+        if (!/[a-z]/.test(pass)) errors.push("Must contain lowercase letter");
+        if (!/[0-9]/.test(pass)) errors.push("Must contain number");
+        if (!/[\W]/.test(pass)) errors.push("Must contain special character");
+
+        if (errors.length > 0) {
+            $("#password-error").html(errors.join("<br>"));
+            return false;
+        } else {
+            $("#password-error").html("");
+            return true;
+        }
+    }
+
+    // Input listener
+    signupPassword.on("input", function () {
         clearTimeout(timer);
-        timer = setTimeout(validatePassword, 500);
+        timer = setTimeout(validateSignupPassword, 500);
     });
 
     // ---------- LOGIN ----------
@@ -54,7 +73,7 @@ $(document).ready(function () {
     $("#signup-form").submit(function (e) {
         e.preventDefault();
 
-        if (!validatePassword()) {
+        if (!validateSignupPassword()) {
             showToast("Please fix password errors before submitting.", "error");
             return;
         }
@@ -69,9 +88,7 @@ $(document).ready(function () {
                     showToast(response.error, "error");
                 } else {
                     showToast("Signup successful!", "success");
-                    setTimeout(() => {
-                        window.location.href = response.redirect || "/home";
-                    }, 1000);
+                    setTimeout(() => window.location.href = response.redirect || "/home", 1000);
                 }
             },
             error: function () {
@@ -89,7 +106,6 @@ $(document).ready(function () {
             dataType: "json",
             success: function (response) {
                 if (response.success) {
-                    showToast("Logged out successfully!", "success");
                     setTimeout(() => window.location.href = response.redirect || "/home", 500);
                 } else {
                     showToast("Logout failed. Try again.", "error");
@@ -185,16 +201,16 @@ $(document).ready(function () {
             }
         });
     });
-    $("#togglePassword").click(function () {
-        const input = $("#password");
+    $(".toggle-password").click(function () {
+        const input = $(this).siblings(".password-field");
         const icon = $(this).find("img");
 
         if (input.attr("type") === "password") {
             input.attr("type", "text");
-            icon.attr("src", "/assets/icons/eye-on.svg"); // eye ON
+            icon.attr("src", "/assets/icons/eye-on.svg");
         } else {
             input.attr("type", "password");
-            icon.attr("src", "/assets/icons/eye-off.svg"); // eye OFF
+            icon.attr("src", "/assets/icons/eye-off.svg");
         }
     });
 });

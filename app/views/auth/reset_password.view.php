@@ -21,22 +21,32 @@
         <div class="mx-auto h-1 w-full bg-yellow-900/60 rounded-lg"></div>
 
         <div class="flex justify-start gap-5">
-            <div class="flex flex-col border rounded p-4 shadow w-1/3 gap-2">
+            <div class="flex flex-col border-[0.3px] rounded p-4 border-neutral-300 w-1/3 gap-2">
                 <p class="italic">Enter your new password below.</p>
 
                 <form id="reset-form" action="/reset-submit?token=<?= htmlspecialchars($token) ?>" method="POST">
                     <input type="hidden" name="token" value="<?= htmlspecialchars($_GET['token'] ?? '') ?>">
 
                     <label for="password">New Password:</label>
-                    <input type="password" id="password" name="password" required
-                        class="border p-2 rounded w-full mb-2">
+                    <div class="relative">
+                        <input type="password" id="password" name="password" required
+                            class="border-[0.3px] border-neutral-300 p-2 rounded w-full mb-2 password-field">
+                        <span class="absolute right-3 top-3 cursor-pointer toggle-password">
+                            <img src="/assets/icons/eye-off.svg" alt="eye" class="w-5 h-5">
+                        </span>
+                    </div>
 
                     <label for="passwordr">Confirm Password:</label>
-                    <input type="password" id="passwordr" name="passwordr" required
-                        class="border p-2 rounded w-full mb-2">
+                    <div class="relative">
+                        <input type="password" id="passwordr" name="passwordr" required
+                            class="border-[0.3px] border-neutral-300 p-2 rounded w-full mb-2 password-field">
+                        <span class="absolute right-3 top-3 cursor-pointer toggle-password">
+                            <img src="/assets/icons/eye-off.svg" alt="eye" class="w-5 h-5">
+                        </span>
+                    </div>
+
                     <div id="password-error" class="error-message mb-2 text-red-600"></div>
 
-                    <!-- TODO: add hover animation to button -->
                     <input type="submit" value="Reset Password" class="bg-[#C39C4D] text-white p-3 rounded mt-2">
                 </form>
             </div>

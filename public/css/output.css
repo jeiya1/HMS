@@ -31,6 +31,7 @@
     --color-zinc-300: oklch(87.1% 0.006 286.286);
     --color-zinc-500: oklch(55.2% 0.016 285.938);
     --color-zinc-800: oklch(27.4% 0.006 286.033);
+    --color-neutral-300: oklch(87% 0 0);
     --color-neutral-700: oklch(37.1% 0 0);
     --color-neutral-800: oklch(26.9% 0 0);
     --color-stone-500: oklch(55.3% 0.013 58.071);
@@ -260,6 +261,12 @@
   .end {
     inset-inline-end: var(--spacing);
   }
+  .-top-3 {
+    top: calc(var(--spacing) * -3);
+  }
+  .-top-6 {
+    top: calc(var(--spacing) * -6);
+  }
   .top-0 {
     top: calc(var(--spacing) * 0);
   }
@@ -277,6 +284,18 @@
   }
   .top-5 {
     top: calc(var(--spacing) * 5);
+  }
+  .top-6 {
+    top: calc(var(--spacing) * 6);
+  }
+  .top-8 {
+    top: calc(var(--spacing) * 8);
+  }
+  .top-9 {
+    top: calc(var(--spacing) * 9);
+  }
+  .top-10 {
+    top: calc(var(--spacing) * 10);
   }
   .top-\[0\.11px\] {
     top: 0.11px;
@@ -995,6 +1014,10 @@
     border-style: var(--tw-border-style);
     border-width: 2px;
   }
+  .border-\[0\.3pc\] {
+    border-style: var(--tw-border-style);
+    border-width: 0.3pc;
+  }
   .border-\[0\.3px\] {
     border-style: var(--tw-border-style);
     border-width: 0.3px;
@@ -1041,6 +1064,12 @@
   }
   .border-gray-400 {
     border-color: var(--color-gray-400);
+  }
+  .border-neutral-300 {
+    border-color: var(--color-neutral-300);
+  }
+  .border-neutral-700 {
+    border-color: var(--color-neutral-700);
   }
   .border-white {
     border-color: var(--color-white);
