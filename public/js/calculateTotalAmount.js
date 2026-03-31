@@ -23,7 +23,7 @@ function calculateTotal({ roomType, nights, guests }) {
     const basePrice = Number(selectedRoom.dataset.basePrice);
     let roomCost = basePrice * nights;
 
-    let nightDiscount = nights > 3 ? roomCost * 0.15 : 0;
+    let nightDiscount = nights > 2 ? roomCost * 0.15 : 0;
 
     let guestCharge = 0;
     if (roomType === 'single') guestCharge = basePrice * 0.10 * Math.max(0, guests - 1) * nights;

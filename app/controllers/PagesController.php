@@ -1,5 +1,7 @@
 <?php
 
+require_once '../app/models/Reservation.php';
+
 class PagesController
 {
     public function privacy()
@@ -80,6 +82,8 @@ class PagesController
     public function bookings()
     {
         $logged_in = $this->getAuthState();
+        $reservationModel = new Reservation($GLOBALS['conn']);
+        $reservations = $reservationModel->showReservations();
         require_once '../app/views/reservations/bookings.view.php';
     }
 

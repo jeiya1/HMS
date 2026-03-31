@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Update right side modal pricing
                     const pricing = calculateTotal({ roomType, nights, guests });
+
                     if (pricing) {
                         document.getElementById('modal-room-cost').textContent = `₱${pricing.roomCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
                         document.getElementById('modal-night-discount').textContent = `₱${pricing.nightDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;

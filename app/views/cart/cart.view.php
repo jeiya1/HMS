@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 
+<!-- TODO: Do not allow to add to cart if already booked -->
 <body class="min-h-screen flex flex-col">
     <?php require_once __DIR__ . '/../components/toast.view.php'; ?>
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
@@ -111,11 +112,11 @@
                                                 </div>
                                                 <div class="flex justify-end">
                                                     <div class="w-48 h-22 bg-black/5 rounded-[3px] p-2">
-                                                        <p class="justify-center text-black text-2xl font-normal font-roboto">₱
+                                                        <p class="flex justify-end text-black text-2xl font-normal font-roboto mt-2">₱
                                                             <?php echo htmlspecialchars($cart['BasePrice']); ?>
                                                         </p>
                                                         <p
-                                                            class="w-36 justify-center text-zinc-500 text-sm font-normal font-crimson">
+                                                            class="flex justify-end text-zinc-500 text-sm font-normal font-crimson">
                                                             Room rate for 1 Night(s) stay</p>
                                                     </div>
                                                 </div>
@@ -357,7 +358,7 @@
 
             function calculateRoomTotal({ basePrice, nights, numGuests, roomType }) {
                 let roomCost = basePrice * nights;
-                let nightDiscount = nights > 3 ? roomCost * 0.15 : 0;
+                let nightDiscount = nights > 2 ? roomCost * 0.15 : 0;
 
                 let extraGuests = 0;
                 if (roomType === 'Standard Single') extraGuests = Math.max(0, numGuests - 1);

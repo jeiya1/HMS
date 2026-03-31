@@ -1,6 +1,7 @@
 <?php
 require_once '../app/models/Room.php';
 require_once '../app/models/RoomType.php';
+require_once '../app/models/Cart.php';
 class SearchController
 {
     public function search()
@@ -75,6 +76,8 @@ class SearchController
         }
 
         $rooms = $roomModel->searchAvailable($filters);
+        $logged_in = $this->getAuthState();
+        $cartCount = $this->getCartCount();
 
         require_once __DIR__ . '/../views/rooms/search.view.php';
     }
@@ -82,6 +85,12 @@ class SearchController
     public function getAuthState()
     {
         return isset($_SESSION['logged_in_user_id']);
+    }
+
+    private function getCartCount()
+    {
+        $cartModel = new Cart($GLOBALS['conn']);
+        return $cartModel->getCartAmount();
     }
 
     function convertDate($range, $isCheckout = false)

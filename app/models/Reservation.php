@@ -121,4 +121,43 @@ class Reservation
             throw new Exception("Failed to cancel reservation: " . $e->getMessage());
         }
     }
+
+    public function showReservations() {
+        try {
+            $result = $this->conn->execute_query(
+                "SELECT
+                    r.BookingToken,
+                    rs.StatusName AS ReservationStatus,
+                    rr.CheckInDate,
+                    rr.CheckOutDate,
+                    rr.NumAdults,
+                    ro.RoomNumber,
+                    pm.MethodName AS PaymentMethod,
+                    p.Amount,
+                    p.PaymentDate
+                FROM Users u
+                INNER JOIN Guests g ON u.GuestID = g.GuestID
+                INNER JOIN Reservations r ON g.GuestID = r.GuestID
+                INNER JOIN ReservationStatus rs ON r.StatusID = rs.StatusID
+                INNER JOIN ReservationRooms rr ON r.ReservationID = rr.ReservationID
+                INNER JOIN Rooms ro ON rr.RoomID = ro.RoomID
+                LEFT JOIN Payments p ON r.ReservationID = p.ReservationID
+                LEFT JOIN PaymentMethods pm ON p.MethodID = pm.MethodID
+                WHERE u.UserID = ?;",
+                [$_SESSION["logged_in_user_id"]]
+            );
+
+            if (!$result) {
+                throw new Exception("Error retrieving reservations: ". $this->conn->error);
+            }
+
+            if ($result->num_rows === 0) {
+                return [];
+            }
+        
+            return $result->fetch_all(MYSQLI_ASSOC);
+        } catch (Exception $e) {
+            throw new Exception("Error retrieving reservations: ". $e->getMessage());
+        }
+    }
 }

@@ -26,7 +26,7 @@
         <div class="mx-auto h-1 w-full bg-yellow-900/60 rounded-lg"></div>
 
         <div class="flex justify-center gap-5 font-roboto">
-            <div class="flex flex-col border rounded p-2 shadow-[0px_0px_4px_0px_rgba(0,0,0,0.25)] w-full gap-2">
+            <div class="flex flex-col border border-zinc-300 rounded p-2 w-full gap-2">
                 <!-- Pop up for checking if an account already exists with the email, if not create an account and log in, if yes, log in and redirect to home page -->
                 <h1 class="font-bold">CREATE AN ACCOUNT</h1>
                 <!-- TODO: Add email verification when signing up -->
@@ -73,7 +73,7 @@
                 </form>
             </div>
 
-            <div class="flex flex-col border rounded p-2 shadow-[0px_0px_4px_0px_rgba(0,0,0,0.25)] w-full">
+            <div class="flex flex-col border rounded p-2 border-zinc-300 w-full">
                 <h1 class="font-bold">ALREADY REGISTERED?</h1>
                 <form id="loginForm" action="/login-submit" method="POST">
                     <label for="email">Email: </label>

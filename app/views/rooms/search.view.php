@@ -13,9 +13,10 @@
 
 </head>
 
+<!-- TODO: Do not show in search if already booked -->
 <body class="min-h-screen flex flex-col">
+    <?php require_once __DIR__ . '/../components/toast.view.php'; ?>
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
-
 
     <div class="flex-1 py-10 px-30 flex flex-col gap-5">
         <div class="justify-start text-black text-lg font-normal font-crimson">
@@ -118,6 +119,7 @@
             </div>
             <div class="flex-3 rounded-[1px] border-[0.30px] border-zinc-500">
                 <div class="p-5">
+                    <!-- TODO: Sort by -->
                     <div class="justify-start text-black text-xs font-light font-['Roboto']">Sort by:</div>
                 </div>
 
