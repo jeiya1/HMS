@@ -75,12 +75,11 @@
                     </form>
                     <div class="flex justify-end mb-5 mr-5">
                         <button type="submit" form="update-form"
-                            class="flex items-center justify-center gap-2 text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3 w-40 align-middle">
-
-                            <span>Save</span>
-                            <img src="/assets/icons/right-arrow.svg" alt="arrow"
-                                class="w-4 h-4 invert brightness-0 relative top-px">
-
+                            class="group flex items-center justify-center gap-2 text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3 w-30 align-middle cursor-pointer hover:bg-[#3F321F] transition-colors">
+                            <p
+                                class="transition-all group-hover:text-white group-hover:[text-shadow:0_0_8px_rgba(255,255,255,0.9)]">
+                                SAVE
+                            </p>
                         </button>
                     </div>
                 </div>

@@ -19,7 +19,7 @@ function showToast(message, type = "error") {
     closeBtn.innerHTML = "&times;";
     closeBtn.className = `
         absolute top-0 right-2 text-[#eed982] text-lg font-bold
-        hover:text-white transition
+        hover:text-white transition cursor-pointer
     `;
 
     closeBtn.onclick = () => {

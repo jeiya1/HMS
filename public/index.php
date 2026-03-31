@@ -58,14 +58,6 @@ switch ($uri) {
         $pages->home();
         break;
 
-    case '/profile':
-        $pages->account();
-        break;
-
-    case '/registration':
-        $pages->registration();
-        break;
-
     case '/forgot-password':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $auth->resetPasswordForm(); // handles sending reset email
@@ -82,6 +74,10 @@ switch ($uri) {
         }
         break;
 
+    case '/registration':
+        $pages->registration();
+        break;
+
     case '/login-submit':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $auth->login();
@@ -96,6 +92,10 @@ switch ($uri) {
         } else {
             $pages->registration();
         }
+        break;
+
+    case '/profile':
+        $pages->account();
         break;
 
     case '/update-submit':
