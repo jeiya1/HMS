@@ -267,8 +267,6 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
         <div class="pt-2">
             <div class="ml-10">
                 <h1 class="justify-center text-black text-2xl font-normal font-crimson">Room Information</h1>
-                <!-- TODO: ADDITIONAL: reviews -->
-                <!-- <h1>Reviews</h1> -->
                 <div class="h-1 w-50 bg-gradient-to-r from-yellow-100 to-yellow-800 rounded-lg"></div>
 
             </div>

@@ -36,9 +36,7 @@
 
         <div class="flex justify-center gap-5 font-roboto">
             <div class="flex flex-col border border-zinc-300 rounded p-2 w-full gap-2">
-                <!-- Pop up for checking if an account already exists with the email, if not create an account and log in, if yes, log in and redirect to home page -->
                 <h1 class="font-bold">CREATE AN ACCOUNT</h1>
-                <!-- TODO: Add email verification when signing up -->
                 <p class="italic">Please enter your details to create an account.</p>
                 <form id="signup-form" action="/signup-submit" method="POST">
                     <label for="fname">First Name: </label>

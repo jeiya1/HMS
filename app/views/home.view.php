@@ -118,7 +118,6 @@
           </div>
 
           <!-- Submit -->
-          <!-- TODO: hover -->
           <div class="flex items-center">
             <button type="submit"
               class="text-white font-roboto text-[14px] font-semibold leading-normal rounded-sm bg-[#714623] p-2.5 cursor-pointer hover:bg-[#654022] transition-colors duration-300 group">
@@ -350,7 +349,6 @@
             <div class="flex flex-col gap-1">
               <div class="flex justify-between">
 
-                <!-- TODO: Add deluxe -->
                 <h1 class="text-stone-800 text-md font-crimson font-normal">Deluxe</h1>
                 <p class="w-56 text-yellow-100 text-xl font-crimson font-normal">from ₱ 2,300.00 / per night</p>
               </div>
@@ -374,7 +372,6 @@
             <div class="flex flex-col gap-1">
               <div class="flex justify-between">
 
-                <!-- TODO: Add Suite -->
                 <h1 class="text-stone-800 text-md font-crimson font-normal">Suite</h1>
                 <p class="w-56 text-yellow-100 text-xl font-crimson font-normal">from ₱ 3,000.00 / per night</p>
               </div>

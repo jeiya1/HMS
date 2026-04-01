@@ -1,9 +1,18 @@
-<?php 
+<?php
 $paymentMethod = array(
-    "card"=> "Debit/Credit Card",
-    "online_payment"=> "QR-Ph",
-    "cash"=> "Cash"
+    "card" => "Debit/Credit Card",
+    "online_payment" => "QR-Ph",
+    "cash" => "Cash"
 );
+?>
+<?php
+$statusMap = [
+    'pending' => ['label' => 'Pending', 'bg' => 'bg-gray-500/25', 'outline' => 'outline-gray-500'],
+    'confirmed' => ['label' => 'Successful', 'bg' => 'bg-green-500/25', 'outline' => 'outline-green-500'],
+    'checked_in' => ['label' => 'Checked_In', 'bg' => 'bg-blue-500/25', 'outline' => 'outline-blue-500'],
+    'checked_out' => ['label' => 'Checked_out', 'bg' => 'bg-gray-500/25', 'outline' => 'outline-gray-500'],
+    'cancelled' => ['label' => 'Cancelled', 'bg' => 'bg-red-500/25', 'outline' => 'outline-red-500'],
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -77,7 +86,14 @@ $paymentMethod = array(
                                     <?= !empty($paymentMethod[$reservation['PaymentMethod']]) ? htmlspecialchars($paymentMethod[$reservation['PaymentMethod']]) : 'N/A' ?>
                                 </td>
                                 <td class="py-2 px-4 border border-gray-400">
-                                    <?= htmlspecialchars($reservation['ReservationStatus']) ?>
+                                    <?php
+                                    $statusKey = $reservation['ReservationStatus'] ?? 'pending';
+                                    $status = $statusMap[$statusKey] ?? ['label' => 'Unknown', 'color' => 'gray'];
+                                    ?>
+                                    <div
+                                        class="w-20 h-5 pl-2.5 pr-3 py-[5px] <?= $status['bg'] ?> rounded-sm outline <?= $status['outline'] ?> outline-offset-[-0.50px] inline-flex justify-center items-center gap-2.5 text-xs font-medium">
+                                        <?= htmlspecialchars($status['label']) ?>
+                                    </div>
                                 </td>
                                 <td class="py-2 px-4 border border-gray-400">
                                     <a href="/reservation/<?= urlencode($reservation['BookingToken']) ?>"
@@ -93,14 +109,14 @@ $paymentMethod = array(
                 </tbody>
             </table>
         </div>
-        <?php else: ?>
-            <div class="text-neutral-700 font-light font-crimson mb-4">
-                You must be logged in to view your bookings.
-                <span class="text-yellow-900 text-xs font-normal font-['Roboto']">
-                    <a href="/registration" class="hover:underline">Register or Login</a>
-                </span> now to make checkout faster and keep track of your orders.
-            </div>
-        <?php endif; ?>
+    <?php else: ?>
+        <div class="text-neutral-700 font-light font-crimson mb-4">
+            You must be logged in to view your bookings.
+            <span class="text-yellow-900 text-xs font-normal font-['Roboto']">
+                <a href="/registration" class="hover:underline">Register or Login</a>
+            </span> now to make checkout faster and keep track of your orders.
+        </div>
+    <?php endif; ?>
     </div>
 
     <?php require_once __DIR__ . '/../components/footer.view.php'; ?>

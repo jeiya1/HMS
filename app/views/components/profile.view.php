@@ -20,7 +20,6 @@
                 Profile
             </a>
 
-            <!-- TODO: Add Bookings -->
             <a href="/bookings" class="block px-4 py-2 hover:bg-gray-100">
                 Bookings
             </a>

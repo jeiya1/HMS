@@ -138,31 +138,33 @@ class ReservationController
     public function show($bookingToken)
     {
         $reservationModel = new Reservation($GLOBALS["conn"]);
-        $reservation = $reservationModel->findByToken($bookingToken);
+        $reservationData = $reservationModel->getReservationWithGuest($bookingToken);
 
-        if (!$reservation) {
+        if (empty($reservationData)) {
             require_once __DIR__ . '/../views/static/404.view.php';
             return;
         }
 
-        $rooms = $reservationModel->getReservationRooms($bookingToken);
-
-        if (empty($rooms)) {
-            require_once __DIR__ . '/../views/static/404.view.php';
-            return;
-        }
-
-        $reservationID = $rooms[0]['ReservationID'] ?? null;
-
-        $userID = $_SESSION["logged_in_user_id"];
+        $reservationID = $reservationData[0]['ReservationID'];
+        $userID = $_SESSION["logged_in_user_id"] ?? null;
 
         $ownsReservation = $reservationModel->checkUserReservation($userID, $reservationID);
 
         if (!$ownsReservation) {
-            echo "<script>alert('$reservationID');</script>";
             require_once __DIR__ . '/../views/static/404.view.php';
             return;
         }
+
+        // Extract guest info from first row
+        $guestDetails = [
+            'FullName' => $reservationData[0]['FirstName'] . ' ' . $reservationData[0]['LastName'],
+            'Email' => $reservationData[0]['Email'],
+            'PhoneContact' => $reservationData[0]['PhoneContact'],
+            'BookingToken'=> $reservationData[0]['BookingToken'],
+            'BookingDate'=> date('j-F-Y', strtotime($reservationData[0]['BookingDate'])),
+        ];
+        $payment = $reservationModel->getReservationPayment($reservationID); // new method
+        $rooms = $reservationData;
 
         require __DIR__ . '/../views/reservations/reservation-details.view.php';
     }

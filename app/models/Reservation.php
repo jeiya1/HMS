@@ -210,13 +210,15 @@ class Reservation
     public function findByToken($token)
     {
         $result = $this->conn->execute_query(
-            "SELECT * FROM Reservations WHERE BookingToken = ?", [$token]
+            "SELECT * FROM Reservations WHERE BookingToken = ?",
+            [$token]
         );
 
         return $result->fetch_assoc();
     }
 
-    public function getReservationRooms($token) {
+    public function getReservationRooms($token)
+    {
         $result = $this->conn->execute_query(
             "SELECT
                 res.ReservationID,
@@ -237,7 +239,8 @@ class Reservation
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function checkUserReservation($userID, $reservationID) {
+    public function checkUserReservation($userID, $reservationID)
+    {
         $result = $this->conn->execute_query(
             "SELECT 1 FROM UserReservations WHERE UserID = ? AND ReservationID = ? LIMIT 1",
             [$userID, $reservationID]
@@ -245,4 +248,44 @@ class Reservation
         return $result && $result->num_rows > 0;
     }
 
+    public function getReservationWithGuest($token)
+    {
+        $result = $this->conn->execute_query(
+            "SELECT
+            res.ReservationID,
+            res.BookingToken,
+            res.CreatedAt AS BookingDate,
+            g.FirstName,
+            g.LastName,
+            g.Email,
+            g.PhoneContact,
+            rr.CheckInDate,
+            rr.CheckOutDate,
+            rr.NumAdults AS NumGuests,
+            r.RoomNumber,
+            rt.RoomTypeName AS RoomType,
+            rt.BasePrice
+        FROM Reservations res
+        JOIN Guests g ON g.GuestID = res.GuestID
+        JOIN ReservationRooms rr ON rr.ReservationID = res.ReservationID
+        JOIN Rooms r ON r.RoomID = rr.RoomID
+        JOIN RoomTypes rt ON rt.RoomTypeID = r.RoomTypeID
+        WHERE res.BookingToken = ?",
+            [$token]
+        );
+
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getReservationPayment($reservationID)
+    {
+        $result = $this->conn->execute_query(
+            "SELECT p.PaymentID, pm.MethodName AS PaymentMethod, p.PaymentStatus
+         FROM Payments p
+         JOIN PaymentMethods pm ON pm.MethodID = p.MethodID
+         WHERE p.ReservationID = ? LIMIT 1",
+            [$reservationID]
+        );
+        return $result->fetch_assoc();
+    }
 }
