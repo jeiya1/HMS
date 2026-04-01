@@ -71,6 +71,10 @@ class ReservationController
                 } else {
                     $guestID = $currentUserGuestIDObj->GuestID;
                 }
+
+                // if (isset($_SESSION['logged_in_user_id'])) {
+                // $reservationModel->linkReservationToUser($reservationID, $_SESSION['logged_in_user_id']);
+                // }
             }
 
             // Fetch cart rows
@@ -83,6 +87,11 @@ class ReservationController
 
             // Book rooms atomically
             $reservationData = $reservationModel->bookRoomsAtomic($guestID, $paymentMethodID, $totalAmount, $cartRows);
+
+            // Link reservation to logged-in user
+            if (isset($_SESSION['logged_in_user_id'])) {
+                $reservationModel->linkReservationToUser($reservationData['ReservationID'], $_SESSION['logged_in_user_id']);
+            }
 
             // Remove cart items
             $cartModel->removeCartItems($cartID);
@@ -138,7 +147,7 @@ class ReservationController
             'Email' => $reservationData[0]['Email'],
             'PhoneContact' => $reservationData[0]['PhoneContact'],
             'BookingToken' => $reservationData[0]['BookingToken'],
-            'BookingDate' => date('j-F-Y', strtotime($reservationData[0]['BookingDate'])),
+            'BookingDate' => date('F j, Y', strtotime($reservationData[0]['BookingDate'])),
         ];
         $payment = $reservationModel->getReservationPayment($reservationID); // new method
         $rooms = $reservationData;
