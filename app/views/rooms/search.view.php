@@ -115,8 +115,13 @@
 
             <!-- Search Results -->
             <div class="flex-3 rounded-[1px] border-[0.30px] border-zinc-500">
-                <div class="p-5">
-                    <div class="justify-start text-black text-xs font-light font-['Roboto']">Sort by:</div>
+                <div class="pt-5 px-5 pb-1 flex items-center gap-3">
+                    <label for="sortPrice" class="text-black text-xs font-light font-roboto">Sort by:</label>
+                    <select id="sortPrice" class="p-2 rounded border border-gray-300 font-roboto cursor-pointer">
+                        <option class="cursor-pointer" value="">-- Select --</option>
+                        <option class="cursor-pointer" value="asc">Price: Low → High</option>
+                        <option class="cursor-pointer" value="desc">Price: High → Low</option>
+                    </select>
                 </div>
 
                 <div class="flex flex-col gap-4 p-5">
@@ -133,48 +138,52 @@
                             $roomRoute = 'standard'; // fallback
                         }
                         ?>
-
-                        <div class="mx-auto h-0.5 w-full bg-yellow-900/60 rounded-lg"></div>
-
-                        <div class="flex gap-3 my-2">
-                            <div class="flex-1">
-                                <img src="<?= htmlspecialchars($roomPics[$room['RoomTypeName']] ?? '/assets/images/standard.jpg') ?>"
-                                    alt="Room Image">
-                            </div>
-
-                            <div class="flex-3 flex flex-col gap-3">
-                                <h2 class="font-crimson font-medium text-3xl">
-                                    Room <?= htmlspecialchars($room['RoomNumber']) ?> -
-                                    <?= htmlspecialchars($room['RoomTypeName']) ?>
-                                </h2>
-                                <p class="font-roboto">
-                                    <?= $roomDescriptions[$room['RoomTypeName']] ?? "A comfortable and well-appointed room designed to meet your needs." ?>
-                                </p>
-
-                                <div class="flex gap-2 -mt-1">
-                                    <img src="/assets/icons/wifi.svg" alt="Wi-Fi Icon" class="w-5 h-5">
-                                    <img src="/assets/icons/AC.svg" alt="Air Condition Icon" class="w-5 h-5">
+                        <div class="room-item" data-price="<?= htmlspecialchars($room['BasePrice']) ?>">
+                            <div class="mx-auto h-0.5 w-full bg-yellow-900/60 rounded-lg mb-7"></div>
+                            <div class="flex gap-3 my-2">
+                                <div class="flex-1">
+                                    <img src="<?= htmlspecialchars($roomPics[$room['RoomTypeName']] ?? '/assets/images/standard.jpg') ?>"
+                                        alt="Room Image">
                                 </div>
 
-                                <div class="flex justify-between mt-3">
-                                    <div>
-                                        <h3 class="justify-center text-zinc-500 text-xs font-medium font-roboto">MAX NO.
-                                            GUESTS</h3>
-                                        <p>Max Occupancy: <?= htmlspecialchars($room['MaxOccupancy']) ?></p>
-                                    </div>
-                                    <p class="font-crimson text-2xl">₱<?= htmlspecialchars($room['BasePrice']) ?>/Per Night
+                                <div class="flex-3 flex flex-col gap-3">
+                                    <h2 class="font-crimson font-medium text-3xl">
+                                        Room
+                                        <?= htmlspecialchars($room['RoomNumber']) ?> -
+                                        <?= htmlspecialchars($room['RoomTypeName']) ?>
+                                    </h2>
+                                    <p class="font-roboto">
+                                        <?= $roomDescriptions[$room['RoomTypeName']] ?? "A comfortable and well-appointed room designed to meet your needs." ?>
                                     </p>
-                                </div>
 
-                                <div class="flex justify-end">
-                                    <button
-                                        class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3 cursor-pointer hover:bg-[#3F321F] transition-colors group">
-                                        <a href="/room/<?= $roomRoute ?>?room=<?= $room['RoomNumber'] ?>&checkin=<?= urlencode($_GET['checkin'] ?? '') ?>&checkout=<?= urlencode($_GET['checkout'] ?? '') ?>"
-                                            class="transition-all duration-300 text-white group-hover:text-white
+                                    <div class="flex gap-2 -mt-1">
+                                        <img src="/assets/icons/wifi.svg" alt="Wi-Fi Icon" class="w-5 h-5">
+                                        <img src="/assets/icons/AC.svg" alt="Air Condition Icon" class="w-5 h-5">
+                                    </div>
+
+                                    <div class="flex justify-between mt-3">
+                                        <div>
+                                            <h3 class="justify-center text-zinc-500 text-xs font-medium font-roboto">MAX NO.
+                                                GUESTS</h3>
+                                            <p>Max Occupancy:
+                                                <?= htmlspecialchars($room['MaxOccupancy']) ?>
+                                            </p>
+                                        </div>
+                                        <p class="font-crimson text-2xl">₱
+                                            <?= htmlspecialchars($room['BasePrice']) ?>/Per Night
+                                        </p>
+                                    </div>
+
+                                    <div class="flex justify-end">
+                                        <button
+                                            class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3 cursor-pointer hover:bg-[#3F321F] transition-colors group">
+                                            <a href="/room/<?= $roomRoute ?>?room=<?= $room['RoomNumber'] ?>&checkin=<?= urlencode($_GET['checkin'] ?? '') ?>&checkout=<?= urlencode($_GET['checkout'] ?? '') ?>"
+                                                class="transition-all duration-300 text-white group-hover:text-white
                               group-hover:[text-shadow:0_0_8px_rgba(255,255,255,0.9)] cursor-pointer">
-                                            VIEW MORE
-                                        </a>
-                                    </button>
+                                                VIEW MORE
+                                            </a>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -191,6 +200,26 @@
     <?php require_once __DIR__ . '/../components/footer.view.php'; ?>
     <script src="/js/daterange.js"></script>
     <script src="/js/clearFilter.js"></script>
+    <script>
+        $(document).ready(function () {
+            const $roomContainer = $('.flex.flex-col.gap-4.p-5'); // container holding room items
+
+            $('#sortPrice').on('change', function () {
+                const order = $(this).val();
+                const $rooms = $roomContainer.children('.room-item');
+
+                if (!order) return; // do nothing if no selection
+
+                const sorted = $rooms.sort(function (a, b) {
+                    const priceA = parseFloat($(a).data('price'));
+                    const priceB = parseFloat($(b).data('price'));
+                    return order === 'asc' ? priceA - priceB : priceB - priceA;
+                });
+
+                $roomContainer.html(sorted);
+            });
+        });
+    </script>
 </body>
 
 </html>
