@@ -601,23 +601,42 @@
                 switch (method) {
                     case 'Card':
                         return `
-                <label class="block">Name on Card<input type="text" class="w-full border p-2 rounded" placeholder="John Doe" required></label>
-                <label class="block">Card Number<input type="text" class="w-full border p-2 rounded" placeholder="1234 5678 9012 3456" required></label>
-                <div class="flex gap-2">
-                    <label class="flex-1">Expiry Date<input type="text" class="w-full border p-2 rounded" placeholder="MM/YY" required></label>
-                    <label class="flex-1">CVV<input type="text" class="w-full border p-2 rounded" placeholder="123" required></label>
-                </div>
-            `;
+            <label class="block">Name on Card
+                <input type="text" class="w-full border p-2 rounded" placeholder="John Doe" required>
+            </label>
+            <label class="block">Card Number
+                <input type="text" class="w-full border p-2 rounded" placeholder="1234567812345678" 
+                       required pattern="\\d{13,16}" title="Enter 13 to 16 digit card number">
+            </label>
+            <div class="flex gap-2">
+                <label class="flex-1">Expiry Date
+                    <input type="text" class="w-full border p-2 rounded" placeholder="MM/YY" 
+                           required pattern="^(0[1-9]|1[0-2])\\/\\d{2}$" title="Enter in MM/YY format">
+                </label>
+                <label class="flex-1">CVV
+                    <input type="text" class="w-full border p-2 rounded" placeholder="123" 
+                           required pattern="\\d{3,4}" title="Enter 3 or 4 digit CVV">
+                </label>
+            </div>
+        `;
                     case 'Cash':
                         return `
-                <p class="text-sm mb-2">Pay in cash at check-in. Provide card for hold.</p>
-                <label class="block">Name on Card<input type="text" class="w-full border p-2 rounded" placeholder="John Doe" required></label>
-                <label class="block">Card Number<input type="text" class="w-full border p-2 rounded" placeholder="1234 5678 9012 3456" required></label>
-            `;
+            <p class="text-sm mb-2">Pay in cash at check-in. Provide card for hold.</p>
+            <label class="block">Name on Card
+                <input type="text" class="w-full border p-2 rounded" placeholder="John Doe" required>
+            </label>
+            <label class="block">Card Number
+                <input type="text" class="w-full border p-2 rounded" placeholder="1234567812345678" 
+                       required pattern="\\d{13,16}" title="Enter 13 to 16 digit card number">
+            </label>
+        `;
                     case 'E-Wallet':
-                    case 'Bank':
-                        // no extra fields, user only uploads or scans QR
-                        return `<p>No additional fields required.</p>`;
+                        return `
+            <p class="text-sm mb-2">Scan QR code to pay</p>
+            <div class="flex justify-center">
+                <img src="/assets/images/qr-code.png" alt="E-Wallet QR" class="w-48 h-48">
+            </div>
+        `;
                     default:
                         return `<p>No payment method selected.</p>`;
                 }
