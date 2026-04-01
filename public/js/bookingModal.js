@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!dateStr) return null;
         const parts = dateStr.split('/');
         if (parts.length !== 3) return null;
-        const [day, month, year] = parts;
+        const [year, month, day] = parts;
         return `${year}-${month}-${day}`;
     }
 
@@ -28,9 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const dates = checkinCheckout.split(' to ');
             const checkin = dates[0] || '-';
             const checkout = dates[1] || '-';
-            const checkinDate = parseDMY(checkin);
-            const checkoutDate = parseDMY(checkout);
-            const nights = (checkinDate && checkoutDate) ? getNights(checkinDate, checkoutDate) : 1;
+
+            // Convert slashes to dashes for consistency
+            const checkinDate = checkin.replace(/\//g, '-');
+            const checkoutDate = checkout.replace(/\//g, '-');
+
+            const nights = getNights(checkinDate, checkoutDate);
 
             // Prepare form data
             const formData = new FormData(form);
@@ -49,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Update left side modal
                     document.getElementById('modal-image').src = firstImage;
-                    document.getElementById('modal-room-type').textContent = roomType.charAt(0).toUpperCase() + roomType.slice(1);
                     document.getElementById('modal-guests').textContent = guests + (guests > 1 ? ' Guests' : ' Guest');
                     document.getElementById('modal-checkin-checkout').textContent = checkinCheckout;
                     document.getElementById('modal-room').textContent = roomType.charAt(0).toUpperCase() + roomType.slice(1);

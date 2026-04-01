@@ -42,8 +42,8 @@ class CartController
             return;
         }
 
-        $checkinObj = DateTime::createFromFormat('d/m/Y', trim($dates[0]));
-        $checkoutObj = DateTime::createFromFormat('d/m/Y', trim($dates[1]));
+        $checkinObj = DateTime::createFromFormat('Y/m/d', trim($dates[0]));
+        $checkoutObj = DateTime::createFromFormat('Y/m/d', trim($dates[1]));
 
         if (!$checkinObj || !$checkoutObj) {
             echo json_encode([

@@ -79,7 +79,8 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
                 <img id="modal-image" src="/assets/images/deluxe.jpg" alt="Room Image"
                     class="w-24 h-24 rounded object-cover">
                 <div class="flex flex-col gap-2">
-                    <h5 id="modal-room-type" class="font-crimson font-semibold text-black">Deluxe Room</h5>
+                    <h5 id="modal-room-type" class="font-crimson font-semibold text-black">Room
+                        <?= htmlspecialchars($_GET['room'] ?? '') ?> - Deluxe Room</h5>
                     <h5 class="font-roboto font-semibold text-black">Time Duration:
                         <span id="modal-checkin-checkout">
                             <?= htmlspecialchars($checkinStr ?: 'Check-In — Check-Out') ?>
