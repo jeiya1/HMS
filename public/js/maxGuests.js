@@ -1,42 +1,47 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const guestInput = document.getElementById("guests");
-  const guestLabel = document.getElementById("guests-label");
+  const roomRadios = document.querySelectorAll('input[name="room"]');
+  const guestsInput = document.getElementById('guests');
+  const guestsLabel = document.getElementById('guests-label');
   const guestAddon = document.getElementById("guests-addon");
 
   const roomType = document.body.dataset.roomType;
 
   const fullConfig = {
     standard: {
-      single: { min: 1, max: 2, add: 1},
-      double: { min: 1, max: 3, add: 2}
+      single: { min: 1, max: 2, add: 1 },
+      double: { min: 1, max: 3, add: 2 }
     },
     deluxe: {
       single: { min: 1, max: 4, add: 1 },
       double: { min: 1, max: 6, add: 2 }
     },
     suite: {
-      single: { min: 1, max: 6, add: 1},
+      single: { min: 1, max: 6, add: 1 },
       double: { min: 1, max: 10, add: 2 }
     }
   };
 
   function updateGuestUI() {
     const selected = document.querySelector('input[name="room"]:checked');
-    if (!selected) return; // safety
+    if (!selected) return;
 
     const occupancy = selected.value;
-    const { min, max, add } = fullConfig[roomType][occupancy];
+    const config = fullConfig[roomType]?.[occupancy];
+    if (!config) return;
 
-    guestInput.min = min;
-    guestInput.max = max;
+    const { min, max, add } = config;
 
-    guestLabel.textContent = `Guests (Max ${max})`;
-    guestAddon.textContent = `Additional guests (above ${add}) cost 10% of the room rate pernight.`;
+    guestsInput.min = min;
+    guestsInput.max = max;
 
-    if (guestInput.value > max) guestInput.value = min;
+    guestsLabel.textContent = `Guests (Max ${max})`;
+    guestAddon.textContent = `Additional guests (above ${add}) cost 10% of the room rate per night.`;
+
+    if (parseInt(guestsInput.value) > max) guestsInput.value = max;
+    if (parseInt(guestsInput.value) < min) guestsInput.value = min;
   }
 
-  document.querySelectorAll('input[name="room"]').forEach(radio => {
+  roomRadios.forEach(radio => {
     radio.addEventListener("change", updateGuestUI);
   });
 

@@ -1,32 +1,51 @@
 <?php
-$typeMap = [
-    'standard single' => 'single',
-    'standard double' => 'double',
-    'deluxe single' => 'single',
-    'deluxe double' => 'double',
-    'suite' => 'double',
+$rooms = [
+    'standard' => [
+        'single' => ['price' => 1800, 'maxGuests' => 2],
+        'double' => ['price' => 2700, 'maxGuests' => 3],
+    ],
+    'deluxe' => [
+        'single' => ['price' => 2300, 'maxGuests' => 4],
+        'double' => ['price' => 3200, 'maxGuests' => 6],
+    ],
+    'suite' => [
+        'single' => ['price' => 3000, 'maxGuests' => 6],
+        'double' => ['price' => 4000, 'maxGuests' => 10],
+    ],
 ];
 
-$roomTypeRaw = strtolower($_GET['type'] ?? 'single');
-$roomType = $typeMap[$roomTypeRaw] ?? 'single';
-$roomNumber = $_GET['room'] ?? null;
+// Set the page room category manually
+// For standard.php page:
+$roomCategory = 'standard';
 
-$roomBasePrice = $roomType === 'single' ? 1800 : 2700;
-$maxGuests = $roomType === 'single' ? 2 : 3;
+// For deluxe.php page:
+// $roomCategory = 'deluxe';
 
-$singleChecked = $roomType === 'single' ? 'checked' : '';
-$doubleChecked = $roomType === 'double' ? 'checked' : '';
+// For suite.php page:
+// $roomCategory = 'suite';
 
+// Occupancy type comes from GET or defaults to single
+$occupancy = strtolower($_GET['type'] ?? 'single');
+if (!in_array($occupancy, ['single', 'double'])) {
+    $occupancy = 'single';
+}
+
+// Fetch room config safely
+$roomConfig = $rooms[$roomCategory][$occupancy];
+$roomBasePrice = $roomConfig['price'];
+$maxGuests = $roomConfig['maxGuests'];
+
+// Checked attributes for the radio buttons
+$singleChecked = $occupancy === 'single' ? 'checked' : '';
+$doubleChecked = $occupancy === 'double' ? 'checked' : '';
+
+// Check-in / Check-out parsing
 $checkinStr = $_GET['checkin'] ?? '';
 $checkin = '';
 $checkout = '';
 
 if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
-    $dates = explode(' to ', $checkinStr);
-    if (count($dates) === 2) {
-        $checkin = $dates[0];
-        $checkout = $dates[1];
-    }
+    [$checkin, $checkout] = explode(' to ', $checkinStr, 2);
 }
 ?>
 
@@ -174,7 +193,8 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
                 <div>
                     <!-- TODO: Add Children and Adults -->
                     <div id="guests-label" class="justify-center text-black text-xl font-normal font-crimson">
-                        Guests (Max 2)
+                        Guests (Max
+                        <?= $maxGuests ?>)
                     </div>
                     <p class="text-sm text-gray-500" id="guests-addon">Additional guests (above 1) cost 10% of the
                         room
@@ -182,22 +202,26 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
                         per
                         night.</p>
                 </div>
-                <input type="number" id="guests" name="adults" placeholder="Guests" min="1" max="<?= $maxGuests ?>"
-                    value="1" required
+                <input type="number" id="guests" name="adults" min="1" max="<?= $maxGuests ?>" value="1"
+                    placeholder="Guests" required
                     class="bg-white rounded-sm p-2 text-crimson-600 font-crimson border border-gray-300">
                 <div class="justify-center text-black text-xl font-normal font-crimson">Room Type</div>
                 <div class="flex items-center gap-4">
                     <label class="relative flex items-center cursor-pointer">
-                        <input type="radio" name="room" value="single" data-base-price="1800" class="peer sr-only"
-                            <?= $singleChecked ?> required>
+                        <input type="radio" name="room" value="single"
+                            data-base-price="<?= $rooms[$roomCategory]['single']['price'] ?>"
+                            data-max-guests="<?= $rooms[$roomCategory]['single']['maxGuests'] ?>" <?= $singleChecked ?>
+                            required class="peer sr-only">
                         <div class="w-5 h-5 border-2 border-gray-400 rounded-full shrink-0
         peer-checked:border-[#c39c4d] peer-checked:bg-[#c39c4d] transition-all"></div>
                         <span class="ml-2 text-gray-700 font-roboto">Single</span>
                     </label>
 
                     <label class="relative flex items-center cursor-pointer">
-                        <input type="radio" name="room" value="double" data-base-price="2700" class="peer sr-only"
-                            <?= $doubleChecked ?>>
+                        <input type="radio" name="room" value="double"
+                            data-base-price="<?= $rooms[$roomCategory]['double']['price'] ?>"
+                            data-max-guests="<?= $rooms[$roomCategory]['single']['maxGuests'] ?>" <?= $doubleChecked ?>
+                            class="peer sr-only">
                         <div class="w-5 h-5 border-2 border-gray-400 rounded-full shrink-0
         peer-checked:border-[#c39c4d] peer-checked:bg-[#c39c4d] transition-all"></div>
                         <span class="ml-2 text-gray-700 font-roboto">Double</span>

@@ -114,6 +114,19 @@
 
                 <div class="flex flex-col gap-4 p-5">
                     <?php foreach ($rooms as $room): ?>
+                        <?php
+                        $type = strtolower($room['RoomTypeName']); // e.g., "deluxe room"
+                        if (stripos($type, 'standard') !== false) {
+                            $roomRoute = 'standard';
+                        } elseif (stripos($type, 'deluxe') !== false) {
+                            $roomRoute = 'deluxe';
+                        } elseif (stripos($type, 'suite') !== false) {
+                            $roomRoute = 'suite';
+                        } else {
+                            $roomRoute = 'standard'; // fallback
+                        }
+                        ?>
+
                         <div class="mx-auto h-0.5 w-full bg-yellow-900/60 rounded-lg"></div>
 
                         <div class="flex gap-3 my-2">
@@ -149,10 +162,9 @@
                                 <div class="flex justify-end">
                                     <button
                                         class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3 cursor-pointer hover:bg-[#3F321F] transition-colors group">
-                                        <a 
-                                            href="/room/standard?type=<?= urlencode($room['RoomTypeName']) ?>&room=<?= $room['RoomNumber'] ?>&checkin=<?= urlencode($_GET['checkin'] ?? '') ?>&checkout=<?= urlencode($_GET['checkout'] ?? '') ?>"
+                                        <a href="/room/<?= $roomRoute ?>?room=<?= $room['RoomNumber'] ?>&checkin=<?= urlencode($_GET['checkin'] ?? '') ?>&checkout=<?= urlencode($_GET['checkout'] ?? '') ?>"
                                             class="transition-all duration-300 text-white group-hover:text-white
-                                            group-hover:[text-shadow:0_0_8px_rgba(255,255,255,0.9)] cursor-pointer">
+                              group-hover:[text-shadow:0_0_8px_rgba(255,255,255,0.9)] cursor-pointer">
                                             VIEW MORE
                                         </a>
                                     </button>
