@@ -134,5 +134,37 @@ class ReservationController
             ]);
         }
     }
+
+    public function show($bookingToken)
+    {
+        $reservationModel = new Reservation($GLOBALS["conn"]);
+        $reservation = $reservationModel->findByToken($bookingToken);
+
+        if (!$reservation) {
+            require_once __DIR__ . '/../views/static/404.view.php';
+            return;
+        }
+
+        $rooms = $reservationModel->getReservationRooms($bookingToken);
+
+        if (empty($rooms)) {
+            require_once __DIR__ . '/../views/static/404.view.php';
+            return;
+        }
+
+        $reservationID = $rooms[0]['ReservationID'] ?? null;
+
+        $userID = $_SESSION["logged_in_user_id"];
+
+        $ownsReservation = $reservationModel->checkUserReservation($userID, $reservationID);
+
+        if (!$ownsReservation) {
+            echo "<script>alert('$reservationID');</script>";
+            require_once __DIR__ . '/../views/static/404.view.php';
+            return;
+        }
+
+        require __DIR__ . '/../views/reservations/reservation-details.view.php';
+    }
 }
 ?>
