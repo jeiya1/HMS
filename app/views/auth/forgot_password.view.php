@@ -18,9 +18,20 @@
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
 
     <div class="flex-1 py-10 px-30 flex flex-col gap-5">
-        <div class="justify-start text-black text-lg font-normal font-crimson">
-            <a href="/home" class="hover:underline">Home</a> <a href="/signup" class="hover:underline">&gt;
-                Authentication</a> &gt; Account Recovery
+        <div class="flex text-black text-base font-normal font-crimson">
+            <!-- Home button with SVG -->
+            <a href="/home" class="flex items-center border border-neutral-300 px-4 py-1">
+                <img src="/assets/icons/home.svg" alt="Home" class="w-4 h-4">
+            </a>
+
+            <a href="/registration" class="flex items-center border border-neutral-300 border-l-0 px-4 py-1">
+                Authentication
+            </a>
+
+            <a href="/forgot-password"
+                class="flex items-center border border-neutral-300 border-l-0 px-4 py-1 bg-[#F6F6F6]">
+                Account Recovery
+            </a>
         </div>
 
         <h1 class="font-crimson font-bold text-3xl">ACCOUNT RECOVERY</h1>
@@ -40,8 +51,7 @@
                     <br>
                     <!-- TODO: add a wait for .. message since creating the recovery link takes a while
                     TODO: add hover animation to button -->
-                    <input type="submit" value="Send Recovery Link"
-                        class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3">
+                    <input type="submit" value="Send Recovery Link" class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3 cursor-pointer shadow-2xl transition-colors hover:bg-[#3F321F] hover:[text-shadow:0_0_8px_rgba(255,255,255,0.9)]">
                 </form>
             </div>
         </div>

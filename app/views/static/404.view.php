@@ -10,14 +10,22 @@
 </head>
 
 <body class="min-h-screen flex flex-col">
+    <?php require_once __DIR__ . '/../components/toast.view.php'; ?>
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
 
     <main class="flex-1 py-10 px-30 flex flex-col">
-        <div class="text-black text-lg font-normal font-crimson mb-2">
-            <a href="/home" class="hover:underline">Home</a> &gt; 404 - Page Not Found
+        <div class="flex text-black text-base font-normal font-crimson">
+            <!-- Home button with SVG -->
+            <a href="/home" class="flex items-center border border-neutral-300 px-4 py-1">
+                <img src="/assets/icons/home.svg" alt="Home" class="w-4 h-4">
+            </a>
+
+            <a href="/" class="flex items-center border border-neutral-300 border-l-0 px-4 py-1 bg-[#F6F6F6]">
+                404
+            </a>
         </div>
 
-        <div class="mx-auto h-1 w-full bg-yellow-900/60 rounded-lg"></div>
+        <div class="mx-auto h-1 w-full bg-yellow-900/60 rounded-lg mt-5"></div>
         <div class="text-black font-normal font-crimson text-2xl my-3">
             404 - Page Not Found
         </div>

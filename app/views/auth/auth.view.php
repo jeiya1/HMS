@@ -18,8 +18,15 @@
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
 
     <div class="py-10 px-30 flex flex-col gap-5">
-        <div class="justify-start text-black text-lg font-normal font-crimson">
-            <a href="/home" class="hover:underline">Home</a> &gt; Authentication
+        <div class="flex text-black text-base font-normal font-crimson">
+            <!-- Home button with SVG -->
+            <a href="/home" class="flex items-center border border-neutral-300 px-4 py-1">
+                <img src="/assets/icons/home.svg" alt="Home" class="w-4 h-4">
+            </a>
+
+            <a href="/registration" class="flex items-center border border-neutral-300 border-l-0 px-4 py-1 bg-[#F6F6F6]">
+                Authentication
+            </a>
         </div>
 
         <h1 class="font-crimson font-bold text-3xl">AUTHENTICATION</h1>

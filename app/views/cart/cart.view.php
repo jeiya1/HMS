@@ -18,8 +18,16 @@
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
 
     <div class="flex-1 py-10 px-30 flex flex-col gap-5">
-        <div class="justify-start text-black text-lg font-normal font-crimson">
-            <a href="/home" class="hover:underline">Home</a> &gt; Cart
+        <div class="flex text-black text-base font-normal font-crimson">
+            <!-- Home button with SVG -->
+            <a href="/home" class="flex items-center border border-neutral-300 px-4 py-1">
+                <img src="/assets/icons/home.svg" alt="Home" class="w-4 h-4">
+            </a>
+
+            <!-- Cart button with text -->
+            <a href="/cart" class="flex items-center border border-neutral-300 border-l-0 px-4 py-1 bg-[#F6F6F6]">
+                Cart
+            </a>
         </div>
 
         <h1 class="font-crimson font-bold text-3xl">YOUR BOOKING CART</h1>
@@ -49,7 +57,7 @@
 
                                         if ($roomType === 'Standard Single' || $roomType === 'Standard Double') {
                                             $imagePath = '/assets/images/standard.jpg';
-                                        } 
+                                        }
                                         if ($roomType === 'Deluxe Single' || $roomType === 'Deluxe Double') {
                                             $imagePath = '/assets/images/deluxe.jpg';
                                         }
@@ -94,7 +102,7 @@
                                                             CHECK IN</div>
                                                         <div
                                                             class="justify-center text-black text-base font-normal font-roboto">
-                                                            <?php echo htmlspecialchars($cart['CheckInDate']); ?>
+                                                            <?php echo htmlspecialchars($cart['CheckInDate']); ?> (12:00 PM)
                                                         </div>
                                                     </div>
 
@@ -104,7 +112,7 @@
                                                             CHECK OUT</div>
                                                         <div
                                                             class="justify-center text-black text-base font-normal font-roboto">
-                                                            <?php echo htmlspecialchars($cart['CheckOutDate']); ?>
+                                                            <?php echo htmlspecialchars($cart['CheckOutDate']); ?> (11:00 AM)
                                                         </div>
                                                     </div>
 
@@ -489,24 +497,26 @@
                     data: { cartRoomID: cartRoomID },
                     success: function (response) {
                         if (response.success) {
-                            btn.closest('.flex.gap-8').remove();
-                            if (response.cartCount > 0) $('#cart-count').text(response.cartCount).show();
-                            else $('#cart-count').hide();
+                            btn.closest('.flex.gap-8').fadeOut(200, function () {
+                                $(this).remove();
 
-                            // Remove from JS carts array
-                            carts = carts.filter(c => c.CartRoomID != cartRoomID);
-                            renderPriceBreakdown(carts);
+                                if (response.cartCount > 0) $('#cart-count').text(response.cartCount).show();
+                                else $('#cart-count').hide();
 
-                            if (response.cartCount === 0) {
-                                $('#cart-summary-section').remove();
-                                $('.flex-1').append(`
+                                // Remove from JS carts array
+                                carts = carts.filter(c => c.CartRoomID != cartRoomID);
+                                renderPriceBreakdown(carts);
+
+                                if (response.cartCount === 0) {
+                                    $('#cart-summary-section').remove();
+                                    $('.flex-1').append(`
                             <div class="flex flex-col border rounded p-4 shadow w-full max-w-xl gap-2">
                                 <h1 class="font-bold">No booking found in cart</h1>
                                 <p class="italic">You have not added any rooms or products to your cart yet.</p>
                             </div>
                         `);
-                            }
-
+                                }
+                            });
                         } else showToast(response.error);
                     },
                     error: function () { showToast('An error occurred while removing the item.'); }

@@ -13,11 +13,11 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 
-<body>
+<body class="min-h-screen flex flex-col">
     <?php require_once __DIR__ . '/../components/toast.view.php'; ?>
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
 
-    <div class="py-10 px-30 flex flex-col gap-5">
+    <div class=" flex-1 py-10 px-30 flex flex-col gap-5">
         <h1 class="font-bold text-3xl">Reset Your Password</h1>
         <div class="mx-auto h-1 w-full bg-yellow-900/60 rounded-lg"></div>
 
@@ -48,7 +48,7 @@
 
                     <div id="password-error" class="error-message mb-2 text-red-600"></div>
 
-                    <input type="submit" value="Reset Password" class="bg-[#C39C4D] text-white p-3 rounded mt-2">
+                    <input type="submit" value="Reset Password" class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#C39C4D] p-3 cursor-pointer shadow-2xl transition-colors hover:bg-[#3F321F] hover:[text-shadow:0_0_8px_rgba(255,255,255,0.9)]">
                 </form>
             </div>
         </div>

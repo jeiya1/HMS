@@ -121,6 +121,7 @@ class PagesController
     public function bookings()
     {
         $logged_in = $this->getAuthState();
+        $cartCount = $this->getCartCount();
         if ($logged_in) {
             $reservationModel = new Reservation($GLOBALS['conn']);
             $reservations = $reservationModel->showReservations();

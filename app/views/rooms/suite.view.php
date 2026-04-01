@@ -49,8 +49,6 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
 }
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -72,7 +70,7 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
         <!-- Left Side -->
         <div class="bg-white rounded-l-sm shadow-lg w-150 p-6 flex flex-col gap-4 relative">
             <div class="flex items-center space-x-2">
-                <?php include $_SERVER['DOCUMENT_ROOT'] . '/assets/icons/check.svg'; ?>
+                <img src="/assets/icons/check.svg" alt="check" class="w-5 h-5">
                 <div class="text-[#6D9858] text-xl font-normal font-crimson">Room successfully added to your cart</div>
             </div>
             <div class="flex gap-4">
@@ -80,7 +78,8 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
                     class="w-24 h-24 rounded object-cover">
                 <div class="flex flex-col gap-2">
                     <h5 id="modal-room-type" class="font-crimson font-semibold text-black">Room
-                        <?= htmlspecialchars($_GET['room'] ?? '') ?> - Suite Room</h5>
+                        <?= htmlspecialchars($_GET['room'] ?? '') ?> - Suite Room
+                    </h5>
                     <h5 class="font-roboto font-semibold text-black">Time Duration:
                         <span id="modal-checkin-checkout">
                             <?= htmlspecialchars($checkinStr ?: 'Check-In — Check-Out') ?>
@@ -141,8 +140,23 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
     <?php require_once __DIR__ . '/../components/header.view.php'; ?>
 
     <div class="py-10 px-30 flex flex-col gap-5">
-        <div class="justify-start text-black text-lg font-normal font-crimson">
-            <a href="/home" class="hover:underline">Home</a> &gt; Book Now
+        <div class="flex text-black text-base font-normal font-crimson">
+            <!-- Home button with SVG -->
+            <a href="/home" class="flex items-center border border-neutral-300 px-4 py-1">
+                <img src="/assets/icons/home.svg" alt="Home" class="w-4 h-4">
+            </a>
+
+            <a href="/search" class="flex items-center border border-neutral-300 border-l-0 px-4 py-1">
+                Search
+            </a>
+
+            <a href="/home#rooms" class="flex items-center border border-neutral-300 border-l-0 px-4 py-1">
+                Rooms
+            </a>
+
+            <a href="" class="flex items-center border border-neutral-300 border-l-0 px-4 py-1 bg-[#F6F6F6]">
+                Suite Room
+            </a>
         </div>
 
         <div class="flex justify-between gap-8">
