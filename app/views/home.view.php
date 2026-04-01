@@ -503,26 +503,6 @@
   <script src="/js/testimonials.js"></script>
   <script src="/js/gallery.js"></script>
   <script src="/js/daterange.js"></script>
-  <script>
-    const openBtn = document.getElementById("openRooms");
-    const closeBtn = document.getElementById("closeRooms");
-    const modal = document.getElementById("RoomsPopup");
-
-    openBtn.addEventListener("click", () => {
-      modal.classList.remove("hidden"); // show modal
-    });
-
-    closeBtn.addEventListener("click", () => {
-      modal.classList.add("hidden"); // hide modal
-    });
-
-    // Optional: close when clicking outside the modal
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.classList.add("hidden");
-      }
-    });
-  </script>
 </body>
 
 </html>
