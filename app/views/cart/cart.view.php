@@ -459,27 +459,27 @@
                 breakdownList.html(`
                     <div class="flex justify-between">
                         <div class=" justify-center text-black text-base font-normal font-roboto">Subtotal Rooms Cost</div>
-                        <div class="  text-black text-base font-normal font-roboto">₱${summary.totalRoomCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                        <div class="  text-black text-base font-normal font-roboto">₱ ${summary.totalRoomCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                     </div>
 
                     <div class="flex justify-between">
                         <div class="  text-black text-base font-normal font-roboto">Night Discount</div>
-                        <div class="  text-black text-base font-normal font-roboto">-₱${summary.totalNightDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                        <div class="  text-black text-base font-normal font-roboto">-₱ ${summary.totalNightDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                     </div>
 
                     <div class="flex justify-between">
                         <div class="  text-black text-base font-normal font-roboto">Additional Guest Charge</div>
-                        <div class="  text-black text-base font-normal font-roboto">₱${summary.totalGuestCharge.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                        <div class="  text-black text-base font-normal font-roboto">₱ ${summary.totalGuestCharge.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                     </div>
 
                     <div class="flex justify-between">
                         <div class="  text-black text-base font-normal font-roboto">Subtotal (before tax)</div>
-                        <div class="  text-black text-base font-normal font-roboto">₱${summary.subtotalRooms.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                        <div class="  text-black text-base font-normal font-roboto">₱ ${summary.subtotalRooms.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                     </div>
 
                     <div class="flex justify-between">
                         <div class="  text-black text-base font-normal font-roboto">Tax (12% included in total)</div>
-                        <div class="  text-black text-base font-normal font-roboto">₱${(summary.totalWithTax - summary.subtotalRooms).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                        <div class="  text-black text-base font-normal font-roboto">₱ ${(summary.totalWithTax - summary.subtotalRooms).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                     </div>
     
                     <div class="w-full h-0.5 bg-linear-to-r from-yellow-100 to-yellow-700 rounded-[100px] flex  items-center mt-4"></div>
@@ -489,7 +489,7 @@
                 $("#cart-total").html(`
                     <div class="flex justify-between font-roboto text-xl font-bold text-black">
                         <div>Total (12% tax included)</div>
-                        <div>₱${summary.totalWithTax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                        <div>₱ ${summary.totalWithTax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                     </div>
                 `);
             }

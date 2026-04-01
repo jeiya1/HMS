@@ -63,7 +63,7 @@ class ReservationController
         $reservationModel = new Reservation($GLOBALS['conn']);
 
         try {
-            if (!$_SESSION['logged_in_user_id']) {
+            if (!isset($_SESSION['logged_in_user_id'])) {
                 $guestIDObj = $userModel->createGuest($email, $fname, $lname, $phone, $birthDate);
                 $guestID = $guestIDObj->GuestID ?? $guestIDObj;
             } else {
@@ -82,8 +82,10 @@ class ReservationController
 
             $reservationID = $reservationData['ReservationID'] ?? null;
             $bookingToken = $reservationData['BookingToken'] ?? null;
-            // optionally link to user
-            $reservationModel->linkReservationToUser($reservationID, $_SESSION['logged_in_user_id']);
+            if (isset($_SESSION['logged_in_user_id'])) {
+                // optionally link to user
+                $reservationModel->linkReservationToUser($reservationID, $_SESSION['logged_in_user_id']);
+            }
             if (!$reservationID || !$bookingToken) {
                 echo json_encode([
                     'success' => false,
@@ -160,8 +162,8 @@ class ReservationController
             'FullName' => $reservationData[0]['FirstName'] . ' ' . $reservationData[0]['LastName'],
             'Email' => $reservationData[0]['Email'],
             'PhoneContact' => $reservationData[0]['PhoneContact'],
-            'BookingToken'=> $reservationData[0]['BookingToken'],
-            'BookingDate'=> date('j-F-Y', strtotime($reservationData[0]['BookingDate'])),
+            'BookingToken' => $reservationData[0]['BookingToken'],
+            'BookingDate' => date('j-F-Y', strtotime($reservationData[0]['BookingDate'])),
         ];
         $payment = $reservationModel->getReservationPayment($reservationID); // new method
         $rooms = $reservationData;
