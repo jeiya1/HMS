@@ -910,6 +910,9 @@
   .border-neutral-300 {
     border-color: var(--color-neutral-300);
   }
+  .border-red-500 {
+    border-color: var(--color-red-500);
+  }
   .border-stone-800 {
     border-color: var(--color-stone-800);
   }
