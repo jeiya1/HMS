@@ -44,11 +44,11 @@
                                 <img src="/assets/icons/left-arrow-black.svg" alt="Back" class="w-5 h-5 cursor-pointer">
                             </button>
                         </div>
-                        <p class="text-neutral-700 font-light font-crimson">Rooms information.</p>
 
                         <!-- CONTENT -->
-                        <div class="section-content mt-4">
+                        <div class="section-content mt-2">
                             <div class="flex flex-col gap-2">
+                                <p class="text-neutral-700 font-light font-crimson">Rooms information.</p>
                                 <div id="cart-items-container" class="flex flex-col gap-5 font-roboto mb-3">
                                     <?php foreach ($carts as $index => $cart): ?>
                                         <?php
