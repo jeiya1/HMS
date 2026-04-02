@@ -1,55 +1,10 @@
 <?php
-$rooms = [
-    'standard' => [
-        'single' => ['price' => 1800, 'maxGuests' => 2],
-        'double' => ['price' => 2700, 'maxGuests' => 3],
-    ],
-    'deluxe' => [
-        'single' => ['price' => 2300, 'maxGuests' => 4],
-        'double' => ['price' => 3200, 'maxGuests' => 6],
-    ],
-    'suite' => [
-        'single' => ['price' => 3000, 'maxGuests' => 6],
-        'double' => ['price' => 4000, 'maxGuests' => 10],
-    ],
-];
-
-// Set the page room category manually
-// For standard.php page:
-// $roomCategory = 'standard';
-
-// For deluxe.php page:
-$roomCategory = 'deluxe';
-
-// For suite.php page:
-// $roomCategory = 'suite';
-
-// Occupancy type comes from GET or defaults to single
-$occupancy = strtolower($_GET['type'] ?? 'single');
-if (!in_array($occupancy, ['single', 'double'])) {
-    $occupancy = 'single';
-}
-
-// Fetch room config safely
-$roomConfig = $rooms[$roomCategory][$occupancy];
-$roomBasePrice = $roomConfig['price'];
-$maxGuests = $roomConfig['maxGuests'];
-
-// Checked attributes for the radio buttons
-$singleChecked = $occupancy === 'single' ? 'checked' : '';
-$doubleChecked = $occupancy === 'double' ? 'checked' : '';
-
-// Check-in / Check-out parsing
-$checkinStr = $_GET['checkin'] ?? '';
-$checkin = '';
-$checkout = '';
-
-if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
-    [$checkin, $checkout] = explode(' to ', $checkinStr, 2);
-}
+// These Work for sure
+// echo $rooms['RoomTypeName']; // Deluxe Single
+$roomBasePrice = $rooms['BasePrice']; // 1800.00
+$maxGuests = $rooms['MaxOccupancy'];  // 2
+// echo $_GET['room']  // 101
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -80,17 +35,21 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
                     class="w-24 h-24 rounded object-cover">
                 <div class="flex flex-col gap-2">
                     <h5 id="modal-room-type" class="font-crimson font-semibold text-black">Room
-                        <?= htmlspecialchars($_GET['room'] ?? '') ?> - Deluxe Room</h5>
+                        <?= htmlspecialchars($_GET['room'] ?? '') ?> - <?= $rooms['RoomTypeName'] ?> Room
+                    </h5>
                     <h5 class="font-roboto font-semibold text-black">Time Duration:
                         <span id="modal-checkin-checkout">
                             <?= htmlspecialchars($checkinStr ?: 'Check-In — Check-Out') ?>
                         </span>
                     </h5>
+                    <h5 class="font-roboto font-semibold text-black">Nights:
+                        <span id="modal-nights" class="font-roboto text-black font-normal">1</span>
+                    </h5>
                     <h5 class="font-roboto font-semibold text-black">Room Occupancy:
-                        <span id="modal-guests" class="font-roboto text-black font-normal">1 Guest</span>
+                        <span id="modal-guests" class="font-roboto text-black font-normal">Guest</span>
                     </h5>
                     <h5 class="font-roboto font-semibold text-black">Room Type:
-                        <span id="modal-room" class="font-roboto text-black font-normal">Single</span>
+                        <span id="modal-room" class="font-roboto text-black font-normal"></span>
                     </h5>
                 </div>
             </div>
@@ -165,7 +124,7 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
                 class="p-6 w-2/3 bg-white rounded shadow-[0px_0px_4px_0px_rgba(0,0,0,0.25)] flex flex-col gap-2 justify-between">
                 <div>
                     <div class="justify-center text-black text-3xl font-normal font-crimson">Room
-                        <?= htmlspecialchars($_GET['room'] ?? '') ?> - Deluxe Room
+                        <?= htmlspecialchars($_GET['room'] ?? '') ?> - <?= $rooms['RoomTypeName'] ?> Room
                     </div>
                     <div class="flex items-center justify-start">
                         <img src="/assets/icons/star.svg" alt="star" class="w-4 h-4">
@@ -186,13 +145,13 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
                             src="/assets/images/g7.jpg" />
                     </div>
 
-                    <div class="w-[80%] main-image">
+                    <div class="w-[70%] main-image">
                         <img class="w-full max-h-200 object-cover rounded" src="/assets/images/deluxe.jpg" />
                     </div>
                 </div>
             </div>
             <form id="cart-form" action="/cart-submit" method="POST" data-max-guests="<?= $maxGuests ?>"
-                class="w-1/3 bg-white rounded shadow-[0px_0px_4px_0px_rgba(0,0,0,0.25)] p-6 flex flex-col gap-6">
+                class="w-1/3 bg-white rounded shadow-[0px_0px_4px_0px_rgba(0,0,0,0.25)] p-8 flex flex-col gap-6">
                 <input type="hidden" name="roomID" value="<?= htmlspecialchars($_GET['room'] ?? '') ?>">
 
                 <div class="flex flex-col gap-3">
@@ -245,44 +204,16 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
 
 
                 <div class="flex flex-col gap-3">
-                    <!-- Room Type -->
-                    <div class="justify-center text-black text-xl font-crimson font-normal">Room Type</div>
-                    <div class="flex items-center gap-4">
-                        <label class="relative flex items-center cursor-pointer">
-                            <input type="radio" name="room" value="single"
-                                data-base-price="<?= $rooms[$roomCategory]['single']['price'] ?>"
-                                data-max-guests="<?= $rooms[$roomCategory]['single']['maxGuests'] ?>" <?= $singleChecked ?>
-                            required class="peer sr-only">
-                            <div
-                                class="w-5 h-5 border-2 border-gray-400 rounded-full peer-checked:border-[#c39c4d] peer-checked:bg-[#c39c4d] transition-all">
-                            </div>
-                            <span class="ml-2 text-gray-700 font-roboto">Single</span>
-                        </label>
-
-                        <label class="relative flex items-center cursor-pointer">
-                            <input type="radio" name="room" value="double"
-                                data-base-price="<?= $rooms[$roomCategory]['double']['price'] ?>"
-                                data-max-guests="<?= $rooms[$roomCategory]['double']['maxGuests'] ?>" <?= $doubleChecked ?>
-                            class="peer sr-only">
-                            <div
-                                class="w-5 h-5 border-2 border-gray-400 rounded-full peer-checked:border-[#c39c4d] peer-checked:bg-[#c39c4d] transition-all">
-                            </div>
-                            <span class="ml-2 text-gray-700 font-roboto">Double</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="flex flex-col gap-3">
                     <!-- Pricing -->
-                    <div class="h-0.5 w-full bg-linear-to-r from-yellow-100 to-yellow-800 rounded-lg"></div>
-                    <div class="justify-center text-zinc-500 text-xl font-crimson font-normal">Room Rate (per night)</div>
+                    <div class="justify-center text-zinc-500 text-xl font-crimson font-normal">Room Rate (per night)
+                    </div>
                     <div id="room-price" class="justify-center text-black text-xl font-crimson font-normal">
-                        ₱<?= number_format($roomBasePrice) ?></div>
+                        ₱ <?= number_format($roomBasePrice, 2) ?></div>
 
                     <div class="h-0.5 w-full bg-linear-to-r from-yellow-100 to-yellow-800 rounded-lg"></div>
                     <div class="justify-center text-zinc-500 text-xl font-crimson font-normal">Subtotal</div>
                     <div id="subtotal-price" class="justify-center text-black text-xl font-crimson font-normal">
-                        ₱<?= number_format($roomBasePrice) ?></div>
+                        ₱ <?= number_format($roomBasePrice, 2) ?></div>
                 </div>
 
                 <!-- Submit -->
@@ -299,7 +230,6 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
         <div class="pt-2">
             <div class="ml-10">
                 <h1 class="justify-center text-black text-2xl font-normal font-crimson">Room Information</h1>
-                <!-- <h1>Reviews</h1> -->
                 <div class="h-1 w-50 bg-gradient-to-r from-yellow-100 to-yellow-800 rounded-lg"></div>
 
             </div>
@@ -417,9 +347,148 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
     <?php require_once __DIR__ . '/../components/footer.view.php'; ?>
     <script src="/js/thumbnail.js"></script>
     <script src="/js/daterange.js"></script>
-    <script src="/js/calculateTotalAmount.js"></script>
-    <script src="/js/bookingModal.js"></script>
-    <script src="/js/maxGuests.js"></script>
+    <script>
+        // Get base occupancy from PHP RoomTypeName
+        const roomTypeName = "<?= $rooms['RoomTypeName'] ?>"; // e.g., "Deluxe Single"
+        const roomBasePrice = parseFloat("<?= $roomBasePrice ?>");
+        const maxGuests = parseInt($("#cart-form").data("max-guests"));
+        const extraGuestRatePercent = 0.10;
+
+        // Determine base occupancy from RoomTypeName (second word)
+        let baseOccupancy = 1; // default
+        const roomTypeParts = roomTypeName.split(" ");
+        if (roomTypeParts.length > 1) {
+            const typeWord = roomTypeParts[1].toLowerCase();
+            if (typeWord === "single") baseOccupancy = 1;
+            else if (typeWord === "double") baseOccupancy = 2;
+            else baseOccupancy = 1; // fallback
+        }
+
+        // Function to calculate nights
+        function getNights(checkInStr, checkOutStr) {
+            const checkIn = new Date(checkInStr);
+            const checkOut = new Date(checkOutStr);
+            const diffTime = checkOut - checkIn;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 0;
+        }
+
+        // Handle dynamic calculation
+        // Handle dynamic calculation
+        function handleUpdate() {
+            const checkInOut = $("#daterange").val().split(" to ");
+            if (checkInOut.length !== 2) return;
+
+            const nights = getNights(checkInOut[0].replace(/\//g, "-"), checkInOut[1].replace(/\//g, "-"));
+            let adults = parseInt($("#adults").val()) || 1;
+            let children = parseInt($("#children").val()) || 0;
+
+            // Validate total guests does not exceed maxGuests
+            if (adults < 1) adults = 1;
+            if (adults + children > maxGuests) {
+                children = maxGuests - adults;
+                $("#children").val(children);
+            }
+
+            // Calculate subtotal: base room rate * nights
+            let subtotal = roomBasePrice * nights;
+
+            // Extra guest charge: only guests above base occupancy
+            const totalGuests = adults + children;
+            let extraGuests = totalGuests - baseOccupancy;
+            if (extraGuests < 0) extraGuests = 0;
+            const extraGuestCharge = extraGuests * roomBasePrice * extraGuestRatePercent * nights;
+            subtotal += extraGuestCharge;
+
+            // Night discount: 15% if nights > 3
+            let nightDiscount = 0;
+            if (nights > 3) {
+                nightDiscount = subtotal * 0.15;
+                subtotal -= nightDiscount;
+            }
+
+            // Format numbers
+            const format = num => num.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            // Update page
+            $("#subtotal-price").text("₱ " + format(subtotal));
+            $("#modal-room-cost").text("₱ " + format(roomBasePrice));
+            $("#modal-guest-charge").text("₱ " + format(extraGuestCharge));
+            $("#modal-night-discount").text("₱ " + format(nightDiscount));
+            $("#modal-total").text("₱ " + format(subtotal)); // <-- subtotal without tax
+            $("#guests-addon").text(
+                `Additional guests (above ${baseOccupancy}) cost 10% of the room rate per night.`
+            );
+        }
+
+        // Recalculate when inputs change
+        $("#daterange, #adults, #children").on("change keyup", handleUpdate);
+
+        // Trigger on page load
+        $(document).ready(function () {
+            handleUpdate();
+        });
+
+        // BOOK NOW click handler
+        $("#cart-form").on("submit", function (e) {
+            e.preventDefault();
+
+            const formData = $(this).serialize(); // sends roomID, adults, children, checkin
+
+            // Recalculate totals for modal
+            handleUpdate();
+
+            // Calculate nights for modal display
+            const checkInOutArr = $("#daterange").val().split(" to ");
+            let nights = 0;
+            if (checkInOutArr.length === 2) {
+                nights = getNights(checkInOutArr[0].replace(/\//g, "-"), checkInOutArr[1].replace(/\//g, "-"));
+            }
+
+            // Update modal fields
+            const roomID = $("input[name='roomID']").val();
+            const roomTypeParts = "<?= $rooms['RoomTypeName'] ?>".split(" ");
+            const roomType = "<?= $rooms['RoomTypeName'] ?>";
+
+            $("#modal-room-type").text(`Room ${roomID} - ${roomType} Room`);
+            $("#modal-checkin-checkout").text($("#daterange").val() || "Check-In — Check-Out");
+            $("#modal-guests").text(`${parseInt($("#adults").val()) + parseInt($("#children").val())} Guest${(parseInt($("#adults").val()) + parseInt($("#children").val())) > 1 ? 's' : ''}`);
+            $("#modal-room").text(roomTypeParts[1] || "Single");
+            $("#modal-nights").text(nights);
+
+            // Show modal
+            $("#booking-modal").removeClass("hidden").addClass("flex");
+
+            // Send AJAX to server for cart
+            $.ajax({
+                url: "/cart-submit",
+                type: "POST",
+                data: formData,
+                dataType: "json",
+                success: function (response) {
+                    if (response.success) {
+                        showToast("Item added to cart.")
+                    } else {
+                        showToast(response.error, "error");
+                    }
+                },
+                error: function () {
+                    showToast({ success: false, message: "An unexpected error occurred." });
+                }
+            });
+        });
+        // Close modal or continue browsing
+        $("#close-modal, #continue-browsing").on("click", function () {
+            // Hide modal
+            $("#booking-modal").removeClass("flex").addClass("hidden");
+            // Optional: scroll back to the main page content if needed
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Proceed to checkout
+        $("#proceed-checkout").on("click", function () {
+            window.location.href = "/cart";
+        });
+    </script>
 </body>
 
 </html>
