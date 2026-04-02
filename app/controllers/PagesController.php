@@ -81,6 +81,12 @@ class PagesController
             }
         }
 
+        $roomNumber = $_GET['room'] ?? '';
+        if (!empty($roomNumber)) {
+            $roomModel = new Room($GLOBALS['conn']);
+            $rooms = $roomModel->getRoomInfoByRoomNumber($roomNumber);
+        }
+
         require_once '../app/views/rooms/deluxe.view.php';
     }
 
@@ -101,8 +107,16 @@ class PagesController
             }
         }
 
+        $roomNumber = $_GET['room'] ?? '';
+        if (!empty($roomNumber)) {
+            $roomModel = new Room($GLOBALS['conn']);
+            $rooms = $roomModel->getRoomInfoByRoomNumber($roomNumber);
+        }
+
         require_once '../app/views/rooms/suite.view.php';
     }
+
+
 
     public function reservation()
     {
