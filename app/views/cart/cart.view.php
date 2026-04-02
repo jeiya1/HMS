@@ -256,7 +256,7 @@
                                                 <input type="text" id="birthDate" name="birthDate" id="birthDate"
                                                     placeholder="Select your birthdate" required
                                                     class="border border-gray-300 p-2 rounded w-full text-black bg-white">
-                                                <label for="email">Email: </label>
+                                                <label for="email">Email* </label>
                                                 <input type="email" name="email" id="email" required
                                                     class="border border-gray-300 p-2 rounded w-full text-black bg-white">
                                             </div>
