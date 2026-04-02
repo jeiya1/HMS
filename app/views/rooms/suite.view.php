@@ -190,74 +190,105 @@ if (!empty($checkinStr) && strpos($checkinStr, ' to ') !== false) {
                     </div>
                 </div>
             </div>
-            <form id="cart-form" action="/cart-submit" method="POST"
+            <form id="cart-form" action="/cart-submit" method="POST" data-max-guests="<?= $maxGuests ?>"
                 class="w-1/3 bg-white rounded shadow-[0px_0px_4px_0px_rgba(0,0,0,0.25)] p-6 flex flex-col gap-6">
-                <input type="hidden" name="roomID" id="roomID" value="<?= htmlspecialchars($_GET['room'] ?? '') ?>">
-                <div class="justify-center text-black text-xl font-normal font-crimson">Check In - Check Out</div>
-                <input type="text" name="checkin" id="daterange" placeholder="Check-In — Check-Out"
-                    value="<?= htmlspecialchars($checkinStr ?: '') ?>" required
-                    class="bg-white rounded-sm p-2 text-crimson-600 font-crimson border border-gray-300">
-                <div>
-                    <div class="justify-center text-zinc-500 text-lg font-normal font-crimson">Time-In 12:00 PM –
-                        Time-Out
-                        11:00 AM</div>
-                    <p class="text-zinc-500 font-normal text-xs">You qualify for a 15% discount for staying more
-                        than 3
-                        nights!
-                    </p>
+                <input type="hidden" name="roomID" value="<?= htmlspecialchars($_GET['room'] ?? '') ?>">
 
+                <div class="flex flex-col gap-3">
+                    <!-- Check-in / Check-out -->
+                    <div class="justify-center text-black text-xl font-crimson font-normal">Check In - Check Out</div>
+                    <input type="text" name="checkin" id="daterange" placeholder="Check-In — Check-Out"
+                        value="<?= htmlspecialchars($checkinStr ?: '') ?>" required
+                        class="bg-white rounded-sm p-2 text-crimson-600 font-crimson border border-gray-300">
+
+                    <div class="text-zinc-500 text-sm">
+                        Time-In 12:00 PM – Time-Out 11:00 AM
+                        <p>You qualify for a 15% discount for staying more than 3 nights!</p>
+                    </div>
                 </div>
-                <div>
-                    <!-- TODO: Add Children and Adults -->
-                    <div id="guests-label" class="justify-center text-black text-xl font-normal font-crimson">
+
+                <div class="flex flex-col gap-3">
+                    <!-- Guests -->
+                    <div id="guests-label" class="justify-center text-black text-xl font-crimson font-normal">
                         Guests (Max
                         <?= $maxGuests ?>)
                     </div>
-                    <p class="text-sm text-gray-500" id="guests-addon">Additional guests (above 1) cost 10% of the
-                        room
+                    <p class="text-sm text-gray-500" id="guests-addon">Additional guests (above 1) cost 10% of the room
                         rate
-                        per
-                        night.</p>
-                </div>
-                <input type="number" id="guests" name="adults" min="1" max="<?= $maxGuests ?>" value="1"
-                    placeholder="Guests" required
-                    class="bg-white rounded-sm p-2 text-crimson-600 font-crimson border border-gray-300">
-                <div class="justify-center text-black text-xl font-normal font-crimson">Room Type</div>
-                <div class="flex items-center gap-4">
-                    <label class="relative flex items-center cursor-pointer">
-                        <input type="radio" name="room" value="single"
-                            data-base-price="<?= $rooms[$roomCategory]['single']['price'] ?>"
-                            data-max-guests="<?= $rooms[$roomCategory]['single']['maxGuests'] ?>" <?= $singleChecked ?>
-                            required class="peer sr-only">
-                        <div class="w-5 h-5 border-2 border-gray-400 rounded-full shrink-0
-        peer-checked:border-[#c39c4d] peer-checked:bg-[#c39c4d] transition-all"></div>
-                        <span class="ml-2 text-gray-700 font-roboto">Single</span>
-                    </label>
+                        per night.</p>
 
-                    <label class="relative flex items-center cursor-pointer">
-                        <input type="radio" name="room" value="double"
-                            data-base-price="<?= $rooms[$roomCategory]['double']['price'] ?>"
-                            data-max-guests="<?= $rooms[$roomCategory]['single']['maxGuests'] ?>" <?= $doubleChecked ?>
+                    <div class="flex gap-2 flex-col">
+                        <!-- Adults -->
+                        <div class="relative w-1/2">
+                            <span class="absolute left-2 top-[13.5px] text-gray-400">
+                                <img src="/assets/icons/people.svg" alt="people" />
+                            </span>
+                            <input type="number" id="adults" name="adults" min="1" max="<?= $maxGuests ?>" value="1"
+                                placeholder="No. of Adults" required
+                                class="bg-white rounded-sm pl-9 p-2 text-crimson-600 font-crimson border border-gray-300">
+                            <span class="ml-3 font-crimson">Adults</span>
+                        </div>
+
+                        <!-- Children -->
+                        <div class="relative w-1/2">
+                            <span class="absolute left-2 top-[13.5px] text-gray-400">
+                                <img src="/assets/icons/people.svg" alt="people" />
+                            </span>
+                            <input type="number" id="children" name="children" min="0" max="<?= $maxGuests ?>" value="0"
+                                placeholder="No. of Children"
+                                class="bg-white rounded-sm pl-9 p-2 text-crimson-600 font-crimson border border-gray-300">
+                            <span class="ml-3 font-crimson">Children</span>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="flex flex-col gap-3">
+                    <!-- Room Type -->
+                    <div class="justify-center text-black text-xl font-crimson font-normal">Room Type</div>
+                    <div class="flex items-center gap-4">
+                        <label class="relative flex items-center cursor-pointer">
+                            <input type="radio" name="room" value="single"
+                                data-base-price="<?= $rooms[$roomCategory]['single']['price'] ?>"
+                                data-max-guests="<?= $rooms[$roomCategory]['single']['maxGuests'] ?>" <?= $singleChecked ?>
+                            required class="peer sr-only">
+                            <div
+                                class="w-5 h-5 border-2 border-gray-400 rounded-full peer-checked:border-[#c39c4d] peer-checked:bg-[#c39c4d] transition-all">
+                            </div>
+                            <span class="ml-2 text-gray-700 font-roboto">Single</span>
+                        </label>
+
+                        <label class="relative flex items-center cursor-pointer">
+                            <input type="radio" name="room" value="double"
+                                data-base-price="<?= $rooms[$roomCategory]['double']['price'] ?>"
+                                data-max-guests="<?= $rooms[$roomCategory]['double']['maxGuests'] ?>" <?= $doubleChecked ?>
                             class="peer sr-only">
-                        <div class="w-5 h-5 border-2 border-gray-400 rounded-full shrink-0
-        peer-checked:border-[#c39c4d] peer-checked:bg-[#c39c4d] transition-all"></div>
-                        <span class="ml-2 text-gray-700 font-roboto">Double</span>
-                    </label>
+                            <div
+                                class="w-5 h-5 border-2 border-gray-400 rounded-full peer-checked:border-[#c39c4d] peer-checked:bg-[#c39c4d] transition-all">
+                            </div>
+                            <span class="ml-2 text-gray-700 font-roboto">Double</span>
+                        </label>
+                    </div>
                 </div>
-                <div class="h-0.5 w-full bg-linear-to-r from-yellow-100 to-yellow-800 rounded-lg"></div>
-                <div class="justify-center text-zinc-500 text-xl font-normal font-crimson">Room Rate (per night)
+
+                <div class="flex flex-col gap-3">
+                    <!-- Pricing -->
+                    <div class="h-0.5 w-full bg-linear-to-r from-yellow-100 to-yellow-800 rounded-lg"></div>
+                    <div class="justify-center text-zinc-500 text-xl font-crimson font-normal">Room Rate (per night)</div>
+                    <div id="room-price" class="justify-center text-black text-xl font-crimson font-normal">
+                        ₱<?= number_format($roomBasePrice) ?></div>
+
+                    <div class="h-0.5 w-full bg-linear-to-r from-yellow-100 to-yellow-800 rounded-lg"></div>
+                    <div class="justify-center text-zinc-500 text-xl font-crimson font-normal">Subtotal</div>
+                    <div id="subtotal-price" class="justify-center text-black text-xl font-crimson font-normal">
+                        ₱<?= number_format($roomBasePrice) ?></div>
                 </div>
-                <div id="room-price" class="justify-center text-black text-xl font-normal font-crimson">
-                    ₱<?= number_format($roomBasePrice) ?></div>
-                <div class="h-0.5 w-full bg-linear-to-r from-yellow-100 to-yellow-800 rounded-lg"></div>
-                <div class="justify-center text-zinc-500 text-xl font-normal font-crimson">Subtotal</div>
-                <div id="subtotal-price" class="justify-center text-black text-xl font-normal font-crimson">
-                    ₱<?= number_format($roomBasePrice) ?>
-                </div>
-                <button type="submit" class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#c39c4d] p-3 
-           hover:bg-[#3F321F] transition-colors duration-300 cursor-pointer">
+
+                <!-- Submit -->
+                <button type="submit"
+                    class="text-white font-roboto text-[16px] font-semibold leading-normal rounded-sm bg-[#c39c4d] p-3 hover:bg-[#3F321F] transition-colors duration-300 cursor-pointer">
                     <p
-                        class="transition-all duration-300 text-white hover:text-white hover:[text-shadow:0_0_8px_rgba(255,255,255,0.9)] cursor-pointer">
+                        class="transition-all duration-300 text-white hover:[text-shadow:0_0_8px_rgba(255,255,255,0.9)] cursor-pointer">
                         BOOK NOW
                     </p>
                 </button>
