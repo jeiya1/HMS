@@ -14,7 +14,7 @@ $statusMapPayment = [
 
 $statusMapRoom = [
     'pending' => ['label' => 'Pending', 'bg' => 'bg-gray-500/25', 'outline' => 'outline-gray-500'],
-    'booked' => ['label' => 'Booked', 'bg' => 'bg-green-500/25', 'outline' => 'outline-green-500'],
+    'confirmed' => ['label' => 'Booked', 'bg' => 'bg-green-500/25', 'outline' => 'outline-green-500'],
     'checked_in' => ['label' => 'Checked In', 'bg' => 'bg-blue-500/25', 'outline' => 'outline-blue-500'],
     'checked_out' => ['label' => 'Checked Out', 'bg' => 'bg-gray-500/25', 'outline' => 'outline-gray-500'],
     'cancelled' => ['label' => 'Cancelled', 'bg' => 'bg-red-500/25', 'outline' => 'outline-red-500'],
