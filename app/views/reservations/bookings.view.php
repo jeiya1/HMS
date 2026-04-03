@@ -6,11 +6,9 @@ $paymentMethod = array(
 );
 ?>
 <?php
-$statusMap = [
+$statusMapReservation = [
     'pending' => ['label' => 'Pending', 'bg' => 'bg-gray-500/25', 'outline' => 'outline-gray-500'],
     'confirmed' => ['label' => 'Successful', 'bg' => 'bg-green-500/25', 'outline' => 'outline-green-500'],
-    'checked_in' => ['label' => 'Checked_In', 'bg' => 'bg-blue-500/25', 'outline' => 'outline-blue-500'],
-    'checked_out' => ['label' => 'Checked_out', 'bg' => 'bg-gray-500/25', 'outline' => 'outline-gray-500'],
     'cancelled' => ['label' => 'Cancelled', 'bg' => 'bg-red-500/25', 'outline' => 'outline-red-500'],
 ];
 ?>
@@ -89,7 +87,7 @@ $statusMap = [
                                 <td class="py-2 px-4 border border-gray-400">
                                     <?php
                                     $statusKey = $reservation['ReservationStatus'] ?? 'pending';
-                                    $status = $statusMap[$statusKey] ?? ['label' => 'Unknown', 'color' => 'gray'];
+                                    $status = $statusMapReservation[$statusKey] ?? ['label' => 'Unknown', 'color' => 'gray'];
                                     ?>
                                     <div
                                         class="w-20 h-5 pl-2.5 pr-3 py-[5px] <?= $status['bg'] ?> rounded-sm outline <?= $status['outline'] ?> outline-offset-[-0.50px] inline-flex justify-center items-center gap-2.5 text-xs font-medium">

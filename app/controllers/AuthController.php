@@ -25,6 +25,31 @@ class AuthController
         require_once '../app/views/auth/reset_password.view.php';
     }
 
+    public function loginAdmin()
+    {
+        header('Content-Type: application/json');
+
+        echo json_encode([
+            "success" => true,
+            "message" => "Login successful!",
+            "redirect" => "/admin"
+        ]);
+        exit;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $email = trim($_POST['email']);
+            $password = trim($_POST['password']);
+
+            if (empty($email) || empty($password)) {
+                echo json_encode([
+                    "success" => false,
+                    "error" => "Please enter both email and password."
+                ]);
+                exit;
+            }
+
+        }
+    }
+
     public function login()
     {
         header('Content-Type: application/json');

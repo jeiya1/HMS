@@ -131,14 +131,6 @@ CREATE TABLE IF NOT EXISTS Rooms (
 );
 
 -- =========================
--- RESERVATION STATUS
--- =========================
-CREATE TABLE IF NOT EXISTS ReservationStatus (
-    StatusID INT AUTO_INCREMENT PRIMARY KEY,
-    StatusName VARCHAR(50) UNIQUE
-);
-
--- =========================
 -- RESERVATIONS
 -- =========================
 
@@ -147,12 +139,11 @@ CREATE TABLE IF NOT EXISTS Reservations (
     ReservationID INT AUTO_INCREMENT PRIMARY KEY,
     GuestID INT NOT NULL,
     GuestUUID CHAR(36) NOT NULL UNIQUE DEFAULT (UUID()),
-    StatusID INT NOT NULL,
+    Status ENUM('pending','confirmed','cancelled') NOT NULL DEFAULT 'pending',
     BookingToken CHAR(36) NOT NULL UNIQUE, -- UUID token for guest access
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (GuestID) REFERENCES Guests(GuestID),
-    FOREIGN KEY (StatusID) REFERENCES ReservationStatus(StatusID)
+    FOREIGN KEY (GuestID) REFERENCES Guests(GuestID)
 );
 
 -- =========================
@@ -167,6 +158,7 @@ CREATE TABLE IF NOT EXISTS ReservationRooms (
     NumAdults INT NOT NULL DEFAULT 1,
     NumChildren INT NOT NULL DEFAULT 0,
     RoomID INT NOT NULL,
+    Status ENUM('pending','confirmed','checked_in','checked_out','cancelled') NOT NULL DEFAULT 'pending',
 
     FOREIGN KEY (ReservationID) REFERENCES Reservations(ReservationID),
     FOREIGN KEY (RoomID) REFERENCES Rooms(RoomID),

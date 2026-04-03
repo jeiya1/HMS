@@ -49,8 +49,6 @@ $pages = new PagesController();
 $reservation = new ReservationController();
 $search = new SearchController();
 
-
-
 switch ($uri) {
     case '/':
         $pages->home();
@@ -195,6 +193,22 @@ switch ($uri) {
         }
         $reservation->cancelGuest(); // you need to create this method
         break;
+
+    case '/admin':
+        $pages->admin();
+        exit;
+
+    case '/admin/reservations':
+        $pages->adminReservations();
+        exit;
+
+    case '/admin-login':
+        $pages->admin_login();
+        exit;
+
+    case '/admin-login-submit':
+        $auth->loginAdmin();
+        exit;
 
     default:
         // Router example

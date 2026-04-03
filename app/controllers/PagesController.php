@@ -2,6 +2,7 @@
 
 require_once '../app/models/Reservation.php';
 require_once '../app/models/Room.php';
+require_once '../app/models/Statistics.php';
 
 class PagesController
 {
@@ -13,7 +14,32 @@ class PagesController
         require_once '../app/views/static/privacy.view.php';
     }
 
-    // Terms and Conditions page
+    public function admin()
+    {
+        $logged_in = $this->getAuthState();
+        $cartCount = $this->getCartCount();
+        $statisticsModel = new Statistics($GLOBALS['conn']);
+
+        $reservationsWeek = $statisticsModel->getReservationsLast7Days();
+        $reservationsMonth = $statisticsModel->getReservationsThisMonth();
+        $revenue6Months = $statisticsModel->getRevenueLast6Months();
+
+        require_once '../app/views/admin/admin.view.php';
+    }
+    public function adminReservations()
+    {
+        $logged_in = $this->getAuthState();
+        $cartCount = $this->getCartCount();
+        require_once '../app/views/admin/reservations.view.php';
+    }
+
+    public function admin_login()
+    {
+        $logged_in = $this->getAuthState();
+        $cartCount = $this->getCartCount();
+        require_once '../app/views/admin/login.view.php';
+    }
+
     public function terms()
     {
         $logged_in = $this->getAuthState();
@@ -126,8 +152,6 @@ class PagesController
         require_once '../app/views/rooms/suite.view.php';
     }
 
-
-    // View reservation page
     public function reservation()
     {
         $logged_in = $this->getAuthState();

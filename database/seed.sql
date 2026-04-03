@@ -10,13 +10,6 @@ INSERT INTO BedTypes (BedName) VALUES
 ('Queen'),
 ('King');
 
-INSERT INTO ReservationStatus (StatusName) VALUES
-('pending'),
-('confirmed'),
-('checked_in'),
-('checked_out'),
-('cancelled');
-
 INSERT INTO DiscountTypes (DiscountTypeID, DiscountName, DiscountPercentage) VALUES 
 (1,'Senior',20),
 (2,'PWD',15);

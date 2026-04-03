@@ -243,8 +243,40 @@ AFTER INSERT ON Reservations
 FOR EACH ROW
 BEGIN
     INSERT INTO Logs(TableName, OperationType, RecordID, NewData)
-    VALUES('Reservations','INSERT', NEW.ReservationID,
-        JSON_OBJECT('GuestID', NEW.GuestID,'StatusID', NEW.StatusID,'CheckInDate', NEW.CheckInDate,'CheckOutDate', NEW.CheckOutDate,'NumAdults', NEW.NumAdults,'BookingToken', NEW.BookingToken)
+    VALUES(
+        'Reservations',
+        'INSERT',
+        NEW.ReservationID,
+        JSON_OBJECT(
+            'GuestID', NEW.GuestID,
+            'Status', NEW.Status,
+            'BookingToken', NEW.BookingToken,
+            'CreatedAt', NEW.CreatedAt
+        )
+    );
+END$$
+
+CREATE TRIGGER trg_Reservations_Update
+AFTER UPDATE ON Reservations
+FOR EACH ROW
+BEGIN
+    INSERT INTO Logs(TableName, OperationType, RecordID, OldData, NewData)
+    VALUES(
+        'Reservations',
+        'UPDATE',
+        OLD.ReservationID,
+        JSON_OBJECT(
+            'GuestID', OLD.GuestID,
+            'Status', OLD.Status,
+            'BookingToken', OLD.BookingToken,
+            'CreatedAt', OLD.CreatedAt
+        ),
+        JSON_OBJECT(
+            'GuestID', NEW.GuestID,
+            'Status', NEW.Status,
+            'BookingToken', NEW.BookingToken,
+            'CreatedAt', NEW.CreatedAt
+        )
     );
 END$$
 
@@ -259,18 +291,6 @@ BEGIN
     );
 END$$
 
-CREATE TRIGGER trg_Reservations_Delete
-AFTER DELETE ON Reservations
-FOR EACH ROW
-BEGIN
-    INSERT INTO Logs(TableName, OperationType, RecordID, OldData)
-    VALUES('Reservations','DELETE', OLD.ReservationID,
-        JSON_OBJECT('GuestID', OLD.GuestID,'StatusID', OLD.StatusID,'CheckInDate', OLD.CheckInDate,'CheckOutDate', OLD.CheckOutDate,'NumAdults', OLD.NumAdults,'BookingToken', OLD.BookingToken)
-    );
-END$$
-
-DELIMITER ;
-
 DELIMITER $$
 
 CREATE TRIGGER trg_ReservationRooms_Insert
@@ -278,8 +298,49 @@ AFTER INSERT ON ReservationRooms
 FOR EACH ROW
 BEGIN
     INSERT INTO Logs(TableName, OperationType, RecordID, NewData)
-    VALUES('ReservationRooms','INSERT', NEW.ReservationRoomID,
-        JSON_OBJECT('ReservationID', NEW.ReservationID,'RoomID', NEW.RoomID)
+    VALUES(
+        'ReservationRooms',
+        'INSERT',
+        NEW.ReservationRoomID,
+        JSON_OBJECT(
+            'ReservationID', NEW.ReservationID,
+            'RoomID', NEW.RoomID,
+            'CheckInDate', NEW.CheckInDate,
+            'CheckOutDate', NEW.CheckOutDate,
+            'NumAdults', NEW.NumAdults,
+            'NumChildren', NEW.NumChildren,
+            'Status', NEW.Status
+        )
+    );
+END$$
+
+CREATE TRIGGER trg_ReservationRooms_Update
+AFTER UPDATE ON ReservationRooms
+FOR EACH ROW
+BEGIN
+    INSERT INTO Logs(TableName, OperationType, RecordID, OldData, NewData)
+    VALUES(
+        'ReservationRooms',
+        'UPDATE',
+        OLD.ReservationRoomID,
+        JSON_OBJECT(
+            'ReservationID', OLD.ReservationID,
+            'RoomID', OLD.RoomID,
+            'CheckInDate', OLD.CheckInDate,
+            'CheckOutDate', OLD.CheckOutDate,
+            'NumAdults', OLD.NumAdults,
+            'NumChildren', OLD.NumChildren,
+            'Status', OLD.Status
+        ),
+        JSON_OBJECT(
+            'ReservationID', NEW.ReservationID,
+            'RoomID', NEW.RoomID,
+            'CheckInDate', NEW.CheckInDate,
+            'CheckOutDate', NEW.CheckOutDate,
+            'NumAdults', NEW.NumAdults,
+            'NumChildren', NEW.NumChildren,
+            'Status', NEW.Status
+        )
     );
 END$$
 
@@ -288,8 +349,19 @@ AFTER DELETE ON ReservationRooms
 FOR EACH ROW
 BEGIN
     INSERT INTO Logs(TableName, OperationType, RecordID, OldData)
-    VALUES('ReservationRooms','DELETE', OLD.ReservationRoomID,
-        JSON_OBJECT('ReservationID', OLD.ReservationID,'RoomID', OLD.RoomID)
+    VALUES(
+        'ReservationRooms',
+        'DELETE',
+        OLD.ReservationRoomID,
+        JSON_OBJECT(
+            'ReservationID', OLD.ReservationID,
+            'RoomID', OLD.RoomID,
+            'CheckInDate', OLD.CheckInDate,
+            'CheckOutDate', OLD.CheckOutDate,
+            'NumAdults', OLD.NumAdults,
+            'NumChildren', OLD.NumChildren,
+            'Status', OLD.Status
+        )
     );
 END$$
 

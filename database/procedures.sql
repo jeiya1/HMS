@@ -139,7 +139,7 @@ BEGIN
         SELECT rr.RoomID
         FROM ReservationRooms rr
         JOIN Reservations res ON rr.ReservationID = res.ReservationID
-        WHERE res.StatusID NOT IN (4,5)
+        WHERE res.Status NOT IN ('checked_out','cancelled')
         AND rr.CheckInDate < pCheckOut
         AND rr.CheckOutDate > pCheckIn
 
@@ -164,8 +164,8 @@ BEGIN
     FROM ReservationRooms rr
     JOIN Reservations r ON rr.ReservationID = r.ReservationID
     WHERE rr.RoomID = pRoomID
-      AND r.StatusID IN (1,2,3)
-      AND NOT (rr.CheckOutDate <= pCheckIn OR rr.CheckInDate >= pCheckOut);
+    AND r.Status IN ('pending','confirmed','checked_in')
+    AND NOT (rr.CheckOutDate <= pCheckIn OR rr.CheckInDate >= pCheckOut);
 
     IF overlapCount = 0 THEN
         SET isAvailable = TRUE;
@@ -209,11 +209,10 @@ BEGIN
           SELECT 1
           FROM ReservationRooms rr
           JOIN Reservations res ON rr.ReservationID = res.ReservationID
-          JOIN ReservationStatus rs ON res.StatusID = rs.StatusID
           WHERE rr.RoomID = r.RoomID
             AND rr.CheckInDate < pCheckOut
             AND rr.CheckOutDate > pCheckIn
-            AND rs.StatusName IN ('confirmed', 'pending')
+            AND res.Status IN ('confirmed','pending')
       )
       -- Exclude rooms in user's cart
       AND NOT EXISTS (
@@ -296,8 +295,8 @@ BEGIN
     SET token = UUID();
 
     -- Insert reservation
-    INSERT INTO Reservations (GuestID, StatusID, BookingToken)
-    VALUES (pGuestID, 1, token);
+    INSERT INTO Reservations (GuestID, Status, BookingToken)
+    VALUES (pGuestID, 'pending', token);
 
     SET pReservationID = LAST_INSERT_ID();
     SET pBookingToken = token;
@@ -343,9 +342,9 @@ BEGIN
         SET pMessage = 'Room already booked for these dates';
     ELSE
         INSERT INTO ReservationRooms
-        (ReservationID, CheckInDate, CheckOutDate, NumAdults, NumChildren, RoomID)
+        (ReservationID, CheckInDate, CheckOutDate, NumAdults, NumChildren, RoomID, Status)
         VALUES 
-        (pReservationID, pCheckIn, pCheckOut, pNumAdults, pNumChildren, pRoomID);
+        (pReservationID, pCheckIn, pCheckOut, pNumAdults, pNumChildren, pRoomID, 'pending');
 
         SET pSuccess = TRUE;
         SET pMessage = 'Room added successfully';
@@ -375,7 +374,11 @@ BEGIN
     );
 
     UPDATE Reservations
-    SET StatusID = 5
+    SET Status = 'cancelled'
+    WHERE ReservationID = pReservationID;
+
+    UPDATE ReservationRooms
+    SET Status = 'cancelled'
     WHERE ReservationID = pReservationID;
 
     UPDATE Payments
@@ -407,7 +410,6 @@ BEGIN
     SELECT ReservationID INTO reservationID
     FROM Reservations
     WHERE BookingToken = pBookingToken
-      AND TokenExpiresAt IS NULL OR TokenExpiresAt > NOW()
     FOR UPDATE;
 
     IF reservationID IS NULL THEN
@@ -430,7 +432,11 @@ BEGIN
     CLOSE roomCursor;
 
     UPDATE Reservations
-    SET StatusID = 5
+    SET Status = 'cancelled'
+    WHERE ReservationID = reservationID;
+
+    UPDATE ReservationRooms
+    SET Status = 'cancelled'
     WHERE ReservationID = reservationID;
 
     UPDATE Payments
@@ -460,11 +466,11 @@ BEGIN
 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
-    SELECT StatusID INTO currentStatus
+    SELECT Status INTO currentStatus
     FROM Reservations
     WHERE ReservationID = pReservationID;
 
-    IF currentStatus != 2 THEN
+    IF currentStatus != 'confirmed' THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = "Only confirmed reservations can be checked in";
     ELSE
@@ -472,7 +478,11 @@ BEGIN
     START TRANSACTION;
 
     UPDATE Reservations
-    SET StatusID = 3
+    SET Status = 'confirmed'
+    WHERE ReservationID = pReservationID;
+
+    UPDATE ReservationRooms
+    SET Status = 'checked_in'
     WHERE ReservationID = pReservationID;
 
     OPEN roomCursor;
@@ -510,19 +520,23 @@ BEGIN
         SELECT RoomID FROM ReservationRooms WHERE ReservationID = pReservationID;
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
-    SELECT StatusID INTO currentStatus
+    SELECT Status INTO currentStatus
     FROM Reservations
     WHERE ReservationID = pReservationID;
 
-    IF currentStatus != 3 THEN
+    IF currentStatus != 'confirmed' THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = "Only checked-in reservations can be checked out";
     ELSE
 
     START TRANSACTION;
 
+    UPDATE ReservationRooms
+    SET Status = 'checked_out'
+    WHERE ReservationID = pReservationID;
+
     UPDATE Reservations
-    SET StatusID = 4
+    SET Status = 'confirmed' -- or keep confirmed
     WHERE ReservationID = pReservationID;
 
     OPEN roomCursor;
@@ -564,7 +578,11 @@ BEGIN
     WHERE ReservationID = pReservationID;
 
     UPDATE Reservations
-    SET StatusID = 2
+    SET Status = 'confirmed'
+    WHERE ReservationID = pReservationID;
+
+    UPDATE ReservationRooms
+    SET Status = 'confirmed'
     WHERE ReservationID = pReservationID;
 
     COMMIT;
@@ -589,7 +607,11 @@ BEGIN
     WHERE ReservationID = pReservationID;
 
     UPDATE Reservations
-    SET StatusID = 5
+    SET Status = 'cancelled'
+    WHERE ReservationID = pReservationID;
+
+    UPDATE ReservationRooms
+    SET Status = 'cancelled'
     WHERE ReservationID = pReservationID;
 
     COMMIT;
@@ -625,8 +647,8 @@ BEGIN
 
     SET token = UUID();
 
-    INSERT INTO Reservations (GuestID, StatusID, BookingToken)
-    VALUES (pGuestID, 1, token);
+    INSERT INTO Reservations (GuestID, Status, BookingToken)
+    VALUES (pGuestID, 'pending', token);
 
     SET pReservationID = LAST_INSERT_ID();
     SET pBookingToken = token;
@@ -683,14 +705,15 @@ BEGIN
             LEAVE room_loop;
         ELSE
             INSERT INTO ReservationRooms
-            (ReservationID, CheckInDate, CheckOutDate, NumAdults, NumChildren, RoomID)
+            (ReservationID, CheckInDate, CheckOutDate, NumAdults, NumChildren, RoomID, Status)
             VALUES (
                 pReservationID,
                 JSON_UNQUOTE(JSON_EXTRACT(room, '$.CheckInDate')),
                 JSON_UNQUOTE(JSON_EXTRACT(room, '$.CheckOutDate')),
                 JSON_UNQUOTE(JSON_EXTRACT(room, '$.NumAdults')),
                 IFNULL(JSON_UNQUOTE(JSON_EXTRACT(room, '$.NumChildren')), 0),
-                JSON_UNQUOTE(JSON_EXTRACT(room, '$.RoomID'))
+                JSON_UNQUOTE(JSON_EXTRACT(room, '$.RoomID')),
+                'pending'
             );
         END IF;
 

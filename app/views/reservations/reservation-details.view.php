@@ -1,16 +1,22 @@
 <?php
-$paymentMethodName = array(
+$paymentMethodName = [
     "card" => "Debit/Credit Card",
     "online_payment" => "QR-Ph",
     "cash" => "Cash"
-);
-?>
-<?php
-$statusMap = [
+];
+
+$statusMapPayment = [
     'pending' => ['label' => 'Pending', 'bg' => 'bg-gray-500/25', 'outline' => 'outline-gray-500'],
-    'confirmed' => ['label' => 'Successful', 'bg' => 'bg-green-500/25', 'outline' => 'outline-green-500'],
-    'checked_in' => ['label' => 'Checked_In', 'bg' => 'bg-blue-500/25', 'outline' => 'outline-blue-500'],
-    'checked_out' => ['label' => 'Checked_out', 'bg' => 'bg-gray-500/25', 'outline' => 'outline-gray-500'],
+    'completed' => ['label' => 'Successful', 'bg' => 'bg-green-500/25', 'outline' => 'outline-green-500'],
+    'failed' => ['label' => 'Failed', 'bg' => 'bg-red-500/25', 'outline' => 'outline-red-500'],
+    'refunded' => ['label' => 'Refunded', 'bg' => 'bg-orange-500/25', 'outline' => 'outline-orange-500'],
+];
+
+$statusMapRoom = [
+    'pending' => ['label' => 'Pending', 'bg' => 'bg-gray-500/25', 'outline' => 'outline-gray-500'],
+    'confirmed' => ['label' => 'Booked', 'bg' => 'bg-green-500/25', 'outline' => 'outline-green-500'],
+    'checked_in' => ['label' => 'Checked In', 'bg' => 'bg-blue-500/25', 'outline' => 'outline-blue-500'],
+    'checked_out' => ['label' => 'Checked Out', 'bg' => 'bg-gray-500/25', 'outline' => 'outline-gray-500'],
     'cancelled' => ['label' => 'Cancelled', 'bg' => 'bg-red-500/25', 'outline' => 'outline-red-500'],
 ];
 ?>
@@ -182,11 +188,15 @@ if (!empty($payment) && isset($payment['TotalBeforeDiscount'], $payment['Discoun
                                                     </p>
                                                 </div>
                                                 <div class="flex justify-between">
-                                                    <p class="justify-center text-black text-sm font-normal font-roboto">Extra
-                                                        Info
+                                                    <p class="justify-center text-black text-sm font-normal font-roboto">Status
                                                     </p>
-                                                    <p class="justify-center text-black text-sm font-normal font-roboto">
-                                                        -
+                                                    <?php
+                                                    $roomStatus = $room['RoomStatus']; // e.g., 'pending', 'confirmed', etc.
+                                                    $statusData = $statusMapRoom[$roomStatus] ?? ['label' => 'Unknown', 'bg' => 'bg-gray-500/25', 'outline' => 'outline-gray-500'];
+                                                    ?>
+                                                    <p
+                                                        class="justify-center text-sm font-normal font-roboto <?= $statusData['bg'] ?> <?= $statusData['outline'] ?> rounded px-2 py-1 text-center">
+                                                        <?= htmlspecialchars($statusData['label']) ?>
                                                     </p>
                                                 </div>
                                                 <!-- Row 3 (for future info) -->
@@ -196,14 +206,6 @@ if (!empty($payment) && isset($payment['TotalBeforeDiscount'], $payment['Discoun
                                                     </p>
                                                     <p class="justify-center text-black text-sm font-normal font-roboto">
                                                         ₱<?php echo htmlspecialchars($room['BasePrice']); ?>
-                                                    </p>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <p class="justify-center text-black text-sm font-normal font-roboto">Extra
-                                                        Info
-                                                    </p>
-                                                    <p class="justify-center text-black text-sm font-normal font-roboto">
-                                                        -
                                                     </p>
                                                 </div>
                                             </div>
@@ -231,7 +233,8 @@ if (!empty($payment) && isset($payment['TotalBeforeDiscount'], $payment['Discoun
                                     <li>Guests must present a valid photo identification during check-in.</li>
                                     <li>Applicable taxes and government charges may apply.</li>
                                     <li>Full or advance payment may be required upon check-in.</li>
-                                    <li>Standard check-in time is 0:00 PM and check-out time is 0:00 AM. Early check-in and
+                                    <li>Standard check-in time is 12:00 PM and check-out time is 11:00 AM. Early check-in
+                                        and
                                         late
                                         check-out are subject to availability.</li>
                                     <li>The hotel reserves the right to refuse accommodation to guests who do not comply
@@ -259,7 +262,7 @@ if (!empty($payment) && isset($payment['TotalBeforeDiscount'], $payment['Discoun
                             </div>
                             <?php
                             $statusKey = $payment['PaymentStatus'] ?? 'pending';
-                            $status = $statusMap[$statusKey] ?? ['label' => 'Unknown', 'bg' => 'bg-gray-500/25', 'outline' => 'outline-gray-500'];
+                            $status = $statusMapPayment[$statusKey] ?? ['label' => 'Unknown', 'bg' => 'bg-gray-500/25', 'outline' => 'outline-gray-500'];
                             ?>
                             <div class="flex justify-between mt-1">
                                 <strong>Payment Status:</strong>

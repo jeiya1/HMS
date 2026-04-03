@@ -184,7 +184,7 @@ class ReservationController
             return;
         }
 
-        // Get guest details from first row
+        // Guest details
         $guestDetails = [
             'FullName' => $reservationData[0]['FirstName'] . ' ' . $reservationData[0]['LastName'],
             'Email' => $reservationData[0]['Email'],
@@ -192,8 +192,22 @@ class ReservationController
             'BookingToken' => $reservationData[0]['BookingToken'],
             'BookingDate' => date('F j, Y', strtotime($reservationData[0]['BookingDate'])),
         ];
-        $payment = $reservationModel->getReservationPayment($reservationID); // new method
-        $rooms = $reservationData;
+
+        // Get payment info
+        $payment = $reservationModel->getReservationPayment($reservationID);
+
+        // Fetch rooms with status directly from ReservationRooms.Status
+        $roomsResult = $GLOBALS["conn"]->execute_query("
+        SELECT rr.ReservationRoomID, rr.CheckInDate, rr.CheckOutDate, rr.NumAdults, rr.NumChildren,
+               r.RoomNumber, rt.RoomTypeName AS RoomType, rt.BasePrice,
+               rr.Status AS RoomStatus
+        FROM ReservationRooms rr
+        JOIN Rooms r ON rr.RoomID = r.RoomID
+        JOIN RoomTypes rt ON r.RoomTypeID = rt.RoomTypeID
+        WHERE rr.ReservationID = ?
+    ", [$reservationID]);
+
+        $rooms = $roomsResult ? $roomsResult->fetch_all(MYSQLI_ASSOC) : [];
 
         require __DIR__ . '/../views/reservations/reservation-details.view.php';
     }

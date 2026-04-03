@@ -121,12 +121,12 @@ class Reservation
         ];
     }
 
-    public function addRoomToReservation($reservationID, $roomID, $checkIn, $checkOut, $numAdults)
+    public function addRoomToReservation($reservationID, $roomID, $checkIn, $checkOut, $numAdults, $numChildren = 0)
     {
         // Call procedure with OUT params
         $this->conn->execute_query(
-            "CALL AddRoomToReservation(?, ?, ?, ?, ?, @success, @message)",
-            [$reservationID, $roomID, $checkIn, $checkOut, $numAdults]
+            "CALL AddRoomToReservation(?, ?, ?, ?, ?, ?, @success, @message)",
+            [$reservationID, $roomID, $checkIn, $checkOut, $numAdults, $numChildren = 0]
         );
 
         // Fetch OUT params
@@ -147,21 +147,27 @@ class Reservation
 
     public function sendReservationConfirmation($guestEmail, $bookingToken, $totalAmount)
     {
-        // Fetch reservation details
+        // Fetch reservation details with all rooms
         $reservationDetails = $this->getReservationWithGuest($bookingToken);
 
         if (empty($reservationDetails)) {
             throw new Exception("Reservation not found for the provided token.");
         }
 
-        $details = $reservationDetails[0]; // Take the first row
-        $guestName = $details['FirstName'] . ' ' . $details['LastName'];
-        $checkIn = date('Y-m-d', strtotime($details['CheckInDate']));
-        $checkOut = date('Y-m-d', strtotime($details['CheckOutDate']));
-        $roomNumber = $details['RoomNumber'];
-        $roomType = $details['RoomType'];
-
+        $guestName = $reservationDetails[0]['FirstName'] . ' ' . $reservationDetails[0]['LastName'];
         $cancelUrl = "http://hms.aniagtech.com/reservation/cancel/guest/{$bookingToken}";
+
+        // Build rooms HTML
+        $roomsHtml = "";
+        foreach ($reservationDetails as $room) {
+            $checkIn = date('Y-m-d', strtotime($room['CheckInDate']));
+            $checkOut = date('Y-m-d', strtotime($room['CheckOutDate']));
+            $roomsHtml .= "
+            <strong>Room:</strong> {$room['RoomType']} (#{$room['RoomNumber']})<br>
+            <strong>Check-in:</strong> {$checkIn} 12:00 PM<br>
+            <strong>Check-out:</strong> {$checkOut} 11:00 AM<br><br>
+        ";
+        }
 
         $mail = new PHPMailer(true);
 
@@ -183,17 +189,24 @@ class Reservation
             $mail->Body = "
             Dear {$guestName},<br><br>
             Your reservation has been confirmed.<br>
-            <strong>Booking Token:</strong> {$bookingToken}<br>
-            <strong>Room:</strong> {$roomType} (#{$roomNumber})<br>
-            <strong>Check-in:</strong> {$checkIn} 12:00 PM<br>
-            <strong>Check-out:</strong> {$checkOut} 11:00 AM<br><br>
+            <strong>Booking Token:</strong> {$bookingToken}<br><br>
+            {$roomsHtml}
             <strong>Total Amount:</strong> {$totalAmount}<br><br>
             If you need to cancel your reservation, please click the link below:<br>
             <a href='{$cancelUrl}' target='_blank'>Cancel Reservation</a><br><br>
             Thank you for choosing our hotel.
         ";
 
-            $mail->AltBody = "Dear {$guestName},\n\nYour reservation has been confirmed.\nBooking Token: {$bookingToken}\nRoom: {$roomType} (#{$roomNumber})\nCheck-in: {$checkIn}\nCheck-out: {$checkOut}\n\nThank you for choosing our hotel.";
+            // Build plain text alternative
+            $altBody = "Dear {$guestName},\n\nYour reservation has been confirmed.\nBooking Token: {$bookingToken}\n\n";
+            foreach ($reservationDetails as $room) {
+                $checkIn = date('Y-m-d', strtotime($room['CheckInDate']));
+                $checkOut = date('Y-m-d', strtotime($room['CheckOutDate']));
+                $altBody .= "Room: {$room['RoomType']} (#{$room['RoomNumber']})\nCheck-in: {$checkIn}\nCheck-out: {$checkOut}\n\n";
+            }
+            $altBody .= "Total Amount: {$totalAmount}\n\nCancel reservation: {$cancelUrl}\n\nThank you for choosing our hotel.";
+
+            $mail->AltBody = $altBody;
 
             $mail->send();
             return true;
@@ -209,7 +222,7 @@ class Reservation
         FROM Reservations
         WHERE BookingToken = ?
         AND GuestID = ?
-        AND StatusID IN (1, 2)
+        AND Status IN ('pending', 'confirmed')
         LIMIT 1
     ", [$bookingToken, $guestID]);
 
@@ -248,10 +261,10 @@ class Reservation
         try {
             $result = $this->conn->execute_query(
                 "SELECT * 
-             FROM Reservations 
-             WHERE BookingToken = ? 
-             AND StatusID IN (1, 2)  -- Only pending or confirmed reservations
-             LIMIT 1",
+                FROM Reservations 
+                WHERE BookingToken = ? 
+                AND Status IN ('pending', 'confirmed')
+                LIMIT 1",
                 [$bookingToken]
             );
 
@@ -265,23 +278,6 @@ class Reservation
         }
     }
 
-    public function addRoomToCart($roomID, $checkin, $checkout, $adults)
-    {
-        try {
-            // Call stored procedure to add room to cart
-            $result = $this->conn->execute_query(
-                "CALL AddRoomToCart(?, ?, ?, ?)",
-                [$roomID, $checkin, $checkout, $adults]
-            );
-
-            if (!$result) {
-                throw new Exception("Failed to add room to cart: " . $this->conn->error);
-            }
-        } catch (Exception $e) {
-            throw new Exception("Failed to cancel reservation: " . $e->getMessage());
-        }
-    }
-
     public function showReservations()
     {
         // Get reservations linked to the logged-in user
@@ -290,25 +286,24 @@ class Reservation
 
             $result = $this->conn->execute_query(
                 "SELECT
-        r.ReservationID,
-        r.BookingToken,
-        rs.StatusName AS ReservationStatus,
-        pm.MethodName AS PaymentMethod,
-        p.TotalBeforeDiscount,
-        p.DiscountAmount,
-        p.Amount,
-        p.PaymentDate,
-        r.CreatedAt,
-        g.FirstName AS GuestFirstName,
-        g.LastName AS GuestLastName,
-        g.Email AS GuestEmail
-    FROM Reservations r
-    INNER JOIN Guests g ON r.GuestID = g.GuestID
-    INNER JOIN ReservationStatus rs ON r.StatusID = rs.StatusID
-    LEFT JOIN Payments p ON r.ReservationID = p.ReservationID
-    LEFT JOIN PaymentMethods pm ON p.MethodID = pm.MethodID
-    INNER JOIN UserReservations ur ON r.ReservationID = ur.ReservationID
-    WHERE ur.UserID = ?",
+                    r.ReservationID,
+                    r.BookingToken,
+                    r.Status AS ReservationStatus,
+                    pm.MethodName AS PaymentMethod,
+                    p.TotalBeforeDiscount,
+                    p.DiscountAmount,
+                    p.Amount,
+                    p.PaymentDate,
+                    r.CreatedAt,
+                    g.FirstName AS GuestFirstName,
+                    g.LastName AS GuestLastName,
+                    g.Email AS GuestEmail
+                FROM Reservations r
+                INNER JOIN Guests g ON r.GuestID = g.GuestID
+                LEFT JOIN Payments p ON r.ReservationID = p.ReservationID
+                LEFT JOIN PaymentMethods pm ON p.MethodID = pm.MethodID
+                INNER JOIN UserReservations ur ON r.ReservationID = ur.ReservationID
+                WHERE ur.UserID = ?",
                 [$userID]
             );
 
@@ -474,7 +469,7 @@ class Reservation
         SELECT ReservationID 
         FROM Reservations
         WHERE BookingToken = ?
-        AND StatusID IN (1, 2)
+        AND Status IN ('pending', 'confirmed')
         LIMIT 1
     ", [$bookingToken]);
 
