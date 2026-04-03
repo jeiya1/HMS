@@ -231,7 +231,7 @@ if (!empty($payment) && isset($payment['TotalBeforeDiscount'], $payment['Discoun
                                     <li>Guests must present a valid photo identification during check-in.</li>
                                     <li>Applicable taxes and government charges may apply.</li>
                                     <li>Full or advance payment may be required upon check-in.</li>
-                                    <li>Standard check-in time is 0:00 PM and check-out time is 0:00 AM. Early check-in and
+                                    <li>Standard check-in time is 12:00 PM and check-out time is 11:00 AM. Early check-in and
                                         late
                                         check-out are subject to availability.</li>
                                     <li>The hotel reserves the right to refuse accommodation to guests who do not comply
