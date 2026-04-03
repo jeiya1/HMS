@@ -8,6 +8,7 @@ class RoomType {
         $this->conn = $db;
     }
 
+    // Retrieve all room types from database
     function getAllRoomTypes() {
         $result = $this->conn->execute_query("SELECT RoomTypeID, RoomTypeName FROM RoomTypes");
         $roomTypes = [];

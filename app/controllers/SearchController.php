@@ -6,6 +6,7 @@ class SearchController
 {
     public function search()
     {
+        // Check authentication and get room data
         $logged_in = $this->getAuthState();
 
         $roomModel = new Room($GLOBALS['conn']);
@@ -24,6 +25,7 @@ class SearchController
             $checkinStr = $_POST['checkin'] ?? null;
             list($checkin, $checkout) = $this->parseCheckinCheckout($checkinStr);
 
+            // Normalize negative guest values 
             $adults = isset($_POST['adults']) ? (int) $_POST['adults'] : 0;
             $children = isset($_POST['children']) ? (int) $_POST['children'] : 0;
 
@@ -32,11 +34,13 @@ class SearchController
             if ($children < 0)
                 $children = 0;
 
+            // Clear guest counts if total is zero
             if (($adults + $children) === 0) {
                 $adults = null;
                 $children = null;
             }
 
+            // Filter array for search
             $filters = [
                 'checkin' => $checkin,
                 'checkout' => $checkout,
@@ -47,6 +51,7 @@ class SearchController
                 'cartID' => $cartID,
             ];
 
+            // Build query string and redirect
             $query = http_build_query(array_filter([
                 'checkin' => $checkin,
                 'checkout' => $checkout,
@@ -66,6 +71,7 @@ class SearchController
         // =========================
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
+            // Normalize negative guest values
             $adults = isset($_GET['adults']) ? (int) $_GET['adults'] : 0;
             $children = isset($_GET['children']) ? (int) $_GET['children'] : 0;
 
@@ -74,16 +80,19 @@ class SearchController
             if ($children < 0)
                 $children = 0;
 
+            // Clear guest counts if total is zero
             if (($adults + $children) === 0) {
                 $adults = null;
                 $children = null;
             }
 
+            // Auto-date
             if (isset($_GET['auto'])) {
 
                 $today = new DateTime();
                 $tomorrow = (new DateTime())->modify('+1 day');
 
+                // Filter array for search (with auto-date)
                 $filters = [
                     'checkin' => $today->format('Y-m-d'),
                     'checkout' => $tomorrow->format('Y-m-d'),
@@ -97,7 +106,7 @@ class SearchController
                 $_GET['checkin'] = $today->format('Y/m/d') . ' to ' . $tomorrow->format('Y/m/d');
 
             } else {
-
+                // Parse check-in and check-out from GET parameters
                 $checkinStr = $_GET['checkin'] ?? null;
                 $checkoutStr = $_GET['checkout'] ?? null;
 
@@ -108,6 +117,7 @@ class SearchController
                     $checkout = $checkoutStr ?: null;
                 }
 
+                // Filter array for search
                 $filters = [
                     'checkin' => $checkin,
                     'checkout' => $checkout,
@@ -120,6 +130,7 @@ class SearchController
             }
         }
 
+        // Search for available rooms with filters
         $rooms = $roomModel->searchAvailable($filters);
         $cartCount = $this->getCartCount();
 
@@ -133,10 +144,12 @@ class SearchController
 
     private function getCartCount()
     {
+        // Get cart amount
         $cartModel = new Cart($GLOBALS['conn']);
         return $cartModel->getCartAmount();
     }
 
+    // Convert date to string range
     function convertDate($range, $isCheckout = false)
     {
         $dates = explode(" to ", $range);
@@ -149,6 +162,7 @@ class SearchController
     // Helper function (can reuse convertDate)
     function parseCheckinCheckout($range)
     {
+        // Parse check-in/check-out dates from range string
         if (!$range)
             return [null, null];
 
@@ -169,6 +183,7 @@ class SearchController
         if (!$checkinObj || !$checkoutObj)
             return [null, null];
 
+        // Return formatted dates
         return [
             $checkinObj->format('Y-m-d'),
             $checkoutObj->format('Y-m-d')

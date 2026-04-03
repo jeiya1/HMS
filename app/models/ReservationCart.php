@@ -31,6 +31,7 @@ class ReservationCart
 
     public function getActiveCart($sessionGuestID)
     {
+        // Look for existing cart that is not yet expired
         $result = $this->conn->execute_query(
             "SELECT * 
              FROM ReservationCarts 
@@ -51,6 +52,7 @@ class ReservationCart
 
     public function findOrCreateCart($sessionToken)
     {
+        // Find or create cart based on SessionGuestID through session token
         $sessionGuestID = $this->getSessionGuestByToken($sessionToken);
 
         $result = $this->conn->execute_query(
@@ -78,7 +80,7 @@ class ReservationCart
 
     public function cartExists($cartID)
     {
-
+        // Check if cart exists by ID
         $result = $this->conn->execute_query(
             "SELECT CartID 
              FROM ReservationCarts 
@@ -96,6 +98,7 @@ class ReservationCart
 
     public function deleteCart($cartID)
     {
+        // Delete cart by ID
         $result = $this->conn->execute_query(
             "DELETE FROM ReservationCarts WHERE CartID = ?",
             [$cartID]
@@ -109,6 +112,7 @@ class ReservationCart
 
     public function extendCart($cartID)
     {
+        // Extend cart by ID
         $result = $this->conn->execute_query(
             "UPDATE ReservationCarts 
              SET ExpiresAt = DATE_ADD(NOW(), INTERVAL 1 DAY) 
@@ -124,6 +128,7 @@ class ReservationCart
 
     public function getSessionGuestByToken($sessionToken)
     {
+        // Get SessionGuestID based on session token
         $result = $this->conn->execute_query(
             "SELECT SessionGuestID 
              FROM SessionGuests 

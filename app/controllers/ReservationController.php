@@ -16,6 +16,7 @@ class ReservationController
             return;
         }
 
+        // Retrieve reservation and payment details
         $input = json_decode(file_get_contents('php://input'), true);
 
         $totalBeforeDiscount = floatval($input['totalBeforeDiscount'] ?? 0);
@@ -38,11 +39,13 @@ class ReservationController
         $discountType = $input['discountType'] ?? null;
         $discountCardNumber = $input['discountCardNumber'] ?? null;
 
+        // Validate guest info
         if (!$fname || !$lname || !$email || !$phone || !$birthDate || !$paymentMethodID) {
             echo json_encode(["success" => false, "error" => "Incomplete guest information."]);
             return;
         }
 
+        // Check for active cart session
         $cartID = $_SESSION['cart_id'] ?? null;
         $sessionGuestID = $_SESSION['session_guest_id'] ?? null;
 
@@ -161,6 +164,7 @@ class ReservationController
 
     public function show($bookingToken)
     {
+        // Fetch reservation data
         $reservationModel = new Reservation($GLOBALS["conn"]);
         $reservationData = $reservationModel->getReservationWithGuest($bookingToken);
 
@@ -172,6 +176,7 @@ class ReservationController
         $reservationID = $reservationData[0]['ReservationID'];
         $userID = $_SESSION["logged_in_user_id"] ?? null;
 
+        // Check if user owns this reservation
         $ownsReservation = $reservationModel->checkUserReservation($userID, $reservationID);
 
         if (!$ownsReservation) {
@@ -219,6 +224,7 @@ class ReservationController
             exit;
         }
 
+        // Check if user is logged in
         if (!isset($_SESSION['logged_in_user_id'])) {
             echo json_encode([
                 "success" => false,
@@ -229,6 +235,7 @@ class ReservationController
 
         $bookingToken = $_POST['booking_token'] ?? null;
 
+        // Check for booking token
         if (!$bookingToken) {
             echo json_encode([
                 "success" => false,
@@ -237,11 +244,11 @@ class ReservationController
             exit;
         }
 
+        // Check if reservation belongs to user and cancel
         try {
             $reservationModel = new Reservation($GLOBALS['conn']);
             $userModel = new User($GLOBALS['conn']);
 
-            // Call your model method that executes the CancelReservation procedure
             $currentUserGuestIDObj = $userModel->getGuestIDbyUserID($_SESSION['logged_in_user_id']);
             $reservationModel->cancelReservation($bookingToken, $currentUserGuestIDObj->GuestID);
 
@@ -265,6 +272,7 @@ class ReservationController
 
         $bookingToken = $_POST['booking_token'] ?? null;
 
+        // Check for booking token
         if (!$bookingToken) {
             echo json_encode([
                 'success' => false,
@@ -273,6 +281,7 @@ class ReservationController
             exit;
         }
 
+        // Check if reservation exist and is cancellable
         $reservationModel = new Reservation($GLOBALS['conn']);
         $reservation = $reservationModel->getGuestReservationByToken($bookingToken);
 
@@ -299,7 +308,7 @@ class ReservationController
         }
     }
 
-
+    // Guest cancellation form
     public function showGuestCancelForm($bookingToken)
     {
         $reservationModel = new Reservation($GLOBALS['conn']);
