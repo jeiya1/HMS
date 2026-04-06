@@ -23,6 +23,7 @@ class PaymentController {
         $amount = $_POST['amount'] ?? null;
 
         // ---------- VALIDATION ----------
+        // Validate missing payment info
         if (empty($reservationID) || empty($methodID)) {
             echo json_encode([
                 "success" => false,
@@ -31,6 +32,7 @@ class PaymentController {
             return;
         }
 
+        // Validate amount is a positive number
         if ($amount <= 0) {
             echo json_encode([
                 "success" => false,
@@ -39,6 +41,7 @@ class PaymentController {
             return;
         }
 
+        // ---------- PROCESS PAYMENT ----------
         try {
             $paymentModel = new Payment($GLOBALS['conn']);
 

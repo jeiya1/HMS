@@ -8,6 +8,7 @@ require_once "../app/models/Event.php";
 require_once "../app/models/Log.php";
 class PagesController
 {
+    // Privacy Policy page
     public function privacy()
     {
         $logged_in = $this->getAuthState();
@@ -92,12 +93,16 @@ class PagesController
         $cartCount = $this->getCartCount();
         require_once '../app/views/static/terms.view.php';
     }
+
+    // Home page
     public function home()
     {
         $logged_in = $this->getAuthState();
         $cartCount = $this->getCartCount();
         require_once '../app/views/home.view.php';
     }
+
+    // Account page
     public function account()
     {
         $logged_in = $this->getAuthState();
@@ -105,6 +110,7 @@ class PagesController
         require_once '../app/views/auth/account.view.php';
     }
 
+    // Search page
     public function search()
     {
         $logged_in = $this->getAuthState();
@@ -112,6 +118,7 @@ class PagesController
         require_once '../app/views/rooms/search.view.php';
     }
 
+    // View standard room page
     public function standard()
     {
         $logged_in = $this->getAuthState();
@@ -138,6 +145,7 @@ class PagesController
         require_once '../app/views/rooms/standard.view.php';
     }
 
+    // View deluxe room page
     public function deluxe()
     {
         $logged_in = $this->getAuthState();
@@ -164,6 +172,7 @@ class PagesController
         require_once '../app/views/rooms/deluxe.view.php';
     }
 
+    // View suite room page
     public function suite()
     {
         $logged_in = $this->getAuthState();
@@ -197,6 +206,7 @@ class PagesController
         require_once '../app/views/reservations/reservation.view.html';
     }
 
+    // View registration form
     public function registration()
     {
         $logged_in = $this->getAuthState();
@@ -204,6 +214,7 @@ class PagesController
         require_once '../app/views/auth/auth.view.php';
     }
 
+    // View forgot password form
     public function forgotPasswordForm()
     {
         $logged_in = $this->getAuthState();
@@ -211,6 +222,7 @@ class PagesController
         require_once '../app/views/auth/forgot_password.view.php';
     }
 
+    // View bookings page
     public function bookings()
     {
         $logged_in = $this->getAuthState();
@@ -222,6 +234,7 @@ class PagesController
         require_once '../app/views/reservations/bookings.view.php';
     }
 
+    // 404 Not Found page
     public function notFound()
     {
         $logged_in = $this->getAuthState();
@@ -230,10 +243,13 @@ class PagesController
         require_once '../app/views/static/404.view.php';
     }
 
+    // Check if user session is active
     public function getAuthState()
     {
         return isset($_SESSION['logged_in_user_id']);
     }
+
+    // get current cart count
     private function getCartCount()
     {
         $cartModel = new Cart($GLOBALS['conn']);

@@ -10,8 +10,10 @@ class SessionGuest
         $this->conn = $db;
     }
 
+    // Find or create session guest by token
     public function findOrCreate($token)
     {
+        // Check if session guest exists
         $result = $this->conn->execute_query(
             "SELECT SessionGuestID 
              FROM SessionGuests 
@@ -31,6 +33,7 @@ class SessionGuest
             }
         }
 
+        // Create new session guest if not found
         $result = $this->conn->execute_query(
             "INSERT INTO SessionGuests (SessionToken, ExpiresAt) VALUES (?,?)",
             [$token, date('Y-m-d H:i:s', strtotime('+1 day'))]
@@ -42,8 +45,10 @@ class SessionGuest
 
     }
 
+    // Retrieve session guest by ID
     public function getById($id)
     {
+        // Check if session guest exists
         $result = $this->conn->execute_query(
             "SELECT * 
              FROM SessionGuests 

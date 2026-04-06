@@ -10,8 +10,10 @@ class Room
         $this->conn = $db;
     }
 
+    // Check if room is available for given dates
     public function checkRoomAvailability($roomID, $checkin, $checkout)
     {
+        // Call availability check procedure
         $this->conn->execute_query("CALL CheckRoomAvailability(?, ?, ?, @isAvailable)", [$roomID, $checkin, $checkout]);
 
         $result = $this->conn->query("SELECT @isAvailable AS available;");
@@ -21,6 +23,7 @@ class Room
 
     public function getRoomPrice($roomID)
     {
+        // Call room price procedure
         $this->conn->execute_query("CALL GetRoomPrice(?, @price)", [$roomID]);
 
         $result = $this->conn->query("SELECT @price AS price;");
@@ -93,6 +96,7 @@ WHERE r.RoomNumber = ?;',
         // Call stored procedure
         $this->conn->execute_query("CALL GetRoomName(?, @name)", [$roomID]);
 
+        // Clear result sets
         while ($this->conn->more_results() && $this->conn->next_result()) {
             $this->conn->use_result();
         }
@@ -106,6 +110,7 @@ WHERE r.RoomNumber = ?;',
 
     public function searchAvailable($filters)
     {
+        // Call search procedure with filter parameters
         $result = $this->conn->execute_query(
             "CALL SearchAvailableRooms(?, ?, ?, ?, ?, ?, ?)",
             [
@@ -119,6 +124,7 @@ WHERE r.RoomNumber = ?;',
             ]
         );
 
+        // Fetch all matching rooms
         $rooms = [];
         if ($result instanceof mysqli_result) {
             while ($row = $result->fetch_assoc()) {

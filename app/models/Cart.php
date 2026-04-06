@@ -4,12 +4,14 @@ class Cart
 {
     private $conn;
 
+    // Constructor to initialize database connection
     public function __construct($db)
     {
         $this->conn = $db;
     }
     public function addRoomToCart($roomNumber, $checkin, $checkout, $adults, $children)
     {
+        // Retrieve cart ID from session
         $CartID = $_SESSION['cart_id'];
 
         // Get RoomID from RoomNumber
@@ -41,6 +43,7 @@ class Cart
 
         // Call stored procedure (UPDATED PARAMS)
         try {
+            // Add room to cart via stored procedure
             $this->conn->execute_query(
                 "CALL AddRoomToCart(?, ?, ?, ?, ?, ?)",
                 [$CartID, $roomID, $checkin, $checkout, $adults, $children]
@@ -59,6 +62,7 @@ class Cart
             return 0;
         }
 
+        // Count total items in cart
         $result = $this->conn->execute_query(
             "SELECT COUNT(*) as total FROM CartRooms WHERE CartID = ?",
             [$CartID]
@@ -75,6 +79,7 @@ class Cart
             return [];
         }
 
+        // Get cart items details
         $result = $this->conn->execute_query(
             "SELECT 
             cr.CartRoomID,
@@ -103,7 +108,8 @@ class Cart
             throw new Exception("No cart found for session.");
         }
 
-        try {
+        try { 
+            // delete specific cart room item
             $this->conn->execute_query(
                 "DELETE FROM CartRooms WHERE CartRoomID = ? AND CartID = ?",
                 [$cartRoomID, $CartID]
@@ -119,6 +125,7 @@ class Cart
         $cartRows = $this->getCartRows();
         $removedItems = [];
 
+        // Check each item's availability
         foreach ($cartRows as $row) {
             $roomID = $row['RoomID'];
             $checkIn = $row['CheckInDate'];
@@ -151,6 +158,7 @@ class Cart
         }
 
         try {
+            // Delete all items from cart
             $this->conn->execute_query(
                 "DELETE FROM CartRooms WHERE CartID = ?",
                 [$CartID]

@@ -19,12 +19,13 @@ class CartController
             return;
         }
 
+        // Retrieve guest counts and room selection
         $adults = isset($_POST['adults']) ? (int) $_POST['adults'] : 0;
         $children = isset($_POST['children']) ? (int) $_POST['children'] : 0;
         $roomID = (int) $_POST['roomID'];
         $dateRange = $_POST['checkin'];
 
-        // Normalize
+        // Normalize negative guest values to zero
         if ($adults < 0)
             $adults = 0;
         if ($children < 0)
@@ -33,6 +34,7 @@ class CartController
         $totalGuests = $adults + $children;
 
         // ---------- VALIDATION ----------
+        // Validate date range is provided
         if (empty($dateRange)) {
             echo json_encode([
                 "success" => false,
@@ -70,6 +72,7 @@ class CartController
         $checkinObj->setTime(0, 0, 0);
         $checkoutObj->setTime(0, 0, 0);
 
+        // Validate check-out date is after check-in
         if ($checkinObj >= $checkoutObj) {
             echo json_encode([
                 "success" => false,
@@ -78,6 +81,7 @@ class CartController
             exit;
         }
 
+        // Validate check-in is not in the past
         if ($checkinObj < $today) {
             echo json_encode([
                 "success" => false,
@@ -86,6 +90,7 @@ class CartController
             exit;
         }
 
+        // Validate minimum of one guest
         if ($totalGuests < 1) {
             echo json_encode([
                 "success" => false,
@@ -94,6 +99,7 @@ class CartController
             exit;
         }
 
+        // Validate room selection
         if (empty($roomID)) {
             echo json_encode([
                 "success" => false,
@@ -103,10 +109,10 @@ class CartController
         }
 
         // ---------- ADD TO CART ----------
+        // add the room to the cart
         try {
             $cart = new Cart($GLOBALS['conn']);
 
-            // IMPORTANT: pass children
             $cart->addRoomToCart($roomID, $checkin, $checkout, $adults, $children);
 
             $cartCount = $cart->getCartAmount();
@@ -127,6 +133,7 @@ class CartController
         }
     }
 
+    // Display cart view with cart items
     public function getSessionCarts()
     {
         $logged_in = $this->getAuthState();
@@ -144,6 +151,7 @@ class CartController
         return isset($_SESSION['logged_in_user_id']);
     }
 
+    // Remove a cart item based on cartRoomID
     public function remove()
     {
         header('Content-Type: application/json');

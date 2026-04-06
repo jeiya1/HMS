@@ -16,6 +16,7 @@ class User
 
     public function getUserByEmail($email)
     {
+        // Get user record by email
         $result = $this->conn->execute_query(
             "SELECT u.*, g.FirstName, g.LastName FROM Users u JOIN Guests g ON u.GuestID = g.GuestID WHERE u.Email = ?",
             [$email]
@@ -30,6 +31,7 @@ class User
 
     public function getGuestByEmail($email)
     {
+        // Get guest record by email
         $result = $this->conn->execute_query(
             "SELECT * FROM Guests WHERE Email = ?",
             [$email]
@@ -44,6 +46,7 @@ class User
 
     public function getGuestIDbyUserID($userID)
     {
+        // Look up guest ID for user
         $result = $this->conn->execute_query(
             "SELECT GuestID FROM Users WHERE UserID = ?",
             [$userID]
@@ -57,7 +60,7 @@ class User
 
     public function getGuestDetails($userID)
     {
-
+        // Get guest details by user ID
         $result = $this->conn->execute_query(
             "SELECT g.FirstName, g.LastName, g.PhoneContact, g.BirthDate, g.Email
             FROM Guests g
@@ -83,11 +86,13 @@ class User
 
     public function createGuestUser($email, $emailGuest, $password, $firstName, $lastName, $phone, $birthDate)
     {
+        // Check for duplicate email
         $user = $this->getUserByEmail($email);
         if ($user) {
             throw new Exception("Account with that email already exists.");
         }
 
+        // Call stored procedure to create guest user
         $result = $this->conn->execute_query(
             "CALL CreateGuestUser(?, ?, ?, ?, ?, ?, ?)",
             [$email, $emailGuest, $password, $firstName, $lastName, $phone, $birthDate]
@@ -100,12 +105,14 @@ class User
 
     public function updatePassword($newPassword)
     {
+        // Check if user is logged in
         if (!isset($_SESSION['logged_in_user_id'])) {
             throw new Exception("Unauthorized: User not logged in.");
         }
 
         $userID = $_SESSION['logged_in_user_id'];
 
+        // Update password in users table
         $result = $this->conn->execute_query(
             "UPDATE Users SET PasswordHash = ? WHERE UserID = ?",
             [$newPassword, $userID]
@@ -127,6 +134,7 @@ class User
 
         $userID = $_SESSION['logged_in_user_id'];
 
+        // Get guest ID for the user
         $result = $this->conn->execute_query(
             "SELECT GuestID FROM Users WHERE UserID = ?",
             [$userID]
@@ -139,6 +147,7 @@ class User
         $user = $result->fetch_assoc();
         $guestID = $user['GuestID'];
 
+        // Update guest first name
         $update = $this->conn->execute_query(
             "UPDATE Guests SET FirstName = ? WHERE GuestID = ?",
             [$newFirstName, $guestID]
@@ -148,20 +157,23 @@ class User
             throw new Exception("Failed to update first name: " . $this->conn->error);
         }
 
+        // Update session name
         $_SESSION['logged_in_user_name'] = $newFirstName;
 
         return true;
     }
 
+    // Update last name for authenticated user
     public function updateLastName($newLastName)
     {
-
+        // Require authentication
         if (!isset($_SESSION['logged_in_user_id'])) {
             throw new Exception("Unauthorized: User not logged in.");
         }
 
         $userID = $_SESSION['logged_in_user_id'];
 
+        // Get guest ID for the user
         $result = $this->conn->execute_query(
             "SELECT GuestID FROM Users WHERE UserID = ?",
             [$userID]
@@ -174,6 +186,7 @@ class User
         $user = $result->fetch_assoc();
         $guestID = $user['GuestID'];
 
+        // Update guest last name
         $update = $this->conn->execute_query(
             "UPDATE Guests SET LastName = ? WHERE GuestID = ?",
             [$newLastName, $guestID]
@@ -186,15 +199,17 @@ class User
         return true;
     }
 
+    // Update phone number for authenticated user
     public function updatePhoneNo($newPhoneNo)
     {
-
+        // Require authentication
         if (!isset($_SESSION['logged_in_user_id'])) {
             throw new Exception("Unauthorized: User not logged in.");
         }
 
         $userID = $_SESSION['logged_in_user_id'];
 
+        // Get guest ID for the user
         $result = $this->conn->execute_query(
             "SELECT GuestID FROM Users WHERE UserID = ?",
             [$userID]
@@ -207,6 +222,7 @@ class User
         $user = $result->fetch_assoc();
         $guestID = $user['GuestID'];
 
+        // Update phone contact
         $update = $this->conn->execute_query(
             "UPDATE Guests SET PhoneContact = ? WHERE GuestID = ?",
             [$newPhoneNo, $guestID]
@@ -228,6 +244,7 @@ class User
 
         $userID = $_SESSION['logged_in_user_id'];
 
+        // Get guest ID for the user
         $result = $this->conn->execute_query(
             "SELECT GuestID FROM Users WHERE UserID = ?",
             [$userID]
@@ -240,6 +257,7 @@ class User
         $user = $result->fetch_assoc();
         $guestID = $user['GuestID'];
 
+        // Update birth date
         $update = $this->conn->execute_query(
             "UPDATE Guests SET BirthDate = ? WHERE GuestID = ?",
             [$newBirthdate, $guestID]
@@ -261,6 +279,7 @@ class User
 
         $userID = $_SESSION['logged_in_user_id'];
 
+        // Check for duplicate email
         $check = $this->conn->execute_query(
             "SELECT UserID FROM Users WHERE Email = ?",
             [$newEmail]
@@ -270,6 +289,7 @@ class User
             throw new Exception("Email already in use.");
         }
 
+        // Update email
         $result = $this->conn->execute_query(
             "UPDATE Users SET Email = ? WHERE UserID = ?",
             [$newEmail, $userID]
@@ -284,6 +304,7 @@ class User
 
     public function updatePasswordByID($userID, $newPassword)
     {
+        // Update password by id
         $result = $this->conn->execute_query(
             "UPDATE Users SET PasswordHash = ? WHERE UserID = ?",
             [$newPassword, $userID]
@@ -296,10 +317,12 @@ class User
 
     public function createPasswordResetToken($userID)
     {
+        // Generate secure token
         $token = bin2hex(random_bytes(16)); // secure token
         $expires = date('Y-m-d H:i:s', strtotime('+30 minutes'));
         $tokenHash = hash('sha256', $token); // store hashed token for security
 
+        // Insert token into database
         $result = $this->conn->execute_query(
             "INSERT INTO PasswordResets (UserID, Token, ExpiresAt) VALUES (?, ?, ?)",
             [$userID, $tokenHash, $expires]
@@ -314,6 +337,7 @@ class User
 
     public function sendPasswordResetEmail($toEmail, $token)
     {
+        // Configure email sender
         $mail = new PHPMailer(true);
 
         try {
@@ -342,6 +366,7 @@ class User
     }
     public function getUserByResetToken($token)
     {
+        // Validate token and retrieve user
         $now = date('Y-m-d H:i:s');
         $tokenHash = hash('sha256', $token);
         $result = $this->conn->execute_query(
@@ -359,6 +384,7 @@ class User
 
     public function deleteResetToken($token)
     {
+        // Remove reset token from database
         $this->conn->execute_query(
             "DELETE FROM PasswordResets WHERE Token = ?",
             [$token]
@@ -367,6 +393,7 @@ class User
 
     public function getUserByID($userID)
     {
+        // Get user through id
         $result = $this->conn->execute_query(
             "SELECT * FROM Users WHERE UserID = ?",
             [$userID]
@@ -377,8 +404,10 @@ class User
 
     public function updateFullName($fname, $lname)
     {
+        // Get user ID from session
         $userID = $_SESSION['logged_in_user_id'];
 
+        // Update both first and last name
         $result = $this->conn->execute_query(
             "UPDATE Guests g
             JOIN Users u ON g.GuestID = u.GuestID
@@ -396,8 +425,10 @@ class User
 
     public function updateGuestDetails($phone, $birthDate)
     {
+        // Get user ID from session
         $userID = $_SESSION['logged_in_user_id'];
 
+        // Update guest contact info
         $result = $this->conn->execute_query(
             "UPDATE Guests g
             JOIN Users u ON g.GuestID = u.GuestID
@@ -411,8 +442,8 @@ class User
         }
     }
     // =========================
-// Check if a guest exists by email
-// =========================
+    // Check if a guest exists by email
+    // =========================
     public function getGuestEmailByID($guestID)
     {
         $result = $this->conn->execute_query(
@@ -427,8 +458,8 @@ class User
     }
 
     // =========================
-// Link a reservation to a user
-// =========================
+    // Link a reservation to a user
+    // =========================
     public function linkReservationToUser($reservationID, $userID)
     {
         $result = $this->conn->execute_query(
@@ -445,6 +476,7 @@ class User
 
     public function isReservationLinkedToUser($reservationID, $userID)
     {
+        // Check if reservation is linked to user
         $result = $this->conn->execute_query(
             "SELECT 1 FROM UserReservations WHERE ReservationID = ? AND UserID = ?",
             [$reservationID, $userID]
