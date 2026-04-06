@@ -201,7 +201,21 @@ switch ($uri) {
     case '/admin/reservations':
         $pages->adminReservations();
         exit;
-
+    case '/admin/dashboard':
+        $pages->adminDashboard();
+        exit;
+    case '/admin/rooms':
+        $pages->adminRooms();
+        exit;
+    case '/admin/payments':
+        $pages->payment();
+        exit;
+    case '/admin/activityLogs':
+        $pages->activityLogs();
+        exit;
+    case '/admin/calendar':
+        $pages->calendar();
+        exit;
     case '/admin-login':
         $pages->admin_login();
         exit;
@@ -209,6 +223,7 @@ switch ($uri) {
     case '/admin-login-submit':
         $auth->loginAdmin();
         exit;
+    
 
     default:
         // Router example

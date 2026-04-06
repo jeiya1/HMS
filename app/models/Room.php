@@ -137,5 +137,61 @@ WHERE r.RoomNumber = ?;',
 
         return $rooms;
     }
+
+    //admin functions
+    public function createRoom($type, $price, $description, $imagePath)
+    {
+        $result = $this->conn->execute_query(
+            "INSERT INTO Rooms (RoomTypeID, Price, Description, ImagePath) VALUES (?, ?, ?, ?)",
+            [$type, $price, $description, $imagePath]
+        );
+
+        return $result;
+    }
+    
+    public function getAllRooms()
+    {
+        $result = $this->conn->execute_query(
+            "SELECT r.RoomID, rt.RoomTypeName AS type, r.Price AS price, r.Description AS description, r.ImagePath AS image, rt.MaxOccupancy AS occupancy
+            FROM Rooms r
+            JOIN RoomTypes rt ON r.RoomTypeID = rt.RoomTypeID"
+        );
+
+        $rooms = [];
+        if ($result instanceof mysqli_result) {
+            while ($row = $result->fetch_assoc()) {
+                $rooms[] = $row;
+            }
+            $result->free();
+        }
+
+        return $rooms;
+    }
+
+    public function updateRoom($roomID, $type, $price, $description, $imagePath = null)
+    {
+        if ($imagePath) {
+            $result = $this->conn->execute_query(
+                "UPDATE Rooms SET RoomTypeID = ?, Price = ?, Description = ?, ImagePath = ? WHERE RoomID = ?",
+                [$type, $price, $description, $imagePath, $roomID]
+            );
+        } else {
+            $result = $this->conn->execute_query(
+                "UPDATE Rooms SET RoomTypeID = ?, Price = ?, Description = ? WHERE RoomID = ?",
+                [$type, $price, $description, $roomID]
+            );
+        }
+
+        return $result;
+    }
+    public function deleteRoom($roomID)
+    {
+        $result = $this->conn->execute_query(
+            "DELETE FROM Rooms WHERE RoomID = ?",
+            [$roomID]
+        );
+
+        return $result;
+    }
 }
 ?>

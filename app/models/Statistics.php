@@ -48,5 +48,121 @@ class Statistics {
         ");
         return $result->fetch_all(MYSQLI_ASSOC);
     }
+    // Total revenue this month
+    public function getRevenueMonth() {
+
+        $result = $this->conn->execute_query("
+            SELECT COALESCE(SUM(Amount),0) AS revenue
+            FROM Payments
+            WHERE PaymentStatus = 'completed'
+            AND MONTH(PaymentDate) = MONTH(CURDATE())
+            AND YEAR(PaymentDate) = YEAR(CURDATE())
+        ");
+
+        return $result->fetch_assoc()['revenue'] ?? 0;
+    }
+
+    //Total Revenue
+      public function getTotalRevenue() {
+
+    $result = $this->conn->execute_query("
+        SELECT COALESCE(SUM(Amount),0) AS revenue
+        FROM Payments
+        WHERE PaymentStatus = 'completed'
+    ");
+
+    return $result->fetch_assoc()['revenue'] ?? 0;
+    }
+    
+     // New bookings today
+    public function getNewBookingsToday() {
+
+        $result = $this->conn->execute_query("
+            SELECT COUNT(*) AS total
+            FROM Reservations
+            WHERE DATE(CreatedAt) = CURDATE()
+        ");
+
+        return $result->fetch_assoc()['total'] ?? 0;
+    }
+
+    // Check-ins today
+    public function getCheckInsToday() {
+
+        $result = $this->conn->execute_query("
+            SELECT COUNT(*) AS total
+            FROM ReservationRooms
+            WHERE CheckInDate = CURDATE()
+            AND Status IN ('confirmed','checked_in')
+        ");
+
+        return $result->fetch_assoc()['total'] ?? 0;
+    }
+
+    // Check-outs today
+    public function getCheckOutsToday() {
+
+        $result = $this->conn->execute_query("
+            SELECT COUNT(*) AS total
+            FROM ReservationRooms
+            WHERE CheckOutDate = CURDATE()
+            AND Status = 'checked_out'
+        ");
+
+        return $result->fetch_assoc()['total'] ?? 0;
+    }
+
+    // Occupied rooms
+public function getOccupiedRooms()
+{
+    $result = $this->conn->execute_query("
+        SELECT COUNT(*) AS total
+        FROM Rooms
+        WHERE Status = 'occupied'
+    ");
+
+    return $result->fetch_assoc()['total'] ?? 0;
+}
+
+
+// Available rooms
+public function getAvailableRooms()
+{
+    $result = $this->conn->execute_query("
+        SELECT COUNT(*) AS total
+        FROM Rooms
+        WHERE Status = 'available'
+    ");
+
+    return $result->fetch_assoc()['total'] ?? 0;
+}
+
+
+// Not ready / maintenance
+public function getMaintenanceRooms()
+{
+    $result = $this->conn->execute_query("
+        SELECT COUNT(*) AS total
+        FROM Rooms
+        WHERE Status = 'maintenance'
+    ");
+
+    return $result->fetch_assoc()['total'] ?? 0;
+}
+
+
+// Reserved rooms (future bookings)
+public function getReservedRooms()
+{
+    $result = $this->conn->execute_query("
+        SELECT COUNT(*) AS total
+        FROM ReservationRooms
+        WHERE Status IN ('pending','confirmed')
+    ");
+
+    return $result->fetch_assoc()['total'] ?? 0;
+}
+
+
 }
 ?>

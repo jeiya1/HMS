@@ -4,10 +4,10 @@
         <a href="/admin" class="px-4 py-2 rounded hover:bg-gray-700" onclick="show('statistics')">Dashboard</a>
         <a href="/admin/reservations" class=" px-4 py-2 rounded hover:bg-gray-700"
             onclick="show('reservations')">Reservations</a>
-        <a href="#rooms" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('rooms')">Rooms</a>
-        <a href="#payments" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('payments')">Financials</a>
-        <a href="#calendar" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('calendar')">Calendar</a>
-        <a href="#logs" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('logs')">Activity Logs</a>
+        <a href="/admin/rooms" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('rooms')">Rooms</a>
+        <a href="/admin/payments" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('payments')">Financials</a>
+        <a href="/admin/calendar" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('calendar')">Calendar</a>
+        <a href="/admin/activityLogs" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('logs')">Activity Logs</a>
     </nav>
     <div class="p-4 border-t border-gray-700 text-xs text-gray-400">Hotel Rivera HMS v1.0.5</div>
 </nav>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
-  <link href="/public/css/output.css" rel="stylesheet">
+  <link href="/css/output.css" rel="stylesheet">
   <style>
     
     /* Solid blue border outside */
@@ -53,7 +53,7 @@
 
   <!-- Logo -->
   <div class="transform -translate-y-[40px]">
-    <img src="/public/images/logo.jpg" class="w-90 h-90">
+    <img src="/assets/images/logo.jpg" class="w-90 h-90">
   </div>
 
   <!-- Login Form Container -->
