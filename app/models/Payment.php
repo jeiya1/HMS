@@ -29,6 +29,31 @@ class Payment {
         }
 
     }
+    //admin functions
+    public function getAllPayments()
+    {
+    $sql = "SELECT * FROM payments WHERE status='Paid'";
+    $result = $this->conn->query($sql);
 
+    return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getRefundedPayments()
+    {
+    $sql = "SELECT * FROM payments WHERE status='Refunded'";
+    $result = $this->conn->query($sql);
+
+    return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function refundPayment($id)
+    {
+    $stmt = $this->conn->prepare(
+    "UPDATE payments SET status='Refunded' WHERE id=?"
+    );
+
+    $stmt->bind_param("i",$id);
+
+    return $stmt->execute();
+    }
 }
-?>

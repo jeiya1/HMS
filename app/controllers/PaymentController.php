@@ -2,7 +2,9 @@
 
 require_once '../app/models/Payment.php';
 
+
 class PaymentController {
+    private $paymentModel;
 
     public function payReservation() {
 
@@ -67,6 +69,17 @@ class PaymentController {
                 "error" => "Server error: " . $e->getMessage()
             ]);
         }
+    }
+    //admin functions
+    public function refund()
+    {
+
+    $id = $_POST['id'];
+
+    $this->paymentModel->refundPayment($id);
+
+    header("Location: /payments");
+
     }
 }
 ?>
