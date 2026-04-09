@@ -223,81 +223,6 @@
       }
     });
 
-    const config = {
-      type: "bar",
-      data: roomTypesData,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          },
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                return `${context.label}: ${context.formattedValue}`;
-              }
-            }
-          }
-        },
-        scales: {
-          x: {
-            categoryPercentage: 0.6,
-            barPercentage: 0.8
-          },
-          y: {
-            title: {
-              display: true,
-              text: "No. Of Bookings"
-            },
-            beginAtZero: true
-          }
-        }
-      }
-    };
-
-    const ctx = document.getElementById('roomTypesChart').getContext('2d');
-    const roomTypesChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Standard', 'Deluxe', 'Suite'],
-        datasets: [{
-          label: 'Bookings',
-          data: [1200, 1500, 800],
-          backgroundColor: [
-            'rgba(59, 130, 246, 1)',   // Standard - Blue
-            'rgba(16, 185, 129, 1)',   // Deluxe - Green
-            'rgba(234, 88, 12, 1)'     // Suite - Orange
-          ],
-          borderColor: [
-            'rgba(59, 130, 246, 1)',
-            'rgba(16, 185, 129, 1)',
-            'rgba(234, 88, 12, 1)'
-          ],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        layout: {
-          padding: {
-            top: 10,
-            bottom: 20,
-            left: 10,
-            right: 10
-          }
-        },
-        scales: {
-          x: {
-            ticks: {
-              padding: 5
-            }
-          }
-        },
-        responsive: true,
-        maintainAspectRatio: false
-      }
-    });
     // User Account Creations Last 6 Months
     new Chart(document.getElementById('userAccountsChart'), {
       type: 'line',
@@ -329,9 +254,10 @@
         }
       }
     });
+
   </script>
-  <script src="/js/admin/reservation.js"></script>
-  <script src="/js/admin/calendar.js"></script>
+  <script src="/admin/js/reservation.js"></script>
+  <script src="/admin/js/calendar.js"></script>
 </body>
 
 </html>
