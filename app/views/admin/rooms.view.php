@@ -20,35 +20,34 @@
 
   <!-- Top Bar -->
   <?php include_once __DIR__ . '/components/header.view.php'; ?>
-    <?php include '../app/views/layouts/header.php'; ?>
-<?php include '../app/views/layouts/sidebar.php'; ?>
-<?php include '../app/views/layouts/topbar.php'; ?>
+  <?php include '../app/views/layouts/header.php'; ?>
+  <?php include '../app/views/layouts/sidebar.php'; ?>
+  <?php include '../app/views/layouts/topbar.php'; ?>
 
   <!-- Main Content -->
-    <main class="ml-[480px] pt-[50px] px-6">
+  <main class="ml-[480px] pt-[50px] px-6">
 
     <h2 class="text-5xl font-extrabold mt-10 mb-6">
-    Room Management
+      Room Management
     </h2>
 
-    <button id="add-room-btn"
-    class="bg-green-500 text-white px-6 py-2 rounded-3xl">
-    ADD ROOM
+    <button id="add-room-btn" class="bg-green-500 text-white px-6 py-2 rounded-3xl">
+      ADD ROOM
     </button>
 
     <?php include 'components/add_room_modal.php'; ?>
 
     <div class="grid grid-cols-3 gap-6 mt-10">
 
-    <?php foreach($rooms as $room): ?>
+      <?php foreach ($rooms as $room): ?>
 
-    <?php include 'components/room_card.php'; ?>
+        <?php include 'components/room_card.php'; ?>
 
-    <?php endforeach; ?>
+      <?php endforeach; ?>
 
     </div>
 
-    </main>
+  </main>
 </body>
 
 </html>

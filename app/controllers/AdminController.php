@@ -65,46 +65,46 @@ class AdminController
             header("Location: /admin/login");
             exit();
         }
-        $roomModel = new Room($GLOBALS['conn']);
+        // $roomModel = new Room($GLOBALS['conn']);
         require_once '../../app/views/admin/rooms.view.php';
     }
     public function loginForm()
     {
         require_once '../../app/views/admin/login.view.php';
     }
-    public function payment()
+    public function adminFinancials()
     {
         $paymentModel = new Payment($GLOBALS['conn']);
         if (!$this->getAuthState()) {
             header("Location: /admin/login");
             exit();
         }
-        $payments = $paymentModel->getAllPayments();
-        $refunds = $paymentModel->getRefundedPayments();
-        require_once '../../app/views/payment.view.php';
+        // $payments = $paymentModel->getAllPayments();
+        // $refunds = $paymentModel->getRefundedPayments();
+        require_once '../../app/views/admin/payments.view.php';
     }
-    public function calendar()
+    public function adminCalendar()
     {
         if (!$this->getAuthState()) {
             header("Location: /admin/login");
             exit();
         }
-        $eventModel = new Event();
-        $events = $eventModel->getAllEvents();
+        // $eventModel = new Event();
+        // $events = $eventModel->getAllEvents();
 
-        require "../../app/views/calendar/index.php";
+        require "../../app/views/admin/calendar.view.php";
 
     }
-    public function activityLogs()
+    public function adminLogs()
     {
         if (!$this->getAuthState()) {
             header("Location: /admin/login");
             exit();
         }
-        $logModel = new Log($GLOBALS['conn']);
-        $adminLogs = $logModel->getAdminLogs();
-        $userLogs = $logModel->getUserLogs();
-        require "../../app/views/logs/index.php";
+        // $logModel = new Log($GLOBALS['conn']);
+        // $adminLogs = $logModel->getAdminLogs();
+        // $userLogs = $logModel->getUserLogs();
+        require "../../app/views/admin/activityLogs.view.php";
     }
 
     // Check if user session is active

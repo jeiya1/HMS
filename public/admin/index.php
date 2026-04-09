@@ -14,6 +14,9 @@ $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $adminPath = preg_replace('#^/admin#', '', $uri);
 
 switch ($adminPath) {
+    case '/test':
+        require "../../app/views/admin/ORIGINAL.view.php";
+        break;
     case '/':
         if (!isset($_SESSION['admin_logged_in'])) {
             header('Location: /admin/login');
@@ -63,6 +66,35 @@ switch ($adminPath) {
         $admin->adminReservations();
         break;
 
+    case '/rooms':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /admin/login');
+            exit();
+        }
+        $admin->adminRooms();
+        break;
+
+    case '/financials':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /admin/login');
+            exit();
+        }
+        $admin->adminFinancials();
+        break;
+    case '/calendar':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /admin/login');
+            exit();
+        }
+        $admin->adminCalendar();
+        break;
+    case '/logs':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /admin/login');
+            exit();
+        }
+        $admin->adminLogs();
+        break;
 
     // ENDPOINTS
     case '/getConfirmedReservations':
