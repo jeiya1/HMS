@@ -202,14 +202,12 @@ class User
     // Update phone number for authenticated user
     public function updatePhoneNo($newPhoneNo)
     {
-        // Require authentication
         if (!isset($_SESSION['logged_in_user_id'])) {
             throw new Exception("Unauthorized: User not logged in.");
         }
 
         $userID = $_SESSION['logged_in_user_id'];
 
-        // Get guest ID for the user
         $result = $this->conn->execute_query(
             "SELECT GuestID FROM Users WHERE UserID = ?",
             [$userID]
@@ -219,17 +217,15 @@ class User
             throw new Exception("User not found.");
         }
 
-        $user = $result->fetch_assoc();
-        $guestID = $user['GuestID'];
+        $guestID = $result->fetch_assoc()['GuestID'];
 
-        // Update phone contact
         $update = $this->conn->execute_query(
             "UPDATE Guests SET PhoneContact = ? WHERE GuestID = ?",
             [$newPhoneNo, $guestID]
         );
 
         if (!$update) {
-            throw new Exception("Failed to update phone contact: " . $this->conn->error);
+            throw new Exception("Failed to update phone contact.");
         }
 
         return true;

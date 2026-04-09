@@ -282,7 +282,6 @@ class AuthController
         $lname = trim($_POST['lname'] ?? '');
         $country = trim($_POST['country_code'] ?? '');
         $phoneNo = trim($_POST['phone'] ?? '');
-        $phone = $country . $phoneNo;
         $birthDate = trim($_POST['birthDate'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $currentPassword = trim($_POST['passwordc'] ?? '');
@@ -292,7 +291,7 @@ class AuthController
 
             $userModel = new User($GLOBALS['conn']);
             $user = $userModel->getUserByID($userID);
-
+            $guest = $userModel->getGuestDetails($userID);
 
             if (!$user) {
                 echo json_encode(["success" => false, "error" => "User not found."]);
@@ -314,8 +313,35 @@ class AuthController
                 $userModel->updateFirstName($fname);
             if (!empty($lname))
                 $userModel->updateLastName($lname);
-            if (!empty($phone))
-                $userModel->updatePhoneNo($phone);
+            $currentPhone = $guest['PhoneContact'] ?? '';
+            $finalPhone = $currentPhone;
+
+            $countryCodes = ['+63', '+1', '+44', '+61'];
+
+            // Case 1: user entered new local number
+            if (!empty($phoneNo)) {
+                $finalPhone = $country . $phoneNo;
+            }
+            // Case 2: user changed country code only
+            elseif (!empty($currentPhone) && empty($phoneNo)) {
+                $localPart = $currentPhone;
+
+                // Detect old country code and remove it
+                foreach ($countryCodes as $code) {
+                    if (str_starts_with($currentPhone, $code)) {
+                        $localPart = substr($currentPhone, strlen($code));
+                        break;
+                    }
+                }
+
+                // Prepend new country code
+                $finalPhone = $country . $localPart;
+            }
+
+            // Only update if changed
+            if ($finalPhone !== $currentPhone) {
+                $userModel->updatePhoneNo($finalPhone);
+            }
             if (!empty($birthDate))
                 $userModel->updateBirthdate($birthDate);
             if (!empty($email))

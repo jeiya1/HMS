@@ -190,10 +190,11 @@ $(document).ready(function () {
                 console.log(response);
                 if (!response.success) {
                     showToast(response.error, "error");
-                    console.log(response.error);
                 } else {
                     showToast(response.message, "success");
-                    console.log(response.message);
+                    setTimeout(function () {
+                        location.reload();
+                    }, 500);
                 }
             },
             error: function () {

@@ -6,6 +6,7 @@ require_once '../app/models/Statistics.php';
 require_once "../app/models/Payment.php";
 require_once "../app/models/Event.php";
 require_once "../app/models/Log.php";
+require_once "../app/models/User.php";
 class PagesController
 {
     // Privacy Policy page
@@ -107,6 +108,22 @@ class PagesController
     {
         $logged_in = $this->getAuthState();
         $cartCount = $this->getCartCount();
+        $userModel = new User($GLOBALS['conn']);
+        $userID = $_SESSION['logged_in_user_id'];
+        $userData = $userModel->getGuestDetails($userID);
+        $phoneFull = $userData['PhoneContact'] ?? '';
+        $countryCodes = ['+63', '+1', '+44', '+61'];
+
+        $country_code = '+63'; // default
+        $localNumber = $phoneFull;
+
+        foreach ($countryCodes as $code) {
+            if (str_starts_with($phoneFull, $code)) {
+                $country_code = $code;
+                $localNumber = substr($phoneFull, strlen($code));
+                break;
+            }
+        }
         require_once '../app/views/auth/account.view.php';
     }
 

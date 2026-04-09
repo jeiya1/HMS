@@ -43,30 +43,35 @@
                         <div class="flex flex-col gap-1 w-1/4">
                             <label for="fname">First Name* </label>
                             <input type="text" name="fname"
+                                placeholder="<?= htmlspecialchars($userData['FirstName'] ?? '') ?>"
                                 class="border border-gray-300 p-2 rounded w-full text-black bg-white">
                             <label for="lname">Last Name* </label>
                             <input type="text" name="lname"
+                                placeholder="<?= htmlspecialchars($userData['LastName'] ?? '') ?>"
                                 class="border border-gray-300 p-2 rounded w-full text-black bg-white">
                             <label for="phone">Phone Contact* </label>
                             <div class="flex gap-2">
                                 <!-- Country Code -->
-                                <select name="country_code" required
+                                <select name="country_code"
                                     class="border border-gray-300 p-2 rounded bg-white text-black w-28">
-                                    <option value="+63" selected>🇵🇭 +63</option>
-                                    <option value="+1">🇺🇸 +1</option>
-                                    <option value="+44">🇬🇧 +44</option>
-                                    <option value="+61">🇦🇺 +61</option>
+                                    <option value="+63" <?= $country_code === '+63' ? 'selected' : '' ?>>🇵🇭 +63</option>
+                                    <option value="+1" <?= $country_code === '+1' ? 'selected' : '' ?>>🇺🇸 +1</option>
+                                    <option value="+44" <?= $country_code === '+44' ? 'selected' : '' ?>>🇬🇧 +44</option>
+                                    <option value="+61" <?= $country_code === '+61' ? 'selected' : '' ?>>🇦🇺 +61</option>
                                 </select>
 
                                 <!-- Local Number -->
-                                <input type="tel" name="phone" placeholder="9123456789" pattern="[0-9]{7,12}" required
+                                <input type="tel" name="phone" placeholder="<?= htmlspecialchars($localNumber) ?>"
+                                    pattern="[0-9]{7,12}"
                                     class="border border-gray-300 p-2 rounded w-full text-black bg-white">
                             </div>
                             <label for="birthDate">Birthdate* </label>
-                            <input type="text" id="birthDate" name="birthDate" placeholder="Select your birthdate"
+                            <input type="text" id="birthDate" name="birthDate"
+                                placeholder="<?= htmlspecialchars($userData['BirthDate'] ?? '') ?>"
+                                placeholder="Select your birthdate"
                                 class="border border-gray-300 p-2 rounded w-full text-black bg-white">
                             <label for="email">Email* </label>
-                            <input type="email" name="email"
+                            <input type="email" name="email" placeholder="<?= htmlspecialchars($userData['Email'] ?? '') ?>"
                                 class="border border-gray-300 p-2 rounded w-full text-black bg-white">
                         </div>
                         <div class="flex flex-col gap-2 w-1/4 mr-50">
