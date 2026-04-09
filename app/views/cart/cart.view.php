@@ -336,7 +336,7 @@
                                     </select>
 
                                     <!-- Card number input -->
-                                    <input type="text" id="discount-card-number" placeholder="Enter PWD/Senior Card Number"
+                                    <input type="text" id="discount-card-number" placeholder="Enter PWD/Senior Card ID"
                                         class="border border-gray-300 p-2 rounded w-full mt-2 text-black bg-white" disabled>
                                 </div>
 

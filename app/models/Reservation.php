@@ -488,4 +488,147 @@ class Reservation
 
         return true;
     }
+
+    public function getAllConfirmedReservations()
+    {
+        try {
+            $result = $this->conn->execute_query(
+                "SELECT 
+                r.ReservationID,
+                r.BookingToken,
+                r.Status AS ReservationStatus,
+                r.CreatedAt AS ReservationDate,
+                g.FirstName AS GuestFirstName,
+                g.LastName AS GuestLastName,
+                g.Email AS GuestEmail,
+                rr.ReservationRoomID,
+                rr.CheckInDate,
+                rr.CheckOutDate,
+                rr.NumAdults,
+                rr.NumChildren,
+                rooms.RoomNumber,
+                rt.RoomTypeName,
+                rt.BasePrice,
+                p.Amount AS PaymentAmount,
+                p.PaymentStatus,
+                pm.MethodName AS PaymentMethod
+            FROM Reservations r
+            JOIN Guests g ON r.GuestID = g.GuestID
+            JOIN ReservationRooms rr ON rr.ReservationID = r.ReservationID
+            JOIN Rooms rooms ON rr.RoomID = rooms.RoomID
+            JOIN RoomTypes rt ON rooms.RoomTypeID = rt.RoomTypeID
+            LEFT JOIN Payments p ON p.ReservationID = r.ReservationID
+            LEFT JOIN PaymentMethods pm ON p.MethodID = pm.MethodID
+            WHERE r.Status = 'confirmed'
+            ORDER BY r.CreatedAt DESC, rr.CheckInDate ASC"
+            );
+
+            $reservations = [];
+            if ($result) {
+                while ($row = $result->fetch_assoc()) {
+                    $resID = $row['ReservationID'];
+                    if (!isset($reservations[$resID])) {
+                        $reservations[$resID] = [
+                            'ReservationID' => $resID,
+                            'BookingToken' => $row['BookingToken'],
+                            'ReservationStatus' => $row['ReservationStatus'],
+                            'ReservationDate' => $row['ReservationDate'],
+                            'GuestFirstName' => $row['GuestFirstName'],
+                            'GuestLastName' => $row['GuestLastName'],
+                            'GuestEmail' => $row['GuestEmail'],
+                            'PaymentAmount' => $row['PaymentAmount'],
+                            'PaymentStatus' => $row['PaymentStatus'],
+                            'PaymentMethod' => $row['PaymentMethod'],
+                            'Rooms' => []
+                        ];
+                    }
+
+                    $reservations[$resID]['Rooms'][] = [
+                        'ReservationRoomID' => $row['ReservationRoomID'],
+                        'RoomNumber' => $row['RoomNumber'],
+                        'RoomType' => $row['RoomTypeName'],
+                        'BasePrice' => $row['BasePrice'],
+                        'CheckInDate' => $row['CheckInDate'],
+                        'CheckOutDate' => $row['CheckOutDate'],
+                        'NumAdults' => $row['NumAdults'],
+                        'NumChildren' => $row['NumChildren']
+                    ];
+                }
+            }
+
+            return array_values($reservations);
+
+        } catch (Exception $e) {
+            throw new Exception("Failed to fetch confirmed reservations: " . $e->getMessage());
+        }
+    }
+public function getLiveReservations() {
+    try {
+        $result = $this->conn->execute_query(
+            "SELECT 
+                r.ReservationID,
+                r.BookingToken,
+                r.Status AS ReservationStatus,
+                g.FirstName AS GuestFirstName,
+                g.LastName AS GuestLastName,
+                g.Email AS GuestEmail,
+                rr.ReservationRoomID,
+                rr.RoomID,
+                rooms.RoomNumber,
+                rt.RoomTypeName,
+                rr.CheckInDate,
+                rr.CheckOutDate,
+                rr.NumAdults,
+                rr.NumChildren,
+                p.Amount AS PaymentAmount,
+                p.PaymentStatus,
+                pm.MethodName AS PaymentMethod
+            FROM Reservations r
+            JOIN Guests g ON r.GuestID = g.GuestID
+            JOIN ReservationRooms rr ON rr.ReservationID = r.ReservationID
+            JOIN Rooms rooms ON rr.RoomID = rooms.RoomID
+            JOIN RoomTypes rt ON rooms.RoomTypeID = rt.RoomTypeID
+            LEFT JOIN Payments p ON p.ReservationID = r.ReservationID
+            LEFT JOIN PaymentMethods pm ON p.MethodID = pm.MethodID
+            WHERE r.Status = 'pending' OR p.PaymentStatus = 'pending'
+            ORDER BY r.CreatedAt DESC"
+        );
+
+        $reservations = [];
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $resID = $row['ReservationID'];
+                if (!isset($reservations[$resID])) {
+                    $reservations[$resID] = [
+                        'ReservationID' => $resID,
+                        'BookingToken' => $row['BookingToken'],
+                        'ReservationStatus' => $row['ReservationStatus'],
+                        'GuestFirstName' => $row['GuestFirstName'],
+                        'GuestLastName' => $row['GuestLastName'],
+                        'GuestEmail' => $row['GuestEmail'],
+                        'PaymentAmount' => $row['PaymentAmount'],
+                        'PaymentStatus' => $row['PaymentStatus'],
+                        'PaymentMethod' => $row['PaymentMethod'],
+                        'Rooms' => []
+                    ];
+                }
+
+                $reservations[$resID]['Rooms'][] = [
+                    'ReservationRoomID' => $row['ReservationRoomID'],
+                    'RoomNumber' => $row['RoomNumber'],
+                    'RoomTypeName' => $row['RoomTypeName'],
+                    'CheckInDate' => $row['CheckInDate'],
+                    'CheckOutDate' => $row['CheckOutDate'],
+                    'NumAdults' => $row['NumAdults'],
+                    'NumChildren' => $row['NumChildren']
+                ];
+            }
+        }
+
+        return array_values($reservations);
+
+    } catch (Exception $e) {
+        throw new Exception("Failed to fetch live reservations: " . $e->getMessage());
+    }
+}
 }

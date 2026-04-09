@@ -399,6 +399,9 @@
   .z-20 {
     z-index: 20;
   }
+  .z-30 {
+    z-index: 30;
+  }
   .z-40 {
     z-index: 40;
   }
@@ -752,6 +755,9 @@
   }
   .max-h-200 {
     max-height: calc(var(--spacing) * 200);
+  }
+  .max-h-\[80vh\] {
+    max-height: 80vh;
   }
   .max-h-\[90\%\] {
     max-height: 90%;
@@ -1457,6 +1463,12 @@
     background-color: color-mix(in srgb, #000 5%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-black) 5%, transparent);
+    }
+  }
+  .bg-black\/30 {
+    background-color: color-mix(in srgb, #000 30%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-black) 30%, transparent);
     }
   }
   .bg-black\/50 {
@@ -2493,6 +2505,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-blue-600);
+      }
+    }
+  }
+  .hover\:bg-gray-50 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-gray-50);
       }
     }
   }

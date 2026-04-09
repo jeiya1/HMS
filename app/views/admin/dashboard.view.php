@@ -4,17 +4,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lance Hotel Admin</title>
-  <link href="/css/output.css" rel="stylesheet">
-  <link href="/css/admin/admin.css" rel="stylesheet">
+  <title>Dashboard</title>
+  <link rel="icon" type="image/x-icon" href="/admin/assets/icons/favicon.svg">
+  <link href="/admin/css/output.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
   <script type="module" src="https://unpkg.com/ionicons@8.0.13/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@8.0.13/dist/ionicons/ionicons.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 
 <body class="bg-stone-200 font-roboto flex flex-col min-h-screen">
+  <?php include_once __DIR__ . '/components/toast.view.php'; ?>
   <!-- Sidebar -->
   <?php include_once __DIR__ . '/components/sidebar.view.php'; ?>
 
@@ -39,6 +43,8 @@
     </div>
   </main>
 
+  <script src="/admin/js/reservation.js"></script>
+  <script src="/admin/js/calendar.js"></script>
   <!-- Page toggle -->
   <script>
     const reservationsWeek = <?php echo json_encode($reservationsWeek); ?>;
@@ -256,8 +262,6 @@
     });
 
   </script>
-  <script src="/admin/js/reservation.js"></script>
-  <script src="/admin/js/calendar.js"></script>
 </body>
 
 </html>

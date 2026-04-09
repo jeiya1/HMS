@@ -21,6 +21,7 @@ switch ($adminPath) {
         }
         $admin->adminDashboard();
         break;
+
     case '/login':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $admin->login();
@@ -33,6 +34,17 @@ switch ($adminPath) {
                 exit();
             }
         }
+        break;
+
+    case '/logout':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $admin->logout();
+        }
+        $admin->adminDashboard();
+        break;
+
+    case '/password-change':
+        $admin->passwordChange();
         break;
 
     case '/dashboard':
@@ -49,6 +61,32 @@ switch ($adminPath) {
             exit();
         }
         $admin->adminReservations();
+        break;
+
+
+    // ENDPOINTS
+    case '/getConfirmedReservations':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('HTTP/1.1 401 Unauthorized');
+            echo json_encode(['error' => 'Unauthorized']);
+            exit();
+        }
+        $reservationModel = new Reservation($GLOBALS['conn']);
+        $reservations = $reservationModel->getAllConfirmedReservations();
+        header('Content-Type: application/json');
+        echo json_encode($reservations);
+        break;
+
+    case '/live-reservations':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('HTTP/1.1 401 Unauthorized');
+            echo json_encode(['error' => 'Unauthorized']);
+            exit();
+        }
+        $reservationModel = new Reservation($GLOBALS['conn']);
+        $reservations = $reservationModel->getLiveReservations();
+        header('Content-Type: application/json');
+        echo json_encode($reservations);
         break;
 
     default:

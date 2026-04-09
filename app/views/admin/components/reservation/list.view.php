@@ -4,13 +4,14 @@
         <table class="w-full border border-gray-300">
             <thead>
                 <tr class="bg-gray-200">
-                    <th class="border border-gray-300 p-2 text-center">ID</th>
                     <th class="border border-gray-300 p-2 text-center">Booking Code</th>
                     <th class="border border-gray-300 p-2 text-center">Guest Name</th>
                     <th class="border border-gray-300 p-2 text-center">Check-in</th>
                     <th class="border border-gray-300 p-2 text-center">Check-out</th>
-                    <th class="border border-gray-300 p-2 text-center">Method</th>
-                    <th class="border border-gray-300 p-2 text-center">Status</th>
+                    <th class="border border-gray-300 p-2 text-center">Number of Rooms</th>
+                    <th class="border border-gray-300 p-2 text-center">Total Room Amount</th>
+                    <th class="border border-gray-300 p-2 text-center">Payment Amount (Method)</th>
+                    <th class="border border-gray-300 p-2 text-center">Payment Status</th>
                     <th class="border border-gray-300 p-2 text-center">Actions</th>
                 </tr>
             </thead>

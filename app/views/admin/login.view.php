@@ -107,7 +107,7 @@
         </div>
 
         <button type="submit"
-          class="bg-gray-800 text-white font-semibold py-2 rounded w-full hover:bg-gray-600 transition">
+          class="bg-gray-800 text-white font-semibold py-2 rounded w-full hover:bg-gray-600 transition cursor-pointer">
           Login
         </button>
       </form>
@@ -126,8 +126,7 @@
           if (!response.success) {
             showToast(response.error || "Invalid credentials", "error");
           } else {
-            showToast("Login successful!", "success");
-            setTimeout(() => window.location.href = response.redirect, 1000);
+            window.location.href = response.redirect || "/admin/dashboard";
           }
         },
         error: function (xhr) {

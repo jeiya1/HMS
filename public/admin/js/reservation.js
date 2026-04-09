@@ -1,251 +1,159 @@
-// reservations.js
+$(document).ready(function() {
+    function loadReservations() {
+        $.ajax({
+            url: '/admin/getConfirmedReservations', // JSON endpoint
+            type: 'GET',
+            dataType: 'json',
+            success: function(reservations) {
+                var $table = $('#reservationTable');
+                $table.empty();
 
-// Sample data
-let reservations = [
-  { id: 1, bookingcode: "HVKGHJC", guest: "Lance Samonte", room: 101, checkin: "2026-03-23", checkout: "2026-03-25", method: "Online", status: "Pending" },
-  { id: 2, bookingcode: "HVKGHJC", guest: "Lourence Cortez", room: 102, checkin: "2026-03-24", checkout: "2026-03-26", method: "Walk-in", status: "Confirmed" },
-];
+                if (!reservations || reservations.length === 0) {
+                    $table.append('<tr><td colspan="9" class="text-center p-2">No confirmed reservations found.</td></tr>');
+                    return;
+                }
 
-let currentId = reservations.length;
-let liveFeed = [];
-let currentIndex = 0;
+                reservations.forEach(function(reservation) {
+                    var rooms = reservation.Rooms || [];
+                    var earliestCheckIn = rooms.map(r => r.CheckInDate).sort()[0] || '';
+                    var latestCheckOut = rooms.map(r => r.CheckOutDate).sort().reverse()[0] || '';
+                    var totalRoomAmount = rooms.reduce((sum, r) => sum + parseFloat(r.BasePrice || 0), 0).toFixed(2);
 
-// Utility: render status badge
-function statusBadge(status) {
-  const cls = status.toLowerCase();
-  return `<span class="badge badge-${cls}">${status}</span>`;
-}
+                    $table.append(`
+                        <tr>
+                            <td class="border p-2 text-center">${reservation.BookingToken}</td>
+                            <td class="border p-2 text-center">${reservation.GuestFirstName} ${reservation.GuestLastName}</td>
+                            <td class="border p-2 text-center">${earliestCheckIn}</td>
+                            <td class="border p-2 text-center">${latestCheckOut}</td>
+                            <td class="border p-2 text-center">${rooms.length}</td>
+                            <td class="border p-2 text-center">$${totalRoomAmount}</td>
+                            <td class="border p-2 text-center">$${reservation.PaymentAmount || '0.00'} (${reservation.PaymentMethod || 'N/A'})</td>
+                            <td class="border p-2 text-center">${reservation.PaymentStatus || 'N/A'}</td>
+                            <td class="border p-2 text-center">
+                                <button class="viewReservation" data-token="${reservation.BookingToken}">View</button>
+                                <button class="cancelReservation" data-token="${reservation.BookingToken}">Cancel</button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            },
+            error: function(xhr) {
+                console.error(xhr.responseText);
+                $('#reservationTable').html('<tr><td colspan="9" class="text-center text-red-500">Error loading reservations.</td></tr>');
+            }
+        });
+    }
 
-// Render reservation table
-function renderTable(data = reservations) {
-  const tbody = document.getElementById('reservationTable');
-  tbody.innerHTML = '';
-  data.forEach(r => {
-    tbody.innerHTML += `
-      <tr>
-        <td class="border p-2 text-center">${r.id}</td>
-        <td class="border p-2 text-center">${r.bookingcode}</td>
-        <td class="border p-2 text-center">${r.guest}</td>
-        <td class="border p-2 text-center">${r.checkin}</td>
-        <td class="border p-2 text-center">${r.checkout}</td>
-        <td class="border p-2 text-center">${r.method}</td>
-        <td class="border p-2 text-center">${statusBadge(r.status)}</td>
-        <td class="border p-2">
-          <div class="flex justify-center space-x-2">
-            <button onclick="viewReservation(${r.id})" class="bg-blue-500 text-white px-2 py-1 rounded cursor-pointer">View</button>
-            <button onclick="editReservation(${r.id})" class="bg-yellow-500 text-white px-2 py-1 rounded cursor-pointer">Edit</button>
-            <button onclick="cancelReservation(${r.id})" class="bg-red-500 text-white px-2 py-1 rounded cursor-pointer">Cancel</button>
-          </div>
-        </td>
-      </tr>
-    `;
-  });
-}
+    loadReservations();
+});
+$(document).on('click', '.viewReservation', function() {
+    var token = $(this).data('token');
 
-// View reservation details
-function viewReservation(id) {
-  const r = reservations.find(x => x.id === id);
-  if (!r) return;
-  const modal = document.getElementById('detailsModal');
-  const content = document.getElementById('detailsContent');
-  content.innerHTML = `
-    <div class="text-center">
-      <p><strong>ID:</strong> ${r.id}</p>
-      <p><strong>Booking Code:</strong> ${r.bookingcode}</p>
-      <p><strong>Guest Name:</strong> ${r.guest}</p>
-      <p><strong>Room:</strong> ${r.room}</p>
-      <p><strong>Room Type:</strong> ${r.roomType || ""}</p>
-      <p><strong>Check-in:</strong> ${r.checkin}</p>
-      <p><strong>Check-out:</strong> ${r.checkout}</p>
-      <p><strong>Method:</strong> ${r.method}</p>
-      <p><strong>Status:</strong> ${r.status}</p>
-    </div>
-  `;
-  modal.style.display = "flex";
-}
+    // Find the reservation in the loaded table data
+    $.ajax({
+        url: '/admin/getConfirmedReservations',
+        type: 'GET',
+        dataType: 'json',
+        success: function(reservations) {
+            var res = reservations.find(r => r.BookingToken === token);
+            if (!res) return alert('Reservation not found.');
+
+            var roomsHtml = '';
+            res.Rooms.forEach(function(room) {
+                roomsHtml += `
+                    <div class="border p-2 rounded mb-2">
+                        <p><strong>Room:</strong> ${room.RoomNumber} (${room.RoomType})</p>
+                        <p><strong>Guests:</strong> Adults ${room.NumAdults}, Children ${room.NumChildren}</p>
+                        <p><strong>Check-in:</strong> ${room.CheckInDate}</p>
+                        <p><strong>Check-out:</strong> ${room.CheckOutDate}</p>
+                        <p><strong>Base Price:</strong> $${room.BasePrice}</p>
+                    </div>
+                `;
+            });
+
+            $('#detailsContent').html(`
+                <p><strong>Booking Code:</strong> ${res.BookingToken}</p>
+                <p><strong>Guest Name:</strong> ${res.GuestFirstName} ${res.GuestLastName}</p>
+                <p><strong>Email:</strong> ${res.GuestEmail}</p>
+                <p><strong>Payment:</strong> $${res.PaymentAmount || '0.00'} (${res.PaymentMethod || 'N/A'})</p>
+                <p><strong>Payment Status:</strong> ${res.PaymentStatus || 'N/A'}</p>
+                <p><strong>Rooms:</strong></p>
+                ${roomsHtml}
+            `);
+
+            $('#detailsModal').show();
+        },
+        error: function() {
+            alert('Failed to load reservation details.');
+        }
+    });
+});
+
 function closeModal() {
-  document.getElementById('detailsModal').style.display = "none";
+    $('#detailsModal').hide();
 }
 
-// Edit reservation (open modal)
-function editReservation(id) {
-  const r = reservations.find(x => x.id === id);
-  if (!r) return;
-
-  const form = document.getElementById('editForm').elements;
-  form[0].value = r.guest;              // Guest Name
-  form[1].value = r.room;               // Room
-  form[2].value = r.roomType || "Single"; // Room Type
-  form[3].value = r.guests || 1;        // Guests
-  form[4].value = r.checkin;            // Check-in
-  form[5].value = r.checkout;           // Check-out
-  form[6].value = r.method;             // Method
-  form[7].value = r.status;             // Status
-
-  form[0].dataset.editId = id;
-
-  document.getElementById('editModal').classList.remove('hidden');
+function fetchLiveReservations() {
+    $.ajax({
+        url: '/admin/live-reservations',
+        method: 'GET',
+        dataType: 'json',
+        success: function(reservations) {
+            let feedHtml = '';
+            if (reservations.length === 0) {
+                feedHtml = '<p class="text-gray-500">No pending reservations.</p>';
+            } else {
+                reservations.forEach(res => {
+                    feedHtml += `
+                        <div class="p-2 border border-gray-200 rounded flex justify-between items-center hover:bg-gray-50">
+                            <div>
+                                <p class="font-semibold">${res.GuestFirstName} ${res.GuestLastName}</p>
+                                <p class="text-sm text-gray-600">Booking: ${res.BookingToken}</p>
+                                <p class="text-sm text-gray-600">Room ${res.RoomNumber} (${res.RoomTypeName})</p>
+                                <p class="text-sm text-gray-600">Check-in: ${res.CheckInDate} | Check-out: ${res.CheckOutDate}</p>
+                                <p class="text-sm text-gray-600">Guests: ${res.NumAdults + res.NumChildren}</p>
+                                <p class="text-sm text-gray-600">Payment: ${res.PaymentStatus || 'Pending'} (${res.PaymentMethod || 'N/A'})</p>
+                            </div>
+                            <div>
+                                <button onclick="openDetailsModal('<strong>${res.GuestFirstName} ${res.GuestLastName}</strong> - Booking: ${res.BookingToken}')" 
+                                    class="bg-blue-500 text-white px-2 py-1 rounded text-sm">View</button>
+                                <button onclick="confirmCancel(${res.ReservationID})" 
+                                    class="bg-red-500 text-white px-2 py-1 rounded text-sm">Cancel</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            $('#liveFeed').html(feedHtml);
+        },
+        error: function(err) {
+            console.error('Error fetching live reservations:', err);
+        }
+    });
 }
 
-// Confirm edit
-document.getElementById('confirmEditBtn').addEventListener('click', () => {
-  const form = document.getElementById('editForm').elements;
-  const id = parseInt(form[0].dataset.editId);
-  const r = reservations.find(x => x.id === id);
-  if (r) {
-    r.guest = form[0].value;
-    r.room = parseInt(form[1].value);
-    r.roomType = form[2].value;
-    r.guests = parseInt(form[3].value);
-    r.checkin = form[4].value;
-    r.checkout = form[5].value;
-    r.method = form[6].value;
-    r.status = form[7].value;
-  }
-  renderTable();
-  document.getElementById('editModal').classList.add('hidden');
-});
+// Poll every 5 seconds
+setInterval(fetchLiveReservations, 5000);
+fetchLiveReservations(); // initial load
 
-// Cancel edit
-document.getElementById('cancelEditBtn').addEventListener('click', () => {
-  document.getElementById('editModal').classList.add('hidden');
-});
+function confirmCancel(reservationId) {
+    if (!confirm('Are you sure you want to cancel this reservation?')) return;
 
-
-// Confirm reservation
-function confirmReservation(id) {
-  const r = reservations.find(x => x.id === id);
-  if (r) r.status = "Confirmed";
-  renderTable();
+    $.ajax({
+        url: '/admin/reservations/cancel', // route to your cancel handler
+        method: 'POST',
+        data: { ReservationID: reservationId },
+        dataType: 'json',
+        success: function(resp) {
+            if (resp.success) {
+                alert('Reservation canceled.');
+                fetchLiveReservations(); // refresh feed
+            } else {
+                alert('Failed: ' + resp.message);
+            }
+        },
+        error: function() {
+            alert('Server error while canceling reservation.');
+        }
+    });
 }
-
-let cancelTargetId = null;
-
-function cancelReservation(id) {
-  cancelTargetId = id;
-  document.getElementById('cancelModal').classList.remove('hidden');
-}
-
-document.getElementById('confirmCancelBtn').addEventListener('click', () => {
-  const index = reservations.findIndex(x => x.id === cancelTargetId);
-  if (index !== -1) {
-    reservations.splice(index, 1); // remove the reservation from the array
-  }
-  renderTable(); // re-render table without the removed reservation
-  document.getElementById('cancelModal').classList.add('hidden');
-});
-
-document.getElementById('closeCancelBtn').addEventListener('click', () => {
-  document.getElementById('cancelModal').classList.add('hidden');
-});
-
-// Filtering
-function applyFilter() {
-  const guest = document.getElementById('searchGuest').value.toLowerCase();
-  const date = document.getElementById('searchDate').value;
-  const status = document.getElementById('searchStatus').value;
-  const filtered = reservations.filter(r =>
-    (!guest || r.guest.toLowerCase().includes(guest)) &&
-    (!date || r.checkin === date) &&
-    (!status || r.status === status)
-  );
-  renderTable(filtered);
-}
-function resetFilter() {
-  document.getElementById('searchGuest').value = "";
-  document.getElementById('searchDate').value = "";
-  document.getElementById('searchStatus').value = "";
-  renderTable();
-}
-
-// Live feed simulation
-function addLiveReservation() {
-  const names = ["Lance Samonte", "Lourence Cortez", "Joseph Aniag", "Shanna Carreon", "Trisha Torres", "Myra Meijas", "Justine Garcia", "Shun Soco", "Ma'am Betong", "Ma'am Quicay"];
-  const methods = ["Online", "Walk-in"];
-  const statuses = ["Pending", "Confirmed", "Cancelled"];
-  currentId++;
-  const newRes = {
-    id: currentId,
-    guest: names[Math.floor(Math.random() * names.length)],
-    room: 100 + Math.floor(Math.random() * 50),
-    checkin: "2026-03-" + String(Math.floor(Math.random() * 28) + 1).padStart(2, '0'),
-    checkout: "2026-03-" + String(Math.floor(Math.random() * 28) + 1).padStart(2, '0'),
-    method: methods[Math.floor(Math.random() * methods.length)],
-    status: statuses[Math.floor(Math.random() * statuses.length)]
-  };
-  liveFeed.push(newRes); // push instead of unshift
-  renderLiveFeed();
-}
-
-function renderLiveFeed() {
-  const container = document.getElementById('liveFeed');
-  container.innerHTML = '';
-  liveFeed.forEach(r => {
-    container.innerHTML += `
-      <div class="flex justify-between items-center border border-gray-300 shadow-xs p-2 rounded bg-gray-50">
-        <div>
-          <p class="font-semibold">${r.guest}</p>
-          <p class="text-sm text-gray-600">Room ${r.room} - ${r.method} - ${r.checkin}</p>
-        </div>
-        <div class="space-x-2">
-          <button onclick="viewLiveReservation(${r.id})" class="bg-blue-500 text-white px-2 py-1 rounded cursor-pointer">View</button>
-          <button onclick="confirmLiveReservation(${r.id})" class="bg-green-500 text-white px-2 py-1 rounded cursor-pointer">Confirm</button>
-          <button onclick="cancelLiveReservation(${r.id})" class="bg-red-500 text-white px-2 py-1 rounded cursor-pointer">Cancel</button>
-        </div>
-      </div>
-    `;
-  });
-
-  // Auto-scroll to bottom
-  container.scrollTop = container.scrollHeight;
-}
-
-
-// View live reservation (same as viewReservation)
-function viewLiveReservation(id) {
-  const r = liveFeed.find(x => x.id === id);
-  if (!r) return;
-  const modal = document.getElementById('detailsModal');
-  const content = document.getElementById('detailsContent');
-  content.innerHTML = `
-    <div class="text-center">
-      <p><strong>ID:</strong> ${r.id}</p>
-      <p><strong>Booking Code:</strong> ${r.bookingcode || "N/A"}</p>
-      <p><strong>Guest Name:</strong> ${r.guest}</p>
-      <p><strong>Room:</strong> ${r.room}</p>
-      <p><strong>Room Type:</strong> ${r.roomType || ""}</p>
-      <p><strong>Check-in:</strong> ${r.checkin}</p>
-      <p><strong>Check-out:</strong> ${r.checkout}</p>
-      <p><strong>Method:</strong> ${r.method}</p>
-      <p><strong>Status:</strong> ${r.status}</p>
-    </div>
-  `;
-  modal.style.display = "flex";
-}
-
-// Confirm live reservation → move to reservations list
-function confirmLiveReservation(id) {
-  const index = liveFeed.findIndex(x => x.id === id);
-  if (index !== -1) {
-    const r = liveFeed[index];
-    r.status = "Confirmed";
-    reservations.push(r);   // add to main reservations list
-    liveFeed.splice(index, 1); // remove from live feed
-    renderTable();
-    renderLiveFeed();
-  }
-}
-
-// Cancel live reservation → remove from live feed
-function cancelLiveReservation(id) {
-  const index = liveFeed.findIndex(x => x.id === id);
-  if (index !== -1) {
-    liveFeed.splice(index, 1); // remove from live feed
-    renderLiveFeed();
-  }
-}
-
-
-// Initialize
-renderTable();
-setInterval(addLiveReservation, 2000);

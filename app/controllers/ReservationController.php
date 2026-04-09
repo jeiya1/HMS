@@ -44,6 +44,14 @@ class ReservationController
             echo json_encode(["success" => false, "error" => "Incomplete guest information."]);
             return;
         }
+        // Validate phone number contains only numbers
+        if (!preg_match('/^\d+$/', $phoneNo)) {
+            echo json_encode([
+                "success" => false,
+                "error" => "Phone number must contain only digits."
+            ]);
+            return;
+        }
 
         // Check for active cart session
         $cartID = $_SESSION['cart_id'] ?? null;

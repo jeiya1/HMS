@@ -1,6 +1,7 @@
 <?php
 require_once '../../app/models/User.php';
 require_once '../../app/models/Statistics.php';
+require_once '../../app/models/Reservation.php';
 
 require_once '../../app/models/Room.php';
 require_once '../../app/models/Payment.php';
@@ -54,6 +55,8 @@ class AdminController
             header("Location: /admin/login");
             exit();
         }
+        $reservationModel = new Reservation($GLOBALS['conn']);
+        $reservations = $reservationModel->getAllConfirmedReservations();
         require_once '../../app/views/admin/reservations.view.php';
     }
     public function adminRooms()
@@ -63,7 +66,6 @@ class AdminController
             exit();
         }
         $roomModel = new Room($GLOBALS['conn']);
-        // $rooms = $roomModel->getAllRooms();
         require_once '../../app/views/admin/rooms.view.php';
     }
     public function loginForm()
@@ -168,5 +170,116 @@ class AdminController
 
         // fallback for GET request, show login page
         require_once '../../app/views/admin/login.view.php';
+    }
+
+    // -------------------------
+    // CHANGE USERNAME
+    // -------------------------
+    public function usernameChange()
+    {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!isset($_SESSION['admin_logged_in'])) {
+                echo json_encode(['success' => false, 'message' => 'Not logged in']);
+                exit;
+            }
+
+            $newUsername = trim($_POST['username'] ?? '');
+            if (empty($newUsername)) {
+                echo json_encode(['success' => false, 'message' => 'Username cannot be empty']);
+                exit;
+            }
+
+            try {
+                $userModel = new User($GLOBALS['conn']);
+                $userId = $_SESSION['admin_logged_in'];
+                $userModel->updateUsername($userId, $newUsername);
+
+                echo json_encode(['success' => true, 'message' => 'Username updated successfully']);
+                exit;
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+                exit;
+            }
+        }
+
+        echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+    }
+
+    // -------------------------
+    // CHANGE PASSWORD
+    // -------------------------
+    public function passwordChange()
+    {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!isset($_SESSION['admin_logged_in'])) {
+                echo json_encode(['success' => false, 'message' => 'Not logged in']);
+                exit;
+            }
+
+            $currentPassword = $_POST['current_password'] ?? '';
+            $newPassword = $_POST['new_password'] ?? '';
+
+            if (empty($currentPassword) || empty($newPassword)) {
+                echo json_encode(['success' => false, 'message' => 'Both password fields are required']);
+                exit;
+            }
+
+            try {
+                $userModel = new User($GLOBALS['conn']);
+                $userId = $_SESSION['admin_logged_in'];
+                $user = $userModel->getUserById($userId);
+
+                if (!$user || !password_verify($currentPassword, $user->PasswordHash)) {
+                    echo json_encode(['success' => false, 'message' => 'Current password is incorrect']);
+                    exit;
+                }
+
+                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+                $userModel->updatePassword($userId, $hashedPassword);
+
+                echo json_encode(['success' => true, 'message' => 'Password updated successfully']);
+                exit;
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+                exit;
+            }
+        }
+
+        echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+    }
+
+    // -------------------------
+    // LOGOUT
+    // -------------------------
+    public function logout()
+    {
+        header('Content-Type: application/json');
+        http_response_code(200); // ensure status is OK
+
+        session_unset();
+        session_destroy();
+
+        echo json_encode(['success' => true, 'message' => 'Logged out successfully']);
+        exit;
+    }
+
+    // ENDPOINTS
+    public function liveReservations()
+    {
+        header('Content-Type: application/json');
+
+        if (!$this->getAuthState()) {
+            echo json_encode([]);
+            exit;
+        }
+
+        $reservationModel = new Reservation($GLOBALS['conn']);
+        $pending = $reservationModel->getPendingReservations();
+
+        echo json_encode($pending);
     }
 }

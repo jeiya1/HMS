@@ -112,5 +112,5 @@ $admin_username = "Lance Samonte";
 </div>
 
 <!-- Scripts -->
-<script src="/js/admin/settings.js"></script>
-<script src="/js/admin/logout.js"></script>
+<script src="/admin/js/settings.js"></script>
+<script src="/admin/js/logout.js"></script>
