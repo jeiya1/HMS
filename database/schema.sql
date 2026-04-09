@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS Logs (
 -- =========================
 -- ROLES
 -- =========================
-CREATE TABLE IF NOT EXISTS Roles oom 
+CREATE TABLE IF NOT EXISTS Roles (
     RoleID INT AUTO_INCREMENT PRIMARY KEY,
     RoleName VARCHAR(50) NOT NULL UNIQUE
 );
