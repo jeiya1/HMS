@@ -348,6 +348,48 @@ $maxGuests = $rooms['MaxOccupancy'];  // 2
         const roomBasePrice = parseFloat("<?= $roomBasePrice ?>");
         const maxGuests = parseInt($("#cart-form").data("max-guests"));
         const extraGuestRatePercent = 0.10;
+        const adultsInput = $("#adults");
+        const childrenInput = $("#children");
+
+        // Force numeric input and prevent "-" or other non-digit keys
+        $("#adults, #children").on("keydown", function (e) {
+            // Allow only digits, backspace, delete, arrows, tab
+            if (!((e.key >= "0" && e.key <= "9") ||
+                ["Backspace", "ArrowLeft", "ArrowRight", "Tab", "Delete"].includes(e.key))) {
+                e.preventDefault();
+            }
+        });
+
+        // Clamp values dynamically and enforce maxGuests
+        function enforceGuestLimits() {
+            let adults = parseInt(adultsInput.val()) || 1;
+            let children = parseInt(childrenInput.val()) || 0;
+
+            // Minimum 1 adult
+            if (adults < 1) adults = 1;
+
+            // Maximum total guests
+            if (adults + children > maxGuests) {
+                // Prioritize adults, reduce children
+                children = maxGuests - adults;
+                if (children < 0) {
+                    children = 0;
+                    adults = maxGuests; // If adults exceed maxGuests, clamp adults
+                }
+            }
+
+            adultsInput.val(adults);
+            childrenInput.val(children);
+
+            handleUpdate(); // Recalculate totals
+        }
+
+        // Trigger on typing or changing values
+        adultsInput.on("input", enforceGuestLimits);
+        childrenInput.on("input", enforceGuestLimits);
+
+        // Also call once on page load
+        $(document).ready(enforceGuestLimits);
 
         // Determine base occupancy from RoomTypeName (second word)
         let baseOccupancy = 1; // default
