@@ -194,37 +194,6 @@ switch ($uri) {
         $reservation->cancelGuest(); // you need to create this method
         break;
 
-    case '/admin':
-        $pages->admin();
-        exit;
-
-    case '/admin/reservations':
-        $pages->adminReservations();
-        exit;
-    case '/admin/dashboard':
-        $pages->adminDashboard();
-        exit;
-    case '/admin/rooms':
-        $pages->adminRooms();
-        exit;
-    case '/admin/payments':
-        $pages->payment();
-        exit;
-    case '/admin/activityLogs':
-        $pages->activityLogs();
-        exit;
-    case '/admin/calendar':
-        $pages->calendar();
-        exit;
-    case '/admin-login':
-        $pages->admin_login();
-        exit;
-
-    case '/admin-login-submit':
-        $auth->loginAdmin();
-        exit;
-    
-
     default:
         // Router example
         if (preg_match('#^/reservation/cancel/guest/([A-Za-z0-9_-]+)$#', $uri, $matches)) {

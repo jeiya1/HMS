@@ -1,13 +1,30 @@
 <?php
-class Statistics {
+class Statistics
+{
     private $conn;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->conn = $db;
     }
 
+    // User accounts created per month (last 6 months)
+    public function getUserAccountsLast6Months()
+    {
+        $result = $this->conn->execute_query("
+        SELECT DATE_FORMAT(CreatedAt,'%b') AS month,
+               COUNT(*) AS accounts
+        FROM Users
+        WHERE CreatedAt >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+        GROUP BY YEAR(CreatedAt), MONTH(CreatedAt)
+        ORDER BY YEAR(CreatedAt), MONTH(CreatedAt);
+    ");
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
     // Reservations last 7 days
-    public function getReservationsLast7Days() {
+    public function getReservationsLast7Days()
+    {
         $result = $this->conn->execute_query("
             SELECT DAYNAME(rr.CheckInDate) AS day, 
                    SUM(CASE WHEN rr.Status='confirmed' THEN 1 ELSE 0 END) AS booked,
@@ -21,7 +38,8 @@ class Statistics {
     }
 
     // Reservations this month per week
-    public function getReservationsThisMonth() {
+    public function getReservationsThisMonth()
+    {
         $result = $this->conn->execute_query("
             SELECT WEEK(rr.CheckInDate,1) AS week_number,
                    SUM(CASE WHEN rr.Status='confirmed' THEN 1 ELSE 0 END) AS booked,
@@ -36,7 +54,8 @@ class Statistics {
     }
 
     // Revenue last 6 months
-    public function getRevenueLast6Months() {
+    public function getRevenueLast6Months()
+    {
         $result = $this->conn->execute_query("
             SELECT DATE_FORMAT(PaymentDate,'%b') AS month,
                    SUM(Amount) AS revenue
@@ -49,7 +68,8 @@ class Statistics {
         return $result->fetch_all(MYSQLI_ASSOC);
     }
     // Total revenue this month
-    public function getRevenueMonth() {
+    public function getRevenueMonth()
+    {
 
         $result = $this->conn->execute_query("
             SELECT COALESCE(SUM(Amount),0) AS revenue
@@ -63,19 +83,48 @@ class Statistics {
     }
 
     //Total Revenue
-      public function getTotalRevenue() {
+    public function getTotalRevenue()
+    {
 
-    $result = $this->conn->execute_query("
+        $result = $this->conn->execute_query("
         SELECT COALESCE(SUM(Amount),0) AS revenue
         FROM Payments
         WHERE PaymentStatus = 'completed'
     ");
 
-    return $result->fetch_assoc()['revenue'] ?? 0;
+        return $result->fetch_assoc()['revenue'] ?? 0;
     }
-    
-     // New bookings today
-    public function getNewBookingsToday() {
+    public function getPaymentsByType()
+    {
+        $result = $this->conn->execute_query("
+        SELECT pm.MethodName, COUNT(p.PaymentID) AS Total
+        FROM Payments p
+        JOIN PaymentMethods pm ON p.MethodID = pm.MethodID
+        WHERE p.PaymentStatus = 'completed'
+        GROUP BY pm.MethodName
+        ORDER BY Total DESC
+    ");
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+    // Top performing room types (by number of bookings)
+    public function getTopRoomTypes()
+    {
+        $result = $this->conn->execute_query("
+        SELECT rt.RoomTypeName,
+               COUNT(rr.ReservationRoomID) AS total
+        FROM ReservationRooms rr
+        JOIN Rooms r ON rr.RoomID = r.RoomID
+        JOIN RoomTypes rt ON r.RoomTypeID = rt.RoomTypeID
+        WHERE rr.Status IN ('confirmed','checked_in','checked_out')
+        GROUP BY rt.RoomTypeID
+        ORDER BY total DESC
+    ");
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    // New bookings today
+    public function getNewBookingsToday()
+    {
 
         $result = $this->conn->execute_query("
             SELECT COUNT(*) AS total
@@ -87,7 +136,8 @@ class Statistics {
     }
 
     // Check-ins today
-    public function getCheckInsToday() {
+    public function getCheckInsToday()
+    {
 
         $result = $this->conn->execute_query("
             SELECT COUNT(*) AS total
@@ -100,7 +150,8 @@ class Statistics {
     }
 
     // Check-outs today
-    public function getCheckOutsToday() {
+    public function getCheckOutsToday()
+    {
 
         $result = $this->conn->execute_query("
             SELECT COUNT(*) AS total
@@ -113,55 +164,55 @@ class Statistics {
     }
 
     // Occupied rooms
-public function getOccupiedRooms()
-{
-    $result = $this->conn->execute_query("
+    public function getOccupiedRooms()
+    {
+        $result = $this->conn->execute_query("
         SELECT COUNT(*) AS total
         FROM Rooms
         WHERE Status = 'occupied'
     ");
 
-    return $result->fetch_assoc()['total'] ?? 0;
-}
+        return $result->fetch_assoc()['total'] ?? 0;
+    }
 
 
-// Available rooms
-public function getAvailableRooms()
-{
-    $result = $this->conn->execute_query("
+    // Available rooms
+    public function getAvailableRooms()
+    {
+        $result = $this->conn->execute_query("
         SELECT COUNT(*) AS total
         FROM Rooms
         WHERE Status = 'available'
     ");
 
-    return $result->fetch_assoc()['total'] ?? 0;
-}
+        return $result->fetch_assoc()['total'] ?? 0;
+    }
 
 
-// Not ready / maintenance
-public function getMaintenanceRooms()
-{
-    $result = $this->conn->execute_query("
+    // Not ready / maintenance
+    public function getMaintenanceRooms()
+    {
+        $result = $this->conn->execute_query("
         SELECT COUNT(*) AS total
         FROM Rooms
         WHERE Status = 'maintenance'
     ");
 
-    return $result->fetch_assoc()['total'] ?? 0;
-}
+        return $result->fetch_assoc()['total'] ?? 0;
+    }
 
 
-// Reserved rooms (future bookings)
-public function getReservedRooms()
-{
-    $result = $this->conn->execute_query("
+    // Reserved rooms (future bookings)
+    public function getReservedRooms()
+    {
+        $result = $this->conn->execute_query("
         SELECT COUNT(*) AS total
         FROM ReservationRooms
         WHERE Status IN ('pending','confirmed')
     ");
 
-    return $result->fetch_assoc()['total'] ?? 0;
-}
+        return $result->fetch_assoc()['total'] ?? 0;
+    }
 
 
 }

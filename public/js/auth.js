@@ -59,8 +59,7 @@ $(document).ready(function () {
                 if (!response.success) {
                     showToast(response.error, "error");
                 } else {
-                    showToast("Login successful!", "success");
-                    setTimeout(() => window.location.href = response.redirect, 1000);
+                    window.location.href = response.redirect || "/home";
                 }
             },
             error: function () {
@@ -87,8 +86,7 @@ $(document).ready(function () {
                 if (!response.success) {
                     showToast(response.error, "error");
                 } else {
-                    showToast("Signup successful!", "success");
-                    setTimeout(() => window.location.href = response.redirect || "/home", 1000);
+                    window.location.href = response.redirect || "/home";
                 }
             },
             error: function () {
@@ -106,7 +104,7 @@ $(document).ready(function () {
             dataType: "json",
             success: function (response) {
                 if (response.success) {
-                    setTimeout(() => window.location.href = response.redirect || "/home", 500);
+                    window.location.href = response.redirect || "/home";
                 } else {
                     showToast("Logout failed. Try again.", "error");
                 }

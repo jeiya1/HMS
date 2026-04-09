@@ -2,22 +2,23 @@
 
 require_once "../app/models/Event.php";
 
-class CalendarController {
-
-private $eventModel;
-
-public function __construct()
-{
-$this->eventModel = new Event();
-}
-
-public function index()
+class CalendarController
 {
 
-$events = $this->eventModel->getAllEvents();
+    private $eventModel;
 
-require "../app/views/calendar/index.php";
+    public function __construct()
+    {
+        $this->eventModel = new Event();
+    }
 
-}
+    public function index()
+    {
+
+        $events = $this->eventModel->getAllEvents();
+
+        require "../app/views/calendar/index.php";
+
+    }
 
 }

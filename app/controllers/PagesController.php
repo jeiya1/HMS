@@ -1,99 +1,13 @@
 <?php
 
-require_once '../app/models/Reservation.php';
-require_once '../app/models/Room.php';
-require_once '../app/models/Statistics.php';
-require_once "../app/models/Payment.php";
-require_once "../app/models/Event.php";
-require_once "../app/models/Log.php";
 require_once "../app/models/User.php";
+require_once "../app/models/Room.php";
+require_once "../app/models/Reservation.php";
+require_once "../app/models/Cart.php";
 class PagesController
 {
-    // Privacy Policy page
-    public function privacy()
-    {
-        $logged_in = $this->getAuthState();
-        $cartCount = $this->getCartCount();
-        require_once '../app/views/static/privacy.view.php';
-    }
 
-    public function admin()
-    {
-        $logged_in = $this->getAuthState();
-        $cartCount = $this->getCartCount();
-        $statisticsModel = new Statistics($GLOBALS['conn']);
-
-        // $reservationsWeek = $statisticsModel->getReservationsLast7Days();
-        // $reservationsMonth = $statisticsModel->getReservationsThisMonth();
-        // $revenue6Months = $statisticsModel->getRevenueLast6Months();
-        // $revenueTotal = $statisticsModel->getTotalRevenue();
-        // $newBookings = $statisticsModel->getNewBookingsToday();
-        // $checkIns = $statisticsModel->getCheckInsToday();
-        // $checkOuts = $statisticsModel->getCheckOutsToday();
-        // $revenueTotal = $statisticsModel->getTotalRevenue();
-        // $occupiedRooms = $statisticsModel->getOccupiedRooms();
-        // $reservedRooms = $statisticsModel->getReservedRooms();
-        // $availableRooms = $statisticsModel->getAvailableRooms();
-        // $maintenanceRooms = $statisticsModel->getMaintenanceRooms();
-        require_once '../app/views/admin/admin.view.php';
-    }
-    public function adminReservations()
-    {
-        $logged_in = $this->getAuthState();
-        $cartCount = $this->getCartCount();
-        require_once '../app/views/admin/reservations.view.php';
-    }
-    public function adminRooms()
-    {
-        $logged_in = $this->getAuthState();
-        $cartCount = $this->getCartCount();
-        $roomModel = new Room($GLOBALS['conn']);
-        $rooms = $roomModel->getAllRooms();
-        require_once '../app/views/admin/rooms.view.php';
-    }
-    public function adminDashboard()
-    {
-        $logged_in = $this->getAuthState();
-        $cartCount = $this->getCartCount();
-        require_once '../app/views/admin/dashboard.view.php';
-    }
-
-    public function admin_login()
-    {
-        $logged_in = $this->getAuthState();
-        $cartCount = $this->getCartCount();
-        require_once '../app/views/admin/login.view.php';
-    }
-    public function payment()
-    {
-        $paymentModel = new Payment($GLOBALS['conn']);
-        $logged_in = $this->getAuthState();
-        $cartCount = $this->getCartCount();
-        $payments = $paymentModel->getAllPayments();
-        $refunds = $paymentModel->getRefundedPayments();
-        require_once '../app/views/payment.view.php';
-    }
-    public function calendar()
-    {
-        $eventModel = new Event();
-        $events = $eventModel->getAllEvents();
-
-        require "../app/views/calendar/index.php";
-
-    }
-    public function activityLogs()
-    {
-        $logModel = new Log($GLOBALS['conn']);
-        $adminLogs = $logModel->getAdminLogs();
-        $userLogs = $logModel->getUserLogs();
-        require "../app/views/logs/index.php";
-    }
-    public function terms()
-    {
-        $logged_in = $this->getAuthState();
-        $cartCount = $this->getCartCount();
-        require_once '../app/views/static/terms.view.php';
-    }
+    // ====== USER SIDE ======
 
     // Home page
     public function home()
@@ -249,6 +163,22 @@ class PagesController
             $reservations = $reservationModel->showReservations();
         }
         require_once '../app/views/reservations/bookings.view.php';
+    }
+
+    // Privacy Policy page
+    public function privacy()
+    {
+        $logged_in = $this->getAuthState();
+        $cartCount = $this->getCartCount();
+        require_once '../app/views/static/privacy.view.php';
+    }
+
+    // Terms and Conditions page
+    public function terms()
+    {
+        $logged_in = $this->getAuthState();
+        $cartCount = $this->getCartCount();
+        require_once '../app/views/static/terms.view.php';
     }
 
     // 404 Not Found page

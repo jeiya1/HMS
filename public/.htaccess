@@ -1,8 +1,12 @@
 RewriteEngine On
 
-# If the requested file or directory exists, serve it directly
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+# Don't rewrite requests for existing files or directories
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-# Otherwise, redirect everything to index.php
+# Redirect /admin requests to admin/index.php
+RewriteRule ^admin(/.*)?$ admin/index.php [QSA,L]
+
+# All other requests go to user index.php
 RewriteRule ^ index.php [QSA,L]

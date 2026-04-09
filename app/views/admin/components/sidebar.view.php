@@ -1,7 +1,7 @@
 <nav class="fixed h-screen w-64 bg-gray-900 text-white flex flex-col z-100">
     <div class="p-4.5 text-2xl font-bold border-b border-gray-700"> Admin</div>
     <nav class="flex-1 p-4 text-l flex flex-col gap-3">
-        <a href="/admin" class="px-4 py-2 rounded hover:bg-gray-700" onclick="show('statistics')">Dashboard</a>
+        <a href="/admin/dashboard" class="px-4 py-2 rounded hover:bg-gray-700" onclick="show('statistics')">Dashboard</a>
         <a href="/admin/reservations" class=" px-4 py-2 rounded hover:bg-gray-700"
             onclick="show('reservations')">Reservations</a>
         <a href="/admin/rooms" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('rooms')">Rooms</a>

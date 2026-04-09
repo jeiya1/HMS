@@ -29,6 +29,25 @@ class User
         }
     }
 
+    public function getUserRole($userID)
+    {
+        // Get the role name for the specified user
+        $result = $this->conn->execute_query(
+            "SELECT r.RoleName 
+         FROM Roles r 
+         JOIN Users u ON r.RoleID = u.RoleID 
+         WHERE u.UserID = ? 
+         LIMIT 1",
+            [$userID]
+        );
+
+        if ($result) {
+            return $result->fetch_object();
+        } else {
+            throw new Exception("Query failed: " . $this->conn->error);
+        }
+    }
+
     public function getGuestByEmail($email)
     {
         // Get guest record by email

@@ -101,7 +101,6 @@
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     --default-font-family: var(--font-sans);
     --default-mono-font-family: var(--font-mono);
-    --font-crimson: "Crimson Text", serif;
   }
 }
 @layer base {
@@ -1966,9 +1965,6 @@
   .font-\[\'Roboto\'\] {
     font-family: 'Roboto';
   }
-  .font-crimson {
-    font-family: var(--font-crimson);
-  }
   .font-sans {
     font-family: var(--font-sans);
   }
@@ -2764,6 +2760,46 @@
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
+}
+.page {
+  display: none;
+}
+.page.active {
+  display: block;
+}
+.badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.badge-pending {
+  background-color: #fbbf24;
+  color: #fff;
+}
+.badge-confirmed {
+  background-color: #22c55e;
+  color: #fff;
+}
+.badge-cancelled {
+  background-color: #ef4444;
+  color: #fff;
+}
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 @property --tw-translate-x {
   syntax: "*";

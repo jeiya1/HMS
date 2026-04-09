@@ -71,7 +71,7 @@
                         console.log('Guest cancel response:', response);
                         if (response.success) {
                             showToast(response.message || 'Reservation cancelled.', 'success');
-                            setTimeout(() => window.location.href = '/bookings', 1500);
+                            setTimeout(() => window.location.href = '/bookings', 1000);
                         } else {
                             showToast(response.message || 'Failed to cancel reservation.', 'error');
                         }
