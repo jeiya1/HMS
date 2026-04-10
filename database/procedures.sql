@@ -302,8 +302,8 @@ BEGIN
     SET pBookingToken = token;
 
     -- Insert payment
-    INSERT INTO Payments (ReservationID, MethodID, Amount, PaymentStatus)
-    VALUES (pReservationID, pPaymentMethodID, pAmount, 'pending');
+    INSERT INTO Payments (ReservationID, MethodID, Amount, PaymentStatus, TransactionReference)
+    VALUES (pReservationID, pPaymentMethodID, pAmount, 'pending', UUID());
 
     COMMIT;
 
@@ -557,36 +557,120 @@ BEGIN
 
 END$$
 
-DELIMITER ;
-
--- COMPLETE PAYMENT
-
 DELIMITER $$
 
-CREATE PROCEDURE CompletePayment(
-    IN pReservationID INT,
+CREATE PROCEDURE CompletePaymentByToken(
+    IN pBookingToken VARCHAR(255),
     IN pTransactionRef VARCHAR(255)
 )
 BEGIN
+    DECLARE vReservationID INT;
+    DECLARE existingRef VARCHAR(255);
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Payment transaction failed';
+    END;
 
     START TRANSACTION;
 
+    -- Get ReservationID from BookingToken
+    SELECT ReservationID
+    INTO vReservationID
+    FROM Reservations
+    WHERE BookingToken = pBookingToken
+    LIMIT 1;
+
+    -- Validate reservation exists
+    IF vReservationID IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Reservation not found';
+    END IF;
+
+    -- Validate payment record exists
+    IF NOT EXISTS (
+        SELECT 1 FROM Payments WHERE ReservationID = vReservationID
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Payment record not found';
+    END IF;
+
+    -- Get existing transaction reference
+    SELECT TransactionReference
+    INTO existingRef
+    FROM Payments
+    WHERE ReservationID = vReservationID
+    LIMIT 1;
+
+    -- Update payment
     UPDATE Payments
     SET PaymentStatus = 'completed',
-        TransactionReference = pTransactionRef,
+        TransactionReference = COALESCE(pTransactionRef, existingRef, UUID()),
         PaymentDate = CURRENT_TIMESTAMP
-    WHERE ReservationID = pReservationID;
-
-    UPDATE Reservations
-    SET Status = 'confirmed'
-    WHERE ReservationID = pReservationID;
-
-    UPDATE ReservationRooms
-    SET Status = 'confirmed'
-    WHERE ReservationID = pReservationID;
+    WHERE ReservationID = vReservationID;
 
     COMMIT;
+END$$
 
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE RefundPaymentByToken(
+    IN pBookingToken VARCHAR(255),
+    IN pTransactionRef VARCHAR(255)
+)
+BEGIN
+    DECLARE vReservationID INT;
+    DECLARE existingRef VARCHAR(255);
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Refund transaction failed';
+    END;
+
+    START TRANSACTION;
+
+    -- Get ReservationID
+    SELECT ReservationID
+    INTO vReservationID
+    FROM Reservations
+    WHERE BookingToken = pBookingToken
+    LIMIT 1;
+
+    -- Validate reservation
+    IF vReservationID IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Reservation not found';
+    END IF;
+
+    -- Validate payment exists
+    IF NOT EXISTS (
+        SELECT 1 FROM Payments WHERE ReservationID = vReservationID
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Payment record not found';
+    END IF;
+
+    -- Get existing transaction reference
+    SELECT TransactionReference
+    INTO existingRef
+    FROM Payments
+    WHERE ReservationID = vReservationID
+    LIMIT 1;
+
+    -- Update payment to refunded
+    UPDATE Payments
+    SET PaymentStatus = 'refunded',
+        TransactionReference = COALESCE(pTransactionRef, existingRef, UUID()),
+        PaymentDate = CURRENT_TIMESTAMP
+    WHERE ReservationID = vReservationID;
+
+    COMMIT;
 END$$
 
 DELIMITER ;
@@ -659,14 +743,16 @@ BEGIN
         TotalBeforeDiscount,
         DiscountAmount,
         Amount,
-        PaymentStatus
+        PaymentStatus,
+        TransactionReference
     ) VALUES (
         pReservationID,
         pPaymentMethodID,
         pTotalBeforeDiscount,
         pDiscountAmount,
         (pTotalBeforeDiscount - IFNULL(pDiscountAmount,0)) * 1.12,
-        'pending'
+        'pending',
+        UUID()
     );
 
     IF pDiscountType IS NOT NULL AND pDiscountAmount > 0 THEN

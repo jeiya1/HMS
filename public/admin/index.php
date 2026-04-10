@@ -14,9 +14,6 @@ $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $adminPath = preg_replace('#^/admin#', '', $uri);
 
 switch ($adminPath) {
-    case '/test':
-        require "../../app/views/admin/ORIGINAL.view.php";
-        break;
     case '/':
         if (!isset($_SESSION['admin_logged_in'])) {
             header('Location: /admin/login');
@@ -74,12 +71,12 @@ switch ($adminPath) {
         $admin->adminRooms();
         break;
 
-    case '/financials':
+    case '/payments':
         if (!isset($_SESSION['admin_logged_in'])) {
             header('Location: /admin/login');
             exit();
         }
-        $admin->adminFinancials();
+        $admin->adminPayments();
         break;
     case '/calendar':
         if (!isset($_SESSION['admin_logged_in'])) {
@@ -120,6 +117,71 @@ switch ($adminPath) {
         header('Content-Type: application/json');
         echo json_encode($reservations);
         break;
+
+    case '/getPaymentRooms':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('HTTP/1.1 401 Unauthorized');
+            echo json_encode(['error' => 'Unauthorized']);
+            exit();
+        }
+
+        require_once '../../app/models/Reservation.php';
+
+        $paymentID = $_GET['paymentID'] ?? null;
+
+        if (!$paymentID) {
+            echo json_encode([]);
+            exit();
+        }
+
+        $reservationModel = new Reservation($GLOBALS['conn']);
+        $rooms = $reservationModel->getPaymentRooms($paymentID);
+
+        header('Content-Type: application/json');
+        echo json_encode($rooms);
+        break;
+
+    case '/confirmPayment':
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ]);
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Method not allowed'
+            ]);
+            exit;
+        }
+
+        $admin->confirmPayment();
+        break;
+
+    case '/refundPayment':
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            exit;
+        }
+
+        $admin->refundPayment();
+        exit;
 
     default:
         echo "404 Admin Page Not Found";

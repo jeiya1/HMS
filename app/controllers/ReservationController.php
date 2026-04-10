@@ -44,14 +44,6 @@ class ReservationController
             echo json_encode(["success" => false, "error" => "Incomplete guest information."]);
             return;
         }
-        // Validate phone number contains only numbers
-        if (!preg_match('/^\d+$/', $phoneNo)) {
-            echo json_encode([
-                "success" => false,
-                "error" => "Phone number must contain only digits."
-            ]);
-            return;
-        }
 
         // Check for active cart session
         $cartID = $_SESSION['cart_id'] ?? null;
@@ -172,6 +164,8 @@ class ReservationController
 
     public function show($bookingToken)
     {
+        $logged_in = $this->getAuthState();
+        $cartCount = $this->getCartCount();
         // Fetch reservation data
         $reservationModel = new Reservation($GLOBALS["conn"]);
         $reservationData = $reservationModel->getReservationWithGuest($bookingToken);
@@ -329,6 +323,19 @@ class ReservationController
 
         // pass $reservation array to the view
         require_once '../app/views/reservations/guest-cancel.view.php';
+    }
+
+    // Check if user session is active
+    public function getAuthState()
+    {
+        return isset($_SESSION['logged_in_user_id']);
+    }
+
+    // get current cart count
+    private function getCartCount()
+    {
+        $cartModel = new Cart($GLOBALS['conn']);
+        return $cartModel->getCartAmount();
     }
 }
 ?>

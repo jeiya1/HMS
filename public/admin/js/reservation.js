@@ -21,17 +21,17 @@ $(document).ready(function() {
 
                     $table.append(`
                         <tr>
-                            <td class="border p-2 text-center">${reservation.BookingToken}</td>
-                            <td class="border p-2 text-center">${reservation.GuestFirstName} ${reservation.GuestLastName}</td>
-                            <td class="border p-2 text-center">${earliestCheckIn}</td>
-                            <td class="border p-2 text-center">${latestCheckOut}</td>
-                            <td class="border p-2 text-center">${rooms.length}</td>
-                            <td class="border p-2 text-center">$${totalRoomAmount}</td>
-                            <td class="border p-2 text-center">$${reservation.PaymentAmount || '0.00'} (${reservation.PaymentMethod || 'N/A'})</td>
-                            <td class="border p-2 text-center">${reservation.PaymentStatus || 'N/A'}</td>
-                            <td class="border p-2 text-center">
-                                <button class="viewReservation" data-token="${reservation.BookingToken}">View</button>
-                                <button class="cancelReservation" data-token="${reservation.BookingToken}">Cancel</button>
+                            <td class="border border-gray-300 p-2 text-center">${reservation.BookingToken}</td>
+                            <td class="border border-gray-300 p-2 text-center">${reservation.GuestFirstName} ${reservation.GuestLastName}</td>
+                            <td class="border border-gray-300 p-2 text-center">${earliestCheckIn}</td>
+                            <td class="border border-gray-300 p-2 text-center">${latestCheckOut}</td>
+                            <td class="border border-gray-300 p-2 text-center">${rooms.length}</td>
+                            <td class="border border-gray-300 p-2 text-center">$${totalRoomAmount}</td>
+                            <td class="border border-gray-300 p-2 text-center">$${reservation.PaymentAmount || '0.00'} (${reservation.PaymentMethod || 'N/A'})</td>
+                            <td class="border border-gray-300 p-2 text-center">${reservation.PaymentStatus || 'N/A'}</td>
+                            <td class="border border-gray-300 p-2 text-center">
+                                <button class="viewReservation cursor-pointer" data-token="${reservation.BookingToken}">View</button>
+                                <button class="cancelReservation pointer" data-token="${reservation.BookingToken}">Cancel</button>
                             </td>
                         </tr>
                     `);

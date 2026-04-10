@@ -1,18 +1,21 @@
 <?php
 
-class Payment {
+class Payment
+{
 
     private $conn;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->conn = $db;
     }
 
     // Create a payment record for a reservation
-    public function createPayment($reservationID, $methodID, $amount) {
+    public function createPayment($reservationID, $methodID, $amount)
+    {
 
         // Validate amount is positive
-        if($amount <= 0){
+        if ($amount <= 0) {
             throw new Exception("Invalid payment amount");
         }
 
@@ -29,31 +32,64 @@ class Payment {
         }
 
     }
-    //admin functions
-    public function getAllPayments()
+    public function getAllPaymentsAdmin()
     {
-    $sql = "SELECT * FROM payments WHERE status='Paid'";
-    $result = $this->conn->query($sql);
-
-    return $result->fetch_all(MYSQLI_ASSOC);
+        $result = $this->conn->execute_query("SELECT 
+                p.PaymentID,
+                r.BookingToken,
+                g.FirstName,
+                g.LastName,
+                pm.MethodName,
+                p.TotalBeforeDiscount,
+                p.DiscountAmount,
+                p.Amount,
+                p.PaymentStatus,
+                p.TransactionReference,
+                p.PaymentDate,
+                GROUP_CONCAT(DISTINCT ro.RoomNumber ORDER BY ro.RoomNumber ASC) AS Rooms,
+                SUM(rr.NumAdults + rr.NumChildren) AS TotalGuests,
+                MIN(rr.CheckInDate) AS CheckInDate,
+                MAX(rr.CheckOutDate) AS CheckOutDate
+            FROM Payments p
+            INNER JOIN Reservations r ON p.ReservationID = r.ReservationID
+            INNER JOIN Guests g ON r.GuestID = g.GuestID
+            INNER JOIN PaymentMethods pm ON p.MethodID = pm.MethodID
+            INNER JOIN ReservationRooms rr ON rr.ReservationID = r.ReservationID
+            INNER JOIN Rooms ro ON rr.RoomID = ro.RoomID
+            GROUP BY p.PaymentID, r.BookingToken, g.FirstName, g.LastName, pm.MethodName, p.TotalBeforeDiscount, p.DiscountAmount, p.Amount, p.PaymentStatus, p.TransactionReference, p.PaymentDate
+            ORDER BY p.PaymentDate DESC");
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     public function getRefundedPayments()
     {
-    $sql = "SELECT * FROM payments WHERE status='Refunded'";
-    $result = $this->conn->query($sql);
+        $sql = "SELECT * FROM payments WHERE status='Refunded'";
+        $result = $this->conn->query($sql);
 
-    return $result->fetch_all(MYSQLI_ASSOC);
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function refundPayment($id)
+    public function refundPaymentByToken($bookingToken)
     {
-    $stmt = $this->conn->prepare(
-    "UPDATE payments SET status='Refunded' WHERE id=?"
-    );
+        try {
+            $this->conn->execute_query(
+                "CALL RefundPaymentByToken(?, ?)",
+                [$bookingToken, null]
+            );
 
-    $stmt->bind_param("i",$id);
+            return true;
 
-    return $stmt->execute();
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    public function confirmPaymentByToken($bookingToken)
+    {
+        $this->conn->execute_query(
+            "CALL CompletePaymentByToken(?, ?)",
+            [$bookingToken, null]
+        );
+
+        return true;
     }
 }

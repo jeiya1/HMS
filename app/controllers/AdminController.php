@@ -2,9 +2,9 @@
 require_once '../../app/models/User.php';
 require_once '../../app/models/Statistics.php';
 require_once '../../app/models/Reservation.php';
+require_once '../../app/models/Payment.php';
 
 require_once '../../app/models/Room.php';
-require_once '../../app/models/Payment.php';
 require_once '../../app/models/Event.php';
 require_once '../../app/models/Log.php';
 class AdminController
@@ -72,15 +72,16 @@ class AdminController
     {
         require_once '../../app/views/admin/login.view.php';
     }
-    public function adminFinancials()
+    public function adminPayments()
     {
-        $paymentModel = new Payment($GLOBALS['conn']);
         if (!$this->getAuthState()) {
             header("Location: /admin/login");
             exit();
         }
-        // $payments = $paymentModel->getAllPayments();
-        // $refunds = $paymentModel->getRefundedPayments();
+
+        $paymentModel = new Payment($GLOBALS['conn']);
+        $payments = $paymentModel->getAllPaymentsAdmin();
+
         require_once '../../app/views/admin/payments.view.php';
     }
     public function adminCalendar()
@@ -282,4 +283,85 @@ class AdminController
 
         echo json_encode($pending);
     }
+
+    public function confirmPayment()
+    {
+        header('Content-Type: application/json');
+
+        $bookingCode = $_POST['bookingCode'] ?? null;
+
+        if (!$bookingCode) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Missing booking code'
+            ]);
+            exit;
+        }
+
+        try {
+            $paymentModel = new Payment($GLOBALS['conn']);
+
+            $result = $paymentModel->confirmPaymentByToken($bookingCode);
+
+            if (!$result) {
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Failed to confirm payment'
+                ]);
+                exit;
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Payment confirmed successfully'
+            ]);
+            exit;
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+            exit;
+        }
+    }
+
+    public function refundPayment()
+    {
+        header('Content-Type: application/json');
+
+        $bookingCode = $_POST['bookingCode'] ?? null;
+
+        if (!$bookingCode) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Missing booking code'
+            ]);
+            exit;
+        }
+
+        try {
+            $paymentModel = new Payment($GLOBALS['conn']);
+            $paymentModel->refundPaymentByToken($bookingCode);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Payment refunded successfully'
+            ]);
+            exit;
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+            exit;
+        }
+    }
+
 }

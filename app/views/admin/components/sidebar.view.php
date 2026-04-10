@@ -5,7 +5,7 @@
         <a href="/admin/reservations" class=" px-4 py-2 rounded hover:bg-gray-700"
             onclick="show('reservations')">Reservations</a>
         <a href="/admin/rooms" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('rooms')">Rooms</a>
-        <a href="/admin/financials" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('payments')">Financials</a>
+        <a href="/admin/payments" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('payments')">Payments</a>
         <a href="/admin/calendar" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('calendar')">Calendar</a>
         <a href="/admin/logs" class=" px-4 py-2 rounded hover:bg-gray-700" onclick="show('logs')">Activity Logs</a>
     </nav>
