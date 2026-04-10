@@ -1,6 +1,6 @@
 <?php
 // Set admin username
-$admin_username = "Lance Samonte";
+$admin_username = "Admin";
 ?>
 <!-- Header -->
 <header class="flex justify-end items-center bg-gray-300 p-3 pr-5 shadow-sm fixed w-full z-40">
