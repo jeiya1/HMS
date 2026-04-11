@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lance Hotel Admin</title>
+  <title>Reservations</title>
   <link rel="icon" type="image/x-icon" href="/admin/assets/icons/favicon.svg">
   <link href="/admin/css/output.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.css" rel="stylesheet">
@@ -19,38 +18,39 @@
 
 <body class="bg-stone-200 font-roboto flex flex-col min-h-screen">
   <?php include_once __DIR__ . '/components/toast.view.php'; ?>
-  <!-- Sidebar -->
   <?php include_once __DIR__ . '/components/sidebar.view.php'; ?>
-
-  <!-- Top Bar -->
   <?php include_once __DIR__ . '/components/header.view.php'; ?>
 
-  <main class="ml-64 mt-15.5 p-4 h-screen">
-    <div class="mb-8">
-      <!-- Top Section: Live Feed + Search & Filter -->
-      <!-- Search & Filter Reservations -->
-      <div class="bg-white p-6 border border-gray-300 rounded-lg shadow-sm w-full h-40">
-        <h3 class="text-lg font-bold mb-4">Search & Filter Reservations</h3>
-        <div class="flex space-x-4">
-          <input type="text" id="searchGuest" placeholder="Guest Name" class="border border-gray-300 p-2 rounded w-1/4">
-          <input type="date" id="searchDate" class="border border-gray-300 p-2 rounded flex-1">
-          <select id="searchStatus" class="border border-gray-300 p-2 rounded flex-1">
-            <option value="">All</option>
-            <option>Pending</option>
-            <option>Confirmed</option>
-            <option>Cancelled</option>
-          </select>
-          <button onclick="applyFilter()" class="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">Apply
-            Filter</button>
-          <button onclick="resetFilter()" class="bg-gray-500 text-white px-4 py-2 rounded cursor-pointer">Reset
-            Filter</button>
-        </div>
+  <main class="ml-64 mt-15.5 p-4">
+
+    <!-- Search & Filter -->
+    <div class="bg-white p-6 border border-gray-300 rounded-lg shadow-sm w-full mb-4">
+      <h3 class="text-lg font-bold mb-4">Search & Filter Reservations</h3>
+      <div class="flex flex-wrap gap-3">
+        <input type="text" id="searchGuest" placeholder="Guest Name"
+          class="border border-gray-300 p-2 rounded w-48">
+        <input type="date" id="searchDate"
+          class="border border-gray-300 p-2 rounded">
+        <select id="searchStatus" class="border border-gray-300 p-2 rounded">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <button onclick="applyFilter()"
+          class="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
+          Apply Filter
+        </button>
+        <button onclick="resetFilter()"
+          class="bg-gray-500 text-white px-4 py-2 rounded cursor-pointer">
+          Reset Filter
+        </button>
       </div>
     </div>
-    <!-- Bottom Section: Reservation List -->
+
+    <!-- Table -->
     <div class="flex justify-center">
-      <div class="bg-white p-6 border border-gray-300 rounded-lg shadow-sm w-full h-1/2">
-        <h3 class="text-lg font-bold mb-4">Reservation List</h3>
+      <div class="bg-white p-6 border border-gray-300 rounded-lg shadow-sm w-full">
         <table class="w-full border border-gray-300">
           <thead>
             <tr class="bg-gray-200">
@@ -58,8 +58,8 @@
               <th class="border border-gray-300 p-2 text-center">Guest Name</th>
               <th class="border border-gray-300 p-2 text-center">Check-in</th>
               <th class="border border-gray-300 p-2 text-center">Check-out</th>
-              <th class="border border-gray-300 p-2 text-center">Number of Rooms</th>
-              <th class="border border-gray-300 p-2 text-center">Total Room Amount</th>
+              <th class="border border-gray-300 p-2 text-center">Rooms</th>
+              <th class="border border-gray-300 p-2 text-center">Room Total</th>
               <th class="border border-gray-300 p-2 text-center">Payment Amount (Method)</th>
               <th class="border border-gray-300 p-2 text-center">Payment Status</th>
               <th class="border border-gray-300 p-2 text-center">Reservation Status</th>
@@ -67,345 +67,235 @@
             </tr>
           </thead>
           <tbody id="reservationTable">
+
             <?php foreach ($reservations as $res): ?>
-
               <?php
-              $guestName = $res['GuestFirstName'] . ' ' . $res['GuestLastName'];
+                $guestName   = $res['GuestFirstName'] . ' ' . $res['GuestLastName'];
+                $roomCount   = count($res['Rooms']);
+                $checkIn     = $res['Rooms'][0]['CheckInDate']  ?? '-';
+                $checkOut    = $res['Rooms'][0]['CheckOutDate'] ?? '-';
+                $totalAmount = array_sum(array_column($res['Rooms'], 'BasePrice'));
+                $payStatus   = strtolower(trim($res['PaymentStatus']     ?? ''));
+                $resStatus   = strtolower(trim($res['ReservationStatus'] ?? ''));
 
-              $roomCount = count($res['Rooms']);
-
-              $checkIn = $res['Rooms'][0]['CheckInDate'] ?? '-';
-              $checkOut = $res['Rooms'][0]['CheckOutDate'] ?? '-';
-
-              $totalAmount = 0;
-              foreach ($res['Rooms'] as $room) {
-                $totalAmount += $room['BasePrice'];
-              }
+                $payColor = match($payStatus) {
+                  'pending'   => 'border border-yellow-400 bg-yellow-200 text-yellow-800',
+                  'completed' => 'border border-green-400 bg-green-200 text-green-800',
+                  'failed'    => 'border border-red-400 bg-red-200 text-red-800',
+                  'refunded'  => 'border border-gray-400 bg-gray-200 text-gray-800',
+                  default     => 'border border-gray-400 bg-gray-100 text-gray-800',
+                };
+                $resColor = match($resStatus) {
+                  'pending'   => 'border border-yellow-400 bg-yellow-200 text-yellow-800',
+                  'confirmed' => 'border border-green-400 bg-green-200 text-green-800',
+                  'cancelled' => 'border border-red-400 bg-red-200 text-red-800',
+                  default     => 'border border-gray-400 bg-gray-100 text-gray-800',
+                };
               ?>
+              <tr class="border-b"
+                data-guest="<?= strtolower(htmlspecialchars($guestName)) ?>"
+                data-checkin="<?= $checkIn ?>"
+                data-resstatus="<?= $resStatus ?>">
 
-              <tr class="border-b">
-                <td class="p-2 text-center"><?= $res['BookingToken'] ?></td>
-
-                <td class="p-2 text-center"><?= $guestName ?></td>
-
-                <td class="p-2 text-center"><?= $checkIn ?></td>
-
-                <td class="p-2 text-center"><?= $checkOut ?></td>
-
+                <td class="p-2 text-center"><?= htmlspecialchars($res['BookingToken']) ?></td>
+                <td class="p-2 text-center"><?= htmlspecialchars($guestName) ?></td>
+                <td class="p-2 text-center"><?= htmlspecialchars($checkIn) ?></td>
+                <td class="p-2 text-center"><?= htmlspecialchars($checkOut) ?></td>
                 <td class="p-2 text-center"><?= $roomCount ?></td>
-
                 <td class="p-2 text-center">₱<?= number_format($totalAmount, 2) ?></td>
-
                 <td class="p-2 text-center">
                   ₱<?= number_format($res['PaymentAmount'] ?? 0, 2) ?>
-                  (<?= $res['PaymentMethod'] ?? '-' ?>)
+                  (<?= htmlspecialchars($res['PaymentMethod'] ?? '-') ?>)
                 </td>
 
                 <td class="p-2 text-center">
-                  <?php
-                  $status = strtolower($res['PaymentStatus'] ?? '');
-                  $statusColor = match ($status) {
-                    'pending' => 'border border-yellow-400 bg-yellow-200 text-yellow-800',
-                    'completed' => 'border border-green-400 bg-green-200 text-green-800',
-                    'failed' => 'border border-red-400 bg-red-200 text-red-800',
-                    'refunded' => 'border border-gray-400 bg-gray-200 text-gray-800',
-                    default => 'border border-gray-400 bg-gray-100 text-gray-800',
-                  };
-                  ?>
-                  <span class="px-2 py-1 rounded-sm <?= $statusColor ?>">
-                    <?= ucfirst($status) ?>
+                  <span class="px-2 py-1 rounded-sm <?= $payColor ?>">
+                    <?= ucfirst($payStatus) ?>
                   </span>
                 </td>
+
                 <td class="p-2 text-center">
-                  <?php
-                  $resStatus = strtolower($res['ReservationStatus'] ?? '');
-                  $resColor = match ($resStatus) {
-                    'pending' => 'border border-yellow-400 bg-yellow-200 text-yellow-800',
-                    'confirmed' => 'border border-green-400 bg-green-200 text-green-800',
-                    'cancelled' => 'border border-red-400 bg-red-200 text-red-800',
-                    default => 'border border-gray-400 bg-gray-100 text-gray-800',
-                  };
-                  ?>
                   <span class="px-2 py-1 rounded-sm <?= $resColor ?>">
                     <?= ucfirst($resStatus) ?>
                   </span>
                 </td>
 
-                <td class="p-2 text-center space-x-2">
+                <td class="p-2 text-center space-x-1">
+                  <button class="view-reservation bg-blue-500 text-white px-2 py-1 rounded cursor-pointer"
+                    data-booking="<?= $res['BookingToken'] ?>">View</button>
 
-                  <button class="bg-blue-500 text-white px-2 py-1 rounded view-reservation cursor-pointer"
-                    data-booking="<?= $res['BookingToken'] ?>">
-                    View
-                  </button>
-
-                  <?php
-                  $paymentStatus = trim(strtolower($res['PaymentStatus'] ?? ''));
-                  $resStatus = trim(strtolower($res['ReservationStatus'] ?? ''));
-
-                  if ($resStatus === 'pending'):
-                    ?>
-                    <button class="bg-green-500 text-white px-2 py-1 rounded approve-reservation cursor-pointer"
-                      data-booking="<?= $res['BookingToken'] ?>">
-                      Approve
-                    </button>
+                  <?php if ($resStatus === 'pending'): ?>
+                  <button class="approve-reservation bg-green-500 text-white px-2 py-1 rounded cursor-pointer"
+                    data-booking="<?= $res['BookingToken'] ?>">Approve</button>
                   <?php endif; ?>
 
-                  <button class="bg-red-500 text-white px-2 py-1 rounded cancel-reservation cursor-pointer"
-                    data-booking="<?= $res['BookingToken'] ?>">
-                    Cancel
-                  </button>
-
+                  <?php if ($resStatus !== 'cancelled'): ?>
+                  <button class="cancel-reservation bg-red-500 text-white px-2 py-1 rounded cursor-pointer"
+                    data-booking="<?= $res['BookingToken'] ?>">Cancel</button>
+                  <?php endif; ?>
                 </td>
-              </tr>
 
+              </tr>
             <?php endforeach; ?>
+
+            <?php if (empty($reservations)): ?>
+            <tr>
+              <td colspan="10" class="p-6 text-center text-gray-400">No reservations found.</td>
+            </tr>
+            <?php endif; ?>
+
           </tbody>
         </table>
       </div>
     </div>
-
-    <!-- Edit Modal -->
-    <div id="editModal" class="fixed inset-0 hidden flex items-center justify-center backdrop-blur-sm">
-      <div class="bg-white p-6 rounded rounded-lg border border-gray-300 shadow-sm-lg w-[800px]">
-        <!-- increased width -->
-        <h2 class="text-lg font-bold mb-4">Edit Reservation</h2>
-        <form id="editForm" class="grid grid-cols-2 gap-4"> <!-- two-column grid -->
-          <div>
-            <label class="block text-sm font-medium mb-1">Guest Name</label>
-            <input type="text" class="border border-gray-300 p-2 w-full" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Room</label>
-            <input type="number" class="border border-gray-300 p-2 w-full" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Room Type</label>
-            <input type="text" class="border border-gray-300 p-2 w-full" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Guests</label>
-            <input type="number" class="border border-gray-300 p-2 w-full" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Check-in</label>
-            <input type="date" class="border border-gray-300 p-2 w-full" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Check-out</label>
-            <input type="date" class="border border-gray-300 p-2 w-full" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Method</label>
-            <select class="border border-gray-300 p-2 w-full">
-              <option>Online</option>
-              <option>Walk-in</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Status</label>
-            <select class="border border-gray-300 p-2 w-full">
-              <option>Pending</option>
-              <option>Confirmed</option>
-              <option>Cancelled</option>
-            </select>
-          </div>
-        </form>
-        <div class="flex justify-end space-x-2 mt-6">
-          <button id="confirmEditBtn" class="bg-green-500 text-white px-4 py-2 rounded cursor-pointer">Confirm</button>
-          <button id="cancelEditBtn" class="bg-gray-500 text-white px-4 py-2 rounded cursor-pointer">Cancel</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Container 5: Reservation Details (Modal) -->
-    <div id="detailsModal" class="fixed inset-0 hidden items-center justify-center z-50">
-      <!-- Overlay -->
-      <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
-
-      <!-- Modal Container -->
-      <div class="fixed inset-0 flex items-center justify-center">
-        <div class="bg-white rounded-lg border border-gray-300 shadow-lg w-[600px] max-h-[80vh] overflow-y-auto p-6">
-          <h3 class="text-lg font-bold mb-4 text-center">Reservation Details</h3>
-          <div id="detailsContent" class="space-y-2"></div>
-          <div class="mt-4 flex justify-center space-x-2">
-            <button onclick="closeModal()" class="bg-red-500 text-white px-4 py-2 rounded cursor-pointer">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Cancel Confirmation Modal -->
-    <div id="cancelModal" class="fixed inset-0 hidden items-center justify-center z-50">
-      <!-- backdrop -->
-      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-
-      <!-- modal box -->
-      <div class="relative bg-white p-6 rounded-lg shadow-lg text-center w-[320px] border border-gray-200">
-
-        <h3 id="confirmTitle" class="text-lg font-bold mb-4">Confirm Action</h3>
-
-        <p id="confirmMessage" class="mb-6 text-gray-600">
-          Are you sure you want to proceed?
-        </p>
-
-        <div class="flex justify-center space-x-4">
-          <button id="confirmCancelBtn" class="bg-green-500 text-white px-4 py-2 rounded cursor-pointer">
-            Yes
-          </button>
-
-          <button id="closeCancelBtn" class="bg-gray-500 text-white px-4 py-2 rounded cursor-pointer">
-            No
-          </button>
-        </div>
-
-      </div>
-    </div>
   </main>
-  <div id="detailsOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-40"></div>
+
+  <!-- Overlay -->
+  <div id="overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-40"></div>
+
+  <!-- Details Modal -->
+  <div id="detailsModal" class="fixed inset-0 flex justify-center items-center hidden z-50">
+    <div class="bg-white rounded-lg w-[600px] max-h-[80vh] overflow-y-auto p-6 relative">
+      <button id="closeDetailsModal"
+        class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 cursor-pointer text-xl leading-none">&times;</button>
+      <h2 class="text-xl font-bold mb-4">Reservation Details</h2>
+      <div id="detailsContent" class="space-y-3 text-sm"></div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div id="confirmModal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <div class="absolute inset-0 bg-black/50"></div>
+    <div class="bg-white w-96 p-6 rounded-lg shadow-lg relative z-10">
+      <h2 id="confirmTitle" class="text-lg font-semibold mb-3">Confirm Action</h2>
+      <p id="confirmMessage" class="text-sm text-gray-600 mb-5">Are you sure you want to proceed?</p>
+      <div class="flex justify-end space-x-2">
+        <button id="cancelConfirm"
+          class="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 cursor-pointer">Cancel</button>
+        <button id="okConfirm"
+          class="px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600 cursor-pointer">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // =========================
-    // VIEW RESERVATION DETAILS
-    // =========================
+    // ── Filter ────────────────────────────────────────────────
+    function applyFilter() {
+      const name   = $('#searchGuest').val().toLowerCase();
+      const date   = $('#searchDate').val();
+      const status = $('#searchStatus').val().toLowerCase();
+
+      $('#reservationTable tr').each(function () {
+        const matchName   = !name   || $(this).data('guest').includes(name);
+        const matchDate   = !date   || $(this).data('checkin') === date;
+        const matchStatus = !status || $(this).data('resstatus') === status;
+        $(this).toggle(matchName && matchDate && matchStatus);
+      });
+    }
+
+    function resetFilter() {
+      $('#searchGuest').val('');
+      $('#searchDate').val('');
+      $('#searchStatus').val('');
+      $('#reservationTable tr').show();
+    }
+
+    // ── Details Modal ─────────────────────────────────────────
     $(document).on('click', '.view-reservation', function () {
       const bookingToken = $(this).data('booking');
 
       $.get('/admin/getReservationDetails', { bookingToken }, function (data) {
-
         let html = '';
 
         if (!data || !data.length) {
-          html = '<p class="text-sm text-gray-500">No details found</p>';
+          html = '<p class="text-gray-500">No details found.</p>';
         } else {
           const guest = data[0];
-
           html += `
-        <div class="text-sm space-y-1">
-          <p><strong>Booking Code:</strong> ${guest.BookingToken}</p>
-          <p><strong>Guest:</strong> ${guest.FirstName} ${guest.LastName}</p>
-          <p><strong>Email:</strong> ${guest.Email}</p>
-        </div>
-        <hr class="my-3">
-        <h4 class="font-semibold text-sm mb-2">Rooms</h4>
-      `;
+            <div class="space-y-1">
+              <p><strong>Booking Code:</strong> ${guest.BookingToken}</p>
+              <p><strong>Guest:</strong> ${guest.FirstName} ${guest.LastName}</p>
+              <p><strong>Email:</strong> ${guest.Email}</p>
+            </div>
+            <hr class="my-3">
+            <h3 class="font-semibold mb-2">Room Details</h3>
+          `;
 
           data.forEach(room => {
             html += `
-          <div class="border rounded p-2 mb-2 text-sm">
-            <div><strong>Room:</strong> ${room.RoomType} (#${room.RoomNumber})</div>
-            <div>Check-in: ${room.CheckInDate}</div>
-            <div>Check-out: ${room.CheckOutDate}</div>
-            <div>Guests: ${room.NumAdults} Adult(s), ${room.NumChildren} Child(ren)</div>
-          </div>
-        `;
+              <div class="border rounded p-3">
+                <div class="font-semibold">Room #${room.RoomNumber} — ${room.RoomType}</div>
+                <div>Check-in: ${room.CheckInDate} (12:00 PM)</div>
+                <div>Check-out: ${room.CheckOutDate} (11:00 AM)</div>
+                <div>Guests: ${room.NumAdults} Adult(s), ${room.NumChildren} Child(ren)</div>
+              </div>
+            `;
           });
         }
 
         $('#detailsContent').html(html);
-
-        // IMPORTANT: show modal properly (like payments page)
-        $('#detailsModal')
-          .removeClass('hidden')
-          .addClass('flex');
+        $('#overlay, #detailsModal').removeClass('hidden');
       }, 'json');
     });
 
+    $('#closeDetailsModal, #overlay').on('click', function () {
+      $('#overlay, #detailsModal').addClass('hidden');
+    });
 
-    // =========================
-    // CLOSE MODAL
-    // =========================
     function closeModal() {
-      $('#detailsModal')
-        .addClass('hidden')
-        .removeClass('flex');
+      $('#overlay, #detailsModal').addClass('hidden');
     }
 
-    // click outside modal closes
-    $(document).on('click', '#detailsModal', function (e) {
-      if (e.target.id === 'detailsModal') {
-        closeModal();
-      }
-    });
-
-
-    // =========================
-    // APPROVE RESERVATION
-    // =========================
-    $(document).on('click', '.approve-reservation', function () {
-      const bookingToken = $(this).data('booking');
-
-      openConfirmModal(
-        'Approve Reservation',
-        'Are you sure you want to approve this reservation?',
-        function () {
-          $.post('/admin/approveReservation', { bookingToken }, function (res) {
-            if (res.success) {
-              showToast('Reservation approved successfully', 'success');
-              setTimeout(() => location.reload(), 800);
-            } else {
-              showToast(res.message || 'Failed to approve reservation', 'error');
-            }
-          }, 'json');
-        }
-      );
-    });
-
-
-    // =========================
-    // CANCEL RESERVATION
-    // =========================
-    $(document).on('click', '.cancel-reservation', function () {
-      const bookingToken = $(this).data('booking');
-
-      openConfirmModal(
-        'Cancel Reservation',
-        'Are you sure you want to cancel this reservation?',
-        function () {
-          $.post('/admin/cancelReservationAdmin', { bookingToken }, function (res) {
-            if (res.success) {
-              showToast('Reservation cancelled successfully', 'success');
-              setTimeout(() => location.reload(), 800);
-            } else {
-              showToast(res.message || 'Failed to cancel reservation', 'error');
-            }
-          }, 'json');
-        }
-      );
-    });
-
-
-    // =========================
-    // SIMPLE CONFIRM MODAL (REUSED STYLE LIKE PAYMENTS PAGE)
-    // =========================
+    // ── Confirm Modal ─────────────────────────────────────────
     let pendingAction = null;
 
     function openConfirmModal(title, message, action) {
       pendingAction = action;
-
       $('#confirmTitle').text(title);
       $('#confirmMessage').text(message);
-
-      $('#cancelModal')
-        .removeClass('hidden')
-        .addClass('flex');
+      $('#confirmModal').removeClass('hidden').addClass('flex');
     }
 
     function closeConfirmModal() {
-      $('#cancelModal')
-        .addClass('hidden')
-        .removeClass('flex');
-
+      $('#confirmModal').addClass('hidden').removeClass('flex');
       pendingAction = null;
     }
 
-    $(document).on('click', '#confirmCancelBtn', function () {
+    $('#cancelConfirm').on('click', closeConfirmModal);
+    $('#okConfirm').on('click', function () {
       if (typeof pendingAction === 'function') pendingAction();
       closeConfirmModal();
     });
 
-    $(document).on('click', '#closeCancelBtn', function () {
-      closeConfirmModal();
+    // ── Approve ───────────────────────────────────────────────
+    $(document).on('click', '.approve-reservation', function () {
+      const bookingToken = $(this).data('booking');
+      openConfirmModal('Approve Reservation', 'Are you sure you want to approve this reservation?', function () {
+        $.post('/admin/approveReservation', { bookingToken }, function (res) {
+          if (res.success) {
+            showToast('Reservation approved successfully', 'success');
+            setTimeout(() => location.reload(), 800);
+          } else {
+            showToast(res.message || 'Failed to approve reservation', 'error');
+          }
+        }, 'json');
+      });
+    });
+
+    // ── Cancel ────────────────────────────────────────────────
+    $(document).on('click', '.cancel-reservation', function () {
+      const bookingToken = $(this).data('booking');
+      openConfirmModal('Cancel Reservation', 'Are you sure you want to cancel this reservation?', function () {
+        $.post('/admin/cancelReservationAdmin', { bookingToken }, function (res) {
+          if (res.success) {
+            showToast('Reservation cancelled successfully', 'success');
+            setTimeout(() => location.reload(), 800);
+          } else {
+            showToast(res.message || 'Failed to cancel reservation', 'error');
+          }
+        }, 'json');
+      });
     });
   </script>
 </body>
-
 </html>

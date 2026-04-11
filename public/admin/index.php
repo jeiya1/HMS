@@ -75,6 +75,143 @@ switch ($adminPath) {
         $admin->adminRooms();
         break;
 
+    case '/addRoomType':
+        header('Content-Type: application/json');
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false]);
+            exit();
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit();
+        }
+        try {
+            $roomModel = new Room($GLOBALS['conn']);
+            $roomModel->addRoomType(
+                trim($_POST['name']),
+                (float) $_POST['price'],
+                (int) $_POST['bedTypeID'],
+                (int) $_POST['bedCount'],
+                (int) $_POST['occupancy']
+            );
+            echo json_encode(['success' => true, 'message' => 'Room type added']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case '/updateRoomType':
+        header('Content-Type: application/json');
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false]);
+            exit();
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit();
+        }
+        try {
+            $roomModel = new Room($GLOBALS['conn']);
+            $roomModel->updateRoomType(
+                (int) $_POST['roomTypeID'],
+                trim($_POST['name']),
+                (float) $_POST['price'],
+                (int) $_POST['bedTypeID'],
+                (int) $_POST['bedCount'],
+                (int) $_POST['occupancy']
+            );
+            echo json_encode(['success' => true, 'message' => 'Room type updated']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case '/deleteRoomType':
+        header('Content-Type: application/json');
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false]);
+            exit();
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit();
+        }
+        try {
+            $roomModel = new Room($GLOBALS['conn']);
+            $roomModel->deleteRoomType((int) $_POST['roomTypeID']);
+            echo json_encode(['success' => true, 'message' => 'Room type deleted']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case '/addRoom':
+        header('Content-Type: application/json');
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false]);
+            exit();
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit();
+        }
+        try {
+            $roomModel = new Room($GLOBALS['conn']);
+            $roomModel->addRoom(
+                (int) $_POST['floorID'],
+                (int) $_POST['roomTypeID'],
+                trim($_POST['roomNumber'])
+            );
+            echo json_encode(['success' => true, 'message' => 'Room added']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case '/updateRoomStatus':
+        header('Content-Type: application/json');
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false]);
+            exit();
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit();
+        }
+        try {
+            $roomModel = new Room($GLOBALS['conn']);
+            $roomModel->updateRoomStatus((int) $_POST['roomID'], $_POST['status']);
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case '/deleteRoom':
+        header('Content-Type: application/json');
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false]);
+            exit();
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit();
+        }
+        try {
+            $roomModel = new Room($GLOBALS['conn']);
+            $roomModel->deleteRoom((int) $_POST['roomID']);
+            echo json_encode(['success' => true, 'message' => 'Room deleted']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
     case '/calendar':
         if (!isset($_SESSION['admin_logged_in'])) {
             header('Location: /admin/login');

@@ -59,13 +59,19 @@ class AdminController
         $reservations = $reservationModel->getAllConfirmedReservations();
         require_once '../../app/views/admin/reservations.view.php';
     }
+
     public function adminRooms()
     {
         if (!$this->getAuthState()) {
             header("Location: /admin/login");
             exit();
         }
-        // $roomModel = new Room($GLOBALS['conn']);
+        $roomModel = new Room($GLOBALS['conn']);
+        $rooms = $roomModel->getAllRooms();
+        $roomTypes = $roomModel->getAllRoomTypes();
+        $bedTypes = $roomModel->getAllBedTypes();
+        $floors = $roomModel->getAllFloors();
+
         require_once '../../app/views/admin/rooms.view.php';
     }
     public function loginForm()

@@ -2,7 +2,6 @@
 
 class Room
 {
-
     private $conn;
 
     public function __construct($db)
@@ -10,12 +9,11 @@ class Room
         $this->conn = $db;
     }
 
-    // Check if room is available for given dates
+    // ─── Availability / Search (unchanged) ───────────────────────────────────
+
     public function checkRoomAvailability($roomID, $checkin, $checkout)
     {
-        // Call availability check procedure
         $this->conn->execute_query("CALL CheckRoomAvailability(?, ?, ?, @isAvailable)", [$roomID, $checkin, $checkout]);
-
         $result = $this->conn->query("SELECT @isAvailable AS available;");
         $row = $result->fetch_assoc();
         return (bool) $row['available'];
@@ -23,108 +21,50 @@ class Room
 
     public function getRoomPrice($roomID)
     {
-        // Call room price procedure
         $this->conn->execute_query("CALL GetRoomPrice(?, @price)", [$roomID]);
-
         $result = $this->conn->query("SELECT @price AS price;");
         $row = $result->fetch_assoc();
         return (float) $row['price'];
     }
 
-    public function getRoomInfoByRoomNumber($roomNumber) {
+    public function getRoomInfoByRoomNumber($roomNumber)
+    {
         $result = $this->conn->execute_query(
-            'SELECT 
-    rt.RoomTypeName,
-    rt.BasePrice,
-    rt.MaxOccupancy
-FROM Rooms r
-JOIN RoomTypes rt ON r.RoomTypeID = rt.RoomTypeID
-WHERE r.RoomNumber = ?;',
+            "SELECT rt.RoomTypeName, rt.BasePrice, rt.MaxOccupancy
+             FROM Rooms r
+             JOIN RoomTypes rt ON r.RoomTypeID = rt.RoomTypeID
+             WHERE r.RoomNumber = ?",
             [$roomNumber]
         );
-
-        $roomInfo = $result->fetch_assoc();
-        return $roomInfo ?: null;
+        return $result->fetch_assoc() ?: null;
     }
 
-    function calculateTotalAmount($roomTypeName, $basePrice, $checkin, $checkout, $numAdults = 1)
+    public function getRoomTypeName($roomID)
     {
-        // 1. Calculate number of nights
-        $checkinDate = new DateTime($checkin);
-        $checkoutDate = new DateTime($checkout);
-
-        if ($checkoutDate < $checkinDate) {
-            throw new Exception("Check-out date must be after check-in date.");
-        }
-
-        $interval = $checkinDate->diff($checkoutDate);
-        $numNights = $interval->days;
-
-        if ($numNights == 0) {
-            $numNights = 1; // Minimum charge for 1 night
-        }
-
-        $totalAmount = $basePrice * $numNights;
-
-        // 3. Discount for > 3 nights
-        if ($numNights > 3) {
-            $totalAmount *= 0.85; // Apply 15% discount
-
-            // 4. Additional guest charge
-            // Determine minimum occupancy based on room type
-            $occupancy = 1; // default single occupancy
-            if (stripos($roomTypeName, 'Double') !== false) {
-                $occupancy = 2; // minimum 2 guests for double rooms
-            }
-
-            // Total guests
-            $totalGuests = max($numAdults, $occupancy);
-
-            // Extra charge = 10% of room rate per guest × number of nights
-            $extraCharge = $basePrice * 0.10 * $totalGuests * $numNights;
-            $totalAmount += $extraCharge;
-        }
-
-        // 5. Apply VAT (12%)
-        $totalAmount *= 1.12;
-
-        return round($totalAmount, 2);
-    }
-
-    function getRoomTypeName($roomID)
-    {
-        // Call stored procedure
         $this->conn->execute_query("CALL GetRoomName(?, @name)", [$roomID]);
-
-        // Clear result sets
         while ($this->conn->more_results() && $this->conn->next_result()) {
             $this->conn->use_result();
         }
-
-        // Fetch the output variable
         $result = $this->conn->query("SELECT @name AS name");
         $row = $result->fetch_assoc();
-
         return $row['name'] ?? null;
     }
 
     public function searchAvailable($filters)
     {
-        // Call search procedure with filter parameters
         $result = $this->conn->execute_query(
             "CALL SearchAvailableRooms(?, ?, ?, ?, ?, ?, ?)",
             [
                 $filters['checkin'],
                 $filters['checkout'],
-                $filters['adults'] ?? null,
-                $filters['children'] ?? null,
-                $filters['room'] ?? null,       // single/double
+                $filters['adults']    ?? null,
+                $filters['children']  ?? null,
+                $filters['room']      ?? null,
                 $filters['room_type'] ?? null,
-                $filters['cartID']
+                $filters['cartID'],
             ]
         );
 
-        // Fetch all matching rooms
         $rooms = [];
         if ($result instanceof mysqli_result) {
             while ($row = $result->fetch_assoc()) {
@@ -132,72 +72,173 @@ WHERE r.RoomNumber = ?;',
             }
             $result->free();
         }
-
-        // Clear remaining result sets
         while ($this->conn->more_results() && $this->conn->next_result()) {
-            $extraResult = $this->conn->use_result();
-            if ($extraResult instanceof mysqli_result) {
-                $extraResult->free();
-            }
+            $extra = $this->conn->use_result();
+            if ($extra instanceof mysqli_result) $extra->free();
         }
-
         return $rooms;
     }
 
-    //admin functions
-    public function createRoom($type, $price, $description, $imagePath)
+    public function calculateTotalAmount($roomTypeName, $basePrice, $checkin, $checkout, $numAdults = 1)
     {
-        $result = $this->conn->execute_query(
-            "INSERT INTO Rooms (RoomTypeID, Price, Description, ImagePath) VALUES (?, ?, ?, ?)",
-            [$type, $price, $description, $imagePath]
-        );
+        $checkinDate  = new DateTime($checkin);
+        $checkoutDate = new DateTime($checkout);
+        if ($checkoutDate < $checkinDate) throw new Exception("Check-out date must be after check-in date.");
 
-        return $result;
+        $numNights   = max(1, $checkinDate->diff($checkoutDate)->days);
+        $totalAmount = $basePrice * $numNights;
+
+        if ($numNights > 3) {
+            $totalAmount *= 0.85;
+            $occupancy    = stripos($roomTypeName, 'Double') !== false ? 2 : 1;
+            $totalGuests  = max($numAdults, $occupancy);
+            $totalAmount += $basePrice * 0.10 * $totalGuests * $numNights;
+        }
+
+        return round($totalAmount * 1.12, 2);
     }
-    
-    public function getAllRooms()
+
+    // ─── Admin: Individual Rooms ──────────────────────────────────────────────
+
+    public function getAllRooms(): array
     {
         $result = $this->conn->execute_query(
-            "SELECT r.RoomID, rt.RoomTypeName AS type, r.Price AS price, r.Description AS description, r.ImagePath AS image, rt.MaxOccupancy AS occupancy
-            FROM Rooms r
-            JOIN RoomTypes rt ON r.RoomTypeID = rt.RoomTypeID"
+            "SELECT r.RoomID, r.RoomNumber, r.Status,
+                    f.FloorNumber,
+                    rt.RoomTypeID, rt.RoomTypeName, rt.BasePrice,
+                    rt.BedCount, rt.MaxOccupancy,
+                    bt.BedName
+             FROM Rooms r
+             JOIN Floors f    ON r.FloorID    = f.FloorID
+             JOIN RoomTypes rt ON r.RoomTypeID = rt.RoomTypeID
+             LEFT JOIN BedTypes bt ON rt.BedTypeID = bt.BedTypeID
+             ORDER BY r.RoomNumber ASC"
         );
 
         $rooms = [];
         if ($result instanceof mysqli_result) {
-            while ($row = $result->fetch_assoc()) {
-                $rooms[] = $row;
-            }
+            while ($row = $result->fetch_assoc()) $rooms[] = $row;
             $result->free();
         }
-
         return $rooms;
     }
 
-    public function updateRoom($roomID, $type, $price, $description, $imagePath = null)
+    public function updateRoomStatus(int $roomID, string $status): bool
     {
-        if ($imagePath) {
-            $result = $this->conn->execute_query(
-                "UPDATE Rooms SET RoomTypeID = ?, Price = ?, Description = ?, ImagePath = ? WHERE RoomID = ?",
-                [$type, $price, $description, $imagePath, $roomID]
-            );
-        } else {
-            $result = $this->conn->execute_query(
-                "UPDATE Rooms SET RoomTypeID = ?, Price = ?, Description = ? WHERE RoomID = ?",
-                [$type, $price, $description, $roomID]
-            );
+        if (!in_array($status, ['available', 'occupied', 'maintenance'])) {
+            throw new Exception("Invalid room status.");
         }
-
-        return $result;
+        $result = $this->conn->execute_query(
+            "UPDATE Rooms SET Status = ? WHERE RoomID = ?",
+            [$status, $roomID]
+        );
+        if (!$result) throw new Exception("Failed to update room status: " . $this->conn->error);
+        return true;
     }
-    public function deleteRoom($roomID)
+
+    public function addRoom(int $floorID, int $roomTypeID, string $roomNumber): bool
+    {
+        $result = $this->conn->execute_query(
+            "INSERT INTO Rooms (RoomNumber, FloorID, RoomTypeID) VALUES (?, ?, ?)",
+            [$roomNumber, $floorID, $roomTypeID]
+        );
+        if (!$result) throw new Exception("Failed to add room: " . $this->conn->error);
+        return true;
+    }
+
+    public function deleteRoom(int $roomID): bool
     {
         $result = $this->conn->execute_query(
             "DELETE FROM Rooms WHERE RoomID = ?",
             [$roomID]
         );
+        if (!$result) throw new Exception("Failed to delete room: " . $this->conn->error);
+        return true;
+    }
 
-        return $result;
+    // ─── Admin: Room Types ────────────────────────────────────────────────────
+
+    public function getAllRoomTypes(): array
+    {
+        $result = $this->conn->execute_query(
+            "SELECT rt.RoomTypeID, rt.RoomTypeName, rt.BasePrice,
+                    rt.BedCount, rt.MaxOccupancy,
+                    bt.BedTypeID, bt.BedName
+             FROM RoomTypes rt
+             LEFT JOIN BedTypes bt ON rt.BedTypeID = bt.BedTypeID
+             ORDER BY rt.BasePrice ASC"
+        );
+
+        $types = [];
+        if ($result instanceof mysqli_result) {
+            while ($row = $result->fetch_assoc()) $types[] = $row;
+            $result->free();
+        }
+        return $types;
+    }
+
+    public function getAllBedTypes(): array
+    {
+        $result = $this->conn->execute_query("SELECT * FROM BedTypes ORDER BY BedTypeID ASC");
+        $beds = [];
+        if ($result instanceof mysqli_result) {
+            while ($row = $result->fetch_assoc()) $beds[] = $row;
+            $result->free();
+        }
+        return $beds;
+    }
+
+    public function getAllFloors(): array
+    {
+        $result = $this->conn->execute_query("SELECT * FROM Floors ORDER BY FloorNumber ASC");
+        $floors = [];
+        if ($result instanceof mysqli_result) {
+            while ($row = $result->fetch_assoc()) $floors[] = $row;
+            $result->free();
+        }
+        return $floors;
+    }
+
+    public function addRoomType(string $name, float $price, int $bedTypeID, int $bedCount, int $maxOccupancy): bool
+    {
+        $result = $this->conn->execute_query(
+            "INSERT INTO RoomTypes (RoomTypeName, BasePrice, BedTypeID, BedCount, MaxOccupancy)
+             VALUES (?, ?, ?, ?, ?)",
+            [$name, $price, $bedTypeID, $bedCount, $maxOccupancy]
+        );
+        if (!$result) throw new Exception("Failed to add room type: " . $this->conn->error);
+        return true;
+    }
+
+    public function updateRoomType(int $roomTypeID, string $name, float $price, int $bedTypeID, int $bedCount, int $maxOccupancy): bool
+    {
+        $result = $this->conn->execute_query(
+            "UPDATE RoomTypes SET RoomTypeName = ?, BasePrice = ?, BedTypeID = ?, BedCount = ?, MaxOccupancy = ?
+             WHERE RoomTypeID = ?",
+            [$name, $price, $bedTypeID, $bedCount, $maxOccupancy, $roomTypeID]
+        );
+        if (!$result) throw new Exception("Failed to update room type: " . $this->conn->error);
+        return true;
+    }
+
+    public function deleteRoomType(int $roomTypeID): bool
+    {
+        // Check if any rooms still use this type
+        $check = $this->conn->execute_query(
+            "SELECT COUNT(*) AS cnt FROM Rooms WHERE RoomTypeID = ?",
+            [$roomTypeID]
+        );
+        $row = $check->fetch_assoc();
+        if ($row['cnt'] > 0) {
+            throw new Exception("Cannot delete: {$row['cnt']} room(s) still use this type.");
+        }
+
+        $result = $this->conn->execute_query(
+            "DELETE FROM RoomTypes WHERE RoomTypeID = ?",
+            [$roomTypeID]
+        );
+        if (!$result) throw new Exception("Failed to delete room type: " . $this->conn->error);
+        return true;
     }
 }
 ?>
