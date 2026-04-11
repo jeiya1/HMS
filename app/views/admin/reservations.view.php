@@ -38,13 +38,9 @@
           <option value="cancelled">Cancelled</option>
         </select>
         <button onclick="applyFilter()"
-          class="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
-          Apply Filter
-        </button>
+          class="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">Apply Filter</button>
         <button onclick="resetFilter()"
-          class="bg-gray-500 text-white px-4 py-2 rounded cursor-pointer">
-          Reset Filter
-        </button>
+          class="bg-gray-500 text-white px-4 py-2 rounded cursor-pointer">Reset Filter</button>
       </div>
     </div>
 
@@ -134,7 +130,6 @@
                     data-booking="<?= $res['BookingToken'] ?>">Cancel</button>
                   <?php endif; ?>
                 </td>
-
               </tr>
             <?php endforeach; ?>
 
@@ -155,9 +150,9 @@
 
   <!-- Details Modal -->
   <div id="detailsModal" class="fixed inset-0 flex justify-center items-center hidden z-50">
-    <div class="bg-white rounded-lg w-[600px] max-h-[80vh] overflow-y-auto p-6 relative">
+    <div class="bg-white rounded-lg w-[650px] max-h-[85vh] overflow-y-auto p-6 relative">
       <button id="closeDetailsModal"
-        class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 cursor-pointer text-xl leading-none">&times;</button>
+        class="absolute top-2 right-3 text-gray-600 hover:text-gray-900 cursor-pointer text-xl leading-none">&times;</button>
       <h2 class="text-xl font-bold mb-4">Reservation Details</h2>
       <div id="detailsContent" class="space-y-3 text-sm"></div>
     </div>
@@ -200,77 +195,128 @@
       $('#reservationTable tr').show();
     }
 
-    // ── Details Modal ─────────────────────────────────────────
-    $(document).on('click', '.view-reservation', function () {
-      const bookingToken = $(this).data('booking');
+    // ── Room status badge ─────────────────────────────────────
+    function roomStatusBadge(status) {
+      const map = {
+        pending:     'border border-yellow-400 bg-yellow-200 text-yellow-800',
+        confirmed:   'border border-green-400 bg-green-200 text-green-800',
+        checked_in:  'border border-blue-400 bg-blue-200 text-blue-800',
+        checked_out: 'border border-gray-400 bg-gray-200 text-gray-800',
+        cancelled:   'border border-red-400 bg-red-200 text-red-800',
+      };
+      const cls   = map[status] ?? 'border border-gray-400 bg-gray-100 text-gray-800';
+      const label = status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      return `<span class="px-2 py-0.5 rounded-sm text-xs ${cls}">${label}</span>`;
+    }
+
+    // ── Next action button per room status ────────────────────
+    // CheckInGuest / CheckOutGuest both take ReservationID (not room)
+    function roomActionButton(roomStatus, reservationID) {
+      if (roomStatus === 'confirmed') {
+        return `<button class="checkin-room bg-blue-500 text-white px-2 py-1 rounded text-xs cursor-pointer"
+          data-reservation-id="${reservationID}">Check In</button>`;
+      }
+      if (roomStatus === 'checked_in') {
+        return `<button class="checkout-room bg-gray-600 text-white px-2 py-1 rounded text-xs cursor-pointer"
+          data-reservation-id="${reservationID}">Check Out</button>`;
+      }
+      return ''; // pending / checked_out / cancelled — no action
+    }
+
+    // ── Load details modal ────────────────────────────────────
+    let currentBookingToken = null;
+
+    function loadDetailsModal(bookingToken) {
+      currentBookingToken = bookingToken;
 
       $.get('/admin/getReservationDetails', { bookingToken }, function (data) {
         let html = '';
 
         if (!data || !data.length) {
-          html = '<p class="text-gray-500">No details found.</p>';
-        } else {
-          const guest = data[0];
-          html += `
-            <div class="space-y-1">
-              <p><strong>Booking Code:</strong> ${guest.BookingToken}</p>
-              <p><strong>Guest:</strong> ${guest.FirstName} ${guest.LastName}</p>
-              <p><strong>Email:</strong> ${guest.Email}</p>
-            </div>
-            <hr class="my-3">
-            <h3 class="font-semibold mb-2">Room Details</h3>
-          `;
-
-          data.forEach(room => {
-            html += `
-              <div class="border rounded p-3">
-                <div class="font-semibold">Room #${room.RoomNumber} — ${room.RoomType}</div>
-                <div>Check-in: ${room.CheckInDate} (12:00 PM)</div>
-                <div>Check-out: ${room.CheckOutDate} (11:00 AM)</div>
-                <div>Guests: ${room.NumAdults} Adult(s), ${room.NumChildren} Child(ren)</div>
-              </div>
-            `;
-          });
+          $('#detailsContent').html('<p class="text-gray-500">No details found.</p>');
+          $('#overlay, #detailsModal').removeClass('hidden');
+          return;
         }
+
+        const guest = data[0];
+
+        html += `
+          <div class="space-y-1">
+            <p><strong>Booking Code:</strong> ${guest.BookingToken}</p>
+            <p><strong>Guest:</strong> ${guest.FirstName} ${guest.LastName}</p>
+            <p><strong>Email:</strong> ${guest.Email}</p>
+          </div>
+          <hr class="my-3">
+          <h3 class="font-semibold mb-2">Rooms</h3>
+        `;
+
+        data.forEach(room => {
+          const roomStatus = (room.RoomStatus ?? 'pending').toLowerCase();
+          const actionBtn  = roomActionButton(roomStatus, room.ReservationID);
+
+          html += `
+            <div class="border border-gray-300 rounded p-3 space-y-1">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <span class="font-semibold">Room #${room.RoomNumber} — ${room.RoomType}</span>
+                <div class="flex items-center gap-2">
+                  ${roomStatusBadge(roomStatus)}
+                  ${actionBtn}
+                </div>
+              </div>
+              <div>Check-in: ${room.CheckInDate} <span class="text-gray-400 text-xs">(12:00 PM)</span></div>
+              <div>Check-out: ${room.CheckOutDate} <span class="text-gray-400 text-xs">(11:00 AM)</span></div>
+              <div>Guests: ${room.NumAdults} Adult(s), ${room.NumChildren} Child(ren)</div>
+            </div>
+          `;
+        });
 
         $('#detailsContent').html(html);
         $('#overlay, #detailsModal').removeClass('hidden');
       }, 'json');
+    }
+
+    $(document).on('click', '.view-reservation', function () {
+      loadDetailsModal($(this).data('booking'));
     });
 
     $('#closeDetailsModal, #overlay').on('click', function () {
       $('#overlay, #detailsModal').addClass('hidden');
     });
 
-    function closeModal() {
-      $('#overlay, #detailsModal').addClass('hidden');
-    }
+    // ── Check In ──────────────────────────────────────────────
+    $(document).on('click', '.checkin-room', function () {
+      const reservationID = $(this).data('reservation-id');
+      openConfirmModal('Check In Guest', 'Confirm check-in for this reservation?', function () {
+        $.post('/admin/checkInGuest', { reservationID }, function (res) {
+          if (res.success) {
+            showToast('Guest checked in successfully', 'success');
+            setTimeout(() => { loadDetailsModal(currentBookingToken); location.reload(); }, 600);
+          } else {
+            showToast(res.message || 'Failed to check in', 'error');
+          }
+        }, 'json');
+      });
+    });
 
-    // ── Confirm Modal ─────────────────────────────────────────
-    let pendingAction = null;
-
-    function openConfirmModal(title, message, action) {
-      pendingAction = action;
-      $('#confirmTitle').text(title);
-      $('#confirmMessage').text(message);
-      $('#confirmModal').removeClass('hidden').addClass('flex');
-    }
-
-    function closeConfirmModal() {
-      $('#confirmModal').addClass('hidden').removeClass('flex');
-      pendingAction = null;
-    }
-
-    $('#cancelConfirm').on('click', closeConfirmModal);
-    $('#okConfirm').on('click', function () {
-      if (typeof pendingAction === 'function') pendingAction();
-      closeConfirmModal();
+    // ── Check Out ─────────────────────────────────────────────
+    $(document).on('click', '.checkout-room', function () {
+      const reservationID = $(this).data('reservation-id');
+      openConfirmModal('Check Out Guest', 'Confirm check-out for this reservation?', function () {
+        $.post('/admin/checkOutGuest', { reservationID }, function (res) {
+          if (res.success) {
+            showToast('Guest checked out successfully', 'success');
+            setTimeout(() => { loadDetailsModal(currentBookingToken); location.reload(); }, 600);
+          } else {
+            showToast(res.message || 'Failed to check out', 'error');
+          }
+        }, 'json');
+      });
     });
 
     // ── Approve ───────────────────────────────────────────────
     $(document).on('click', '.approve-reservation', function () {
       const bookingToken = $(this).data('booking');
-      openConfirmModal('Approve Reservation', 'Are you sure you want to approve this reservation?', function () {
+      openConfirmModal('Approve Reservation', 'Approve this reservation and mark payment as completed?', function () {
         $.post('/admin/approveReservation', { bookingToken }, function (res) {
           if (res.success) {
             showToast('Reservation approved successfully', 'success');
@@ -295,6 +341,27 @@
           }
         }, 'json');
       });
+    });
+
+    // ── Confirm Modal ─────────────────────────────────────────
+    let pendingAction = null;
+
+    function openConfirmModal(title, message, action) {
+      pendingAction = action;
+      $('#confirmTitle').text(title);
+      $('#confirmMessage').text(message);
+      $('#confirmModal').removeClass('hidden').addClass('flex');
+    }
+
+    function closeConfirmModal() {
+      $('#confirmModal').addClass('hidden').removeClass('flex');
+      pendingAction = null;
+    }
+
+    $('#cancelConfirm').on('click', closeConfirmModal);
+    $('#okConfirm').on('click', function () {
+      if (typeof pendingAction === 'function') pendingAction();
+      closeConfirmModal();
     });
   </script>
 </body>

@@ -8,7 +8,7 @@ require_once '../../config/connect.php';
 require_once '../../app/controllers/AdminController.php';
 require_once '../../app/models/Reservation.php';
 require_once '../../app/models/Log.php';
-
+require_once '../../app/models/Event.php';
 
 $admin = new AdminController();
 $reservationModel = new Reservation($GLOBALS['conn']);
@@ -273,7 +273,7 @@ switch ($adminPath) {
         }
 
         try {
-            $details = $reservationModel->getReservationWithGuest($token);
+            $details = $reservationModel->getReservationWithGuest2($token);
             echo json_encode($details);
         } catch (Exception $e) {
             echo json_encode(['error' => $e->getMessage()]);
@@ -281,7 +281,6 @@ switch ($adminPath) {
         break;
 
 
-    // APPROVE FULL BOOKING (multi-room safe)
     case '/approveReservation':
         header('Content-Type: application/json');
 
@@ -299,34 +298,40 @@ switch ($adminPath) {
         }
 
         try {
-            // 1. Update reservation status FIRST
+            // 1. Confirm reservation
             $GLOBALS['conn']->execute_query(
                 "UPDATE Reservations SET Status = 'confirmed' WHERE BookingToken = ?",
                 [$bookingToken]
             );
 
-            // 2. Update payment
+            // 2. Confirm ALL rooms in this reservation (pending → confirmed)
+            //    THIS IS THE MISSING LINE — without it RoomStatus stays 'pending'
+            //    and the Check In button never appears in the modal
             $GLOBALS['conn']->execute_query(
-                "UPDATE Payments SET PaymentStatus = 'completed'
-             WHERE ReservationID = (
-                SELECT ReservationID FROM Reservations WHERE BookingToken = ?
-             )",
+                "UPDATE ReservationRooms SET Status = 'confirmed'
+                 WHERE ReservationID = (
+                     SELECT ReservationID FROM Reservations WHERE BookingToken = ?
+                 )",
                 [$bookingToken]
             );
 
-            echo json_encode([
-                'success' => true,
-                'message' => 'Reservation approved'
-            ]);
+            // 3. Complete payment
+            $GLOBALS['conn']->execute_query(
+                "UPDATE Payments SET PaymentStatus = 'completed'
+                 WHERE ReservationID = (
+                     SELECT ReservationID FROM Reservations WHERE BookingToken = ?
+                 )",
+                [$bookingToken]
+            );
+
+            echo json_encode(['success' => true, 'message' => 'Reservation approved']);
             exit;
 
         } catch (Exception $e) {
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
             exit;
         }
+
 
     // CANCEL RESERVATION (and refund if paid)
     case '/cancelReservationAdmin':
@@ -518,6 +523,74 @@ switch ($adminPath) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
         break;
+
+    case '/checkInGuest':
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            exit();
+        }
+
+        $reservationID = intval($_POST['reservationID'] ?? 0);
+
+        if (!$reservationID) {
+            echo json_encode(['success' => false, 'message' => 'Missing reservation ID']);
+            exit();
+        }
+
+        try {
+            $GLOBALS['conn']->execute_query(
+                "CALL CheckInGuest(?)",
+                [$reservationID]
+            );
+            echo json_encode(['success' => true, 'message' => 'Guest checked in']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+
+    case '/checkOutGuest':
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            exit();
+        }
+
+        $reservationID = intval($_POST['reservationID'] ?? 0);
+
+        if (!$reservationID) {
+            echo json_encode(['success' => false, 'message' => 'Missing reservation ID']);
+            exit();
+        }
+
+        try {
+            $GLOBALS['conn']->execute_query(
+                "CALL CheckOutGuest(?)",
+                [$reservationID]
+            );
+            echo json_encode(['success' => true, 'message' => 'Guest checked out']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
 
     default:
         echo "404 Admin Page Not Found";

@@ -2,7 +2,7 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require __DIR__ . '/../../vendor/autoload.php'; // Adjust path to your vendor/autoload.php
+require __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../../env.php';
 
 class User

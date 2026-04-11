@@ -440,6 +440,40 @@ class Reservation
 
         return $result->fetch_all(MYSQLI_ASSOC);
     }
+    public function getReservationWithGuest2($token): array
+    {
+        $result = $this->conn->execute_query(
+            "SELECT
+                res.ReservationID,
+                res.BookingToken,
+                res.Status AS ReservationStatus,
+                g.FirstName,
+                g.LastName,
+                g.Email,
+                rr.ReservationRoomID,
+                rr.CheckInDate,
+                rr.CheckOutDate,
+                rr.NumAdults,
+                rr.NumChildren,
+                rr.Status AS RoomStatus,
+                ro.RoomNumber,
+                rt.RoomTypeName AS RoomType,
+                rt.BasePrice
+             FROM Reservations res
+             JOIN Guests g             ON res.GuestID        = g.GuestID
+             JOIN ReservationRooms rr  ON rr.ReservationID   = res.ReservationID
+             JOIN Rooms ro             ON rr.RoomID          = ro.RoomID
+             JOIN RoomTypes rt         ON ro.RoomTypeID      = rt.RoomTypeID
+             WHERE res.BookingToken = ?",
+            [$token]
+        );
+ 
+        if ($result instanceof mysqli_result) {
+            return $result->fetch_all(MYSQLI_ASSOC);
+        }
+ 
+        return [];
+    }
 
     public function getReservationPayment($reservationID)
     {

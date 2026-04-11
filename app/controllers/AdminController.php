@@ -96,12 +96,13 @@ class AdminController
             header("Location: /admin/login");
             exit();
         }
-        // $eventModel = new Event();
-        // $events = $eventModel->getAllEvents();
+
+        $eventModel = new Event($GLOBALS['conn']);
+        $events = $eventModel->getCalendarEvents();
 
         require "../../app/views/admin/calendar.view.php";
-
     }
+
     public function adminLogs()
     {
         if (!$this->getAuthState()) {

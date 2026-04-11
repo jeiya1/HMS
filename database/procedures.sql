@@ -449,114 +449,75 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-
+ 
 CREATE PROCEDURE CheckInGuest(
     IN pReservationID INT
 )
 BEGIN
-
-    DECLARE roomID INT;
-    DECLARE done INT DEFAULT 0;
-    DECLARE currentStatus INT;
-
-    DECLARE roomCursor CURSOR FOR
-        SELECT RoomID 
-        FROM ReservationRooms 
-        WHERE ReservationID = pReservationID;
-
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
-
+    DECLARE currentStatus VARCHAR(20);
+ 
     SELECT Status INTO currentStatus
     FROM Reservations
     WHERE ReservationID = pReservationID;
-
+ 
     IF currentStatus != 'confirmed' THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = "Only confirmed reservations can be checked in";
+        SET MESSAGE_TEXT = 'Only confirmed reservations can be checked in';
     ELSE
-
-    START TRANSACTION;
-
-    UPDATE Reservations
-    SET Status = 'confirmed'
-    WHERE ReservationID = pReservationID;
-
-    UPDATE ReservationRooms
-    SET Status = 'checked_in'
-    WHERE ReservationID = pReservationID;
-
-    OPEN roomCursor;
-    read_loop: LOOP
-        FETCH roomCursor INTO roomID;
-        IF done THEN
-            LEAVE read_loop;
-        END IF;
-
+        START TRANSACTION;
+ 
+        UPDATE ReservationRooms
+        SET Status = 'checked_in'
+        WHERE ReservationID = pReservationID;
+ 
         UPDATE Rooms
         SET Status = 'occupied'
-        WHERE RoomID = roomID;
-    END LOOP;
-    CLOSE roomCursor;
-
-    COMMIT;
+        WHERE RoomID IN (
+            SELECT RoomID FROM ReservationRooms WHERE ReservationID = pReservationID
+        );
+ 
+        COMMIT;
     END IF;
-
 END$$
-
+ 
 DELIMITER ;
-
+ 
 DELIMITER $$
-
+ 
 CREATE PROCEDURE CheckOutGuest(
     IN pReservationID INT
 )
 BEGIN
-
-    DECLARE roomID INT;
-    DECLARE done INT DEFAULT 0;
-    DECLARE currentStatus INT;
-
-    DECLARE roomCursor CURSOR FOR
-        SELECT RoomID FROM ReservationRooms WHERE ReservationID = pReservationID;
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
-
-    SELECT Status INTO currentStatus
-    FROM Reservations
-    WHERE ReservationID = pReservationID;
-
-    IF currentStatus != 'confirmed' THEN
+    DECLARE currentRoomStatus VARCHAR(20);
+ 
+    -- Check based on room status since reservation stays 'confirmed'
+    SELECT Status INTO currentRoomStatus
+    FROM ReservationRooms
+    WHERE ReservationID = pReservationID
+    LIMIT 1;
+ 
+    IF currentRoomStatus != 'checked_in' THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = "Only checked-in reservations can be checked out";
+        SET MESSAGE_TEXT = 'Only checked-in reservations can be checked out';
     ELSE
-
-    START TRANSACTION;
-
-    UPDATE ReservationRooms
-    SET Status = 'checked_out'
-    WHERE ReservationID = pReservationID;
-
-    UPDATE Reservations
-    SET Status = 'confirmed' -- or keep confirmed
-    WHERE ReservationID = pReservationID;
-
-    OPEN roomCursor;
-    read_loop: LOOP
-        FETCH roomCursor INTO roomID;
-        IF done THEN
-            LEAVE read_loop;
-        END IF;
-
+        START TRANSACTION;
+ 
+        UPDATE ReservationRooms
+        SET Status = 'checked_out'
+        WHERE ReservationID = pReservationID;
+ 
         UPDATE Rooms
         SET Status = 'available'
-        WHERE RoomID = roomID;
-    END LOOP;
-    CLOSE roomCursor;
-
-    COMMIT;
+        WHERE RoomID IN (
+            SELECT RoomID FROM ReservationRooms WHERE ReservationID = pReservationID
+        );
+ 
+        COMMIT;
     END IF;
-
 END$$
-
+ 
+DELIMITER ;
+ 
 DELIMITER $$
 
 CREATE PROCEDURE CompletePaymentByToken(
