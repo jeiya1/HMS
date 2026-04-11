@@ -211,14 +211,14 @@
 
     // ── Next action button per room status ────────────────────
     // CheckInGuest / CheckOutGuest both take ReservationID (not room)
-    function roomActionButton(roomStatus, reservationID) {
+    function roomActionButton(roomStatus, reservationRoomID) {
       if (roomStatus === 'confirmed') {
         return `<button class="checkin-room bg-blue-500 text-white px-2 py-1 rounded text-xs cursor-pointer"
-          data-reservation-id="${reservationID}">Check In</button>`;
+          data-reservation-room-id="${reservationRoomID}">Check In</button>`;
       }
       if (roomStatus === 'checked_in') {
         return `<button class="checkout-room bg-gray-600 text-white px-2 py-1 rounded text-xs cursor-pointer"
-          data-reservation-id="${reservationID}">Check Out</button>`;
+          data-reservation-room-id="${reservationRoomID}">Check Out</button>`;
       }
       return ''; // pending / checked_out / cancelled — no action
     }
@@ -252,7 +252,7 @@
 
         data.forEach(room => {
           const roomStatus = (room.RoomStatus ?? 'pending').toLowerCase();
-          const actionBtn  = roomActionButton(roomStatus, room.ReservationID);
+          const actionBtn  = roomActionButton(roomStatus, room.ReservationRoomID);
 
           html += `
             <div class="border border-gray-300 rounded p-3 space-y-1">
@@ -285,11 +285,11 @@
 
     // ── Check In ──────────────────────────────────────────────
     $(document).on('click', '.checkin-room', function () {
-      const reservationID = $(this).data('reservation-id');
-      openConfirmModal('Check In Guest', 'Confirm check-in for this reservation?', function () {
-        $.post('/admin/checkInGuest', { reservationID }, function (res) {
+      const reservationRoomID = $(this).data('reservation-room-id');
+      openConfirmModal('Check In Guest', 'Confirm check-in for this room?', function () {
+        $.post('/admin/checkInRoom', { reservationRoomID }, function (res) {
           if (res.success) {
-            showToast('Guest checked in successfully', 'success');
+            showToast('Room checked in successfully', 'success');
             setTimeout(() => { loadDetailsModal(currentBookingToken); location.reload(); }, 600);
           } else {
             showToast(res.message || 'Failed to check in', 'error');
@@ -300,11 +300,11 @@
 
     // ── Check Out ─────────────────────────────────────────────
     $(document).on('click', '.checkout-room', function () {
-      const reservationID = $(this).data('reservation-id');
-      openConfirmModal('Check Out Guest', 'Confirm check-out for this reservation?', function () {
-        $.post('/admin/checkOutGuest', { reservationID }, function (res) {
+      const reservationRoomID = $(this).data('reservation-room-id');
+      openConfirmModal('Check Out Guest', 'Confirm check-out for this room?', function () {
+        $.post('/admin/checkOutRoom', { reservationRoomID }, function (res) {
           if (res.success) {
-            showToast('Guest checked out successfully', 'success');
+            showToast('Room checked out successfully', 'success');
             setTimeout(() => { loadDetailsModal(currentBookingToken); location.reload(); }, 600);
           } else {
             showToast(res.message || 'Failed to check out', 'error');

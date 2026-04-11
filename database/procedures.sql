@@ -450,67 +450,59 @@ DELIMITER ;
 
 DELIMITER $$
  
-CREATE PROCEDURE CheckInGuest(
-    IN pReservationID INT
+CREATE PROCEDURE CheckInRoom(
+    IN pReservationRoomID INT
 )
 BEGIN
     DECLARE currentStatus VARCHAR(20);
+    DECLARE roomID INT;
  
-    SELECT Status INTO currentStatus
-    FROM Reservations
-    WHERE ReservationID = pReservationID;
+    SELECT Status, RoomID INTO currentStatus, roomID
+    FROM ReservationRooms
+    WHERE ReservationRoomID = pReservationRoomID;
  
     IF currentStatus != 'confirmed' THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Only confirmed reservations can be checked in';
+        SET MESSAGE_TEXT = 'Only confirmed rooms can be checked in';
     ELSE
         START TRANSACTION;
  
         UPDATE ReservationRooms
         SET Status = 'checked_in'
-        WHERE ReservationID = pReservationID;
+        WHERE ReservationRoomID = pReservationRoomID;
  
         UPDATE Rooms
         SET Status = 'occupied'
-        WHERE RoomID IN (
-            SELECT RoomID FROM ReservationRooms WHERE ReservationID = pReservationID
-        );
+        WHERE RoomID = roomID;
  
         COMMIT;
     END IF;
 END$$
  
-DELIMITER ;
- 
-DELIMITER $$
- 
-CREATE PROCEDURE CheckOutGuest(
-    IN pReservationID INT
+CREATE PROCEDURE CheckOutRoom(
+    IN pReservationRoomID INT
 )
 BEGIN
-    DECLARE currentRoomStatus VARCHAR(20);
+    DECLARE currentStatus VARCHAR(20);
+    DECLARE roomID INT;
  
-    -- Check based on room status since reservation stays 'confirmed'
-    SELECT Status INTO currentRoomStatus
+    SELECT Status, RoomID INTO currentStatus, roomID
     FROM ReservationRooms
-    WHERE ReservationID = pReservationID
-    LIMIT 1;
+    WHERE ReservationRoomID = pReservationRoomID;
  
-    IF currentRoomStatus != 'checked_in' THEN
+    IF currentStatus != 'checked_in' THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Only checked-in reservations can be checked out';
+        SET MESSAGE_TEXT = 'Only checked-in rooms can be checked out';
     ELSE
         START TRANSACTION;
  
         UPDATE ReservationRooms
         SET Status = 'checked_out'
-        WHERE ReservationID = pReservationID;
+        WHERE ReservationRoomID = pReservationRoomID;
  
         UPDATE Rooms
         SET Status = 'available'
-        WHERE RoomID IN (
-            SELECT RoomID FROM ReservationRooms WHERE ReservationID = pReservationID
-        );
+        WHERE RoomID = roomID;
  
         COMMIT;
     END IF;

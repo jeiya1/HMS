@@ -524,7 +524,8 @@ switch ($adminPath) {
         }
         break;
 
-    case '/checkInGuest':
+
+    case '/checkInRoom':
         header('Content-Type: application/json');
 
         if (!isset($_SESSION['admin_logged_in'])) {
@@ -539,26 +540,26 @@ switch ($adminPath) {
             exit();
         }
 
-        $reservationID = intval($_POST['reservationID'] ?? 0);
+        $reservationRoomID = intval($_POST['reservationRoomID'] ?? 0);
 
-        if (!$reservationID) {
-            echo json_encode(['success' => false, 'message' => 'Missing reservation ID']);
+        if (!$reservationRoomID) {
+            echo json_encode(['success' => false, 'message' => 'Missing reservation room ID']);
             exit();
         }
 
         try {
             $GLOBALS['conn']->execute_query(
-                "CALL CheckInGuest(?)",
-                [$reservationID]
+                "CALL CheckInRoom(?)",
+                [$reservationRoomID]
             );
-            echo json_encode(['success' => true, 'message' => 'Guest checked in']);
+            echo json_encode(['success' => true, 'message' => 'Room checked in']);
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
         break;
 
 
-    case '/checkOutGuest':
+    case '/checkOutRoom':
         header('Content-Type: application/json');
 
         if (!isset($_SESSION['admin_logged_in'])) {
@@ -573,24 +574,23 @@ switch ($adminPath) {
             exit();
         }
 
-        $reservationID = intval($_POST['reservationID'] ?? 0);
+        $reservationRoomID = intval($_POST['reservationRoomID'] ?? 0);
 
-        if (!$reservationID) {
-            echo json_encode(['success' => false, 'message' => 'Missing reservation ID']);
+        if (!$reservationRoomID) {
+            echo json_encode(['success' => false, 'message' => 'Missing reservation room ID']);
             exit();
         }
 
         try {
             $GLOBALS['conn']->execute_query(
-                "CALL CheckOutGuest(?)",
-                [$reservationID]
+                "CALL CheckOutRoom(?)",
+                [$reservationRoomID]
             );
-            echo json_encode(['success' => true, 'message' => 'Guest checked out']);
+            echo json_encode(['success' => true, 'message' => 'Room checked out']);
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
         break;
-
 
     default:
         echo "404 Admin Page Not Found";
