@@ -145,7 +145,7 @@ class AdminController
                 // Make sure the user is an admin
                 $role = $userModel->getUserRole($user->UserID);
 
-                if ($role->RoleName !== 'admin') {
+                if ($role->RoleName !== 'admin' && $role->RoleName !== 'receptionist' && $role->RoleName !== 'manager') {
                     echo json_encode(["success" => false, "error" => "Not an admin account."]);
                     exit;
                 }
@@ -157,8 +157,8 @@ class AdminController
                 }
 
                 // Set session
+                $_SESSION['role'] = $role->RoleName;
                 $_SESSION['admin_logged_in'] = $user->UserID;
-                $_SESSION['role'] = 'admin';
 
                 echo json_encode([
                     "success" => true,
@@ -166,7 +166,6 @@ class AdminController
                     "redirect" => "/admin/dashboard"
                 ]);
                 exit;
-
             } catch (Exception $e) {
                 echo json_encode(["success" => false, "error" => $e->getMessage()]);
                 exit;
@@ -322,7 +321,6 @@ class AdminController
                 'message' => 'Payment confirmed successfully'
             ]);
             exit;
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -357,7 +355,6 @@ class AdminController
                 'message' => 'Payment refunded successfully'
             ]);
             exit;
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -368,5 +365,182 @@ class AdminController
         }
     }
 
+    // Backup directory — all .sql files live here
+    private string $backupDir = '/opt/lampp/htdocs/HMS/databaseBackup/';
+    // ── Page ──────────────────────────────────────────────────
+    public function adminBackup()
+    {
+        if (!$this->getAuthState()) {
+            header('Location: /admin/login');
+            exit();
+        }
 
+        $dir     = $this->backupDir;
+        $backups = [];
+
+        if (is_dir($dir)) {
+            $files = glob($dir . '*.sql');
+            // Sort newest first
+            usort($files, fn($a, $b) => filemtime($b) - filemtime($a));
+
+            foreach ($files as $file) {
+                $bytes = filesize($file);
+                $backups[] = [
+                    'name' => basename($file),
+                    'size' => $this->formatBytes($bytes),
+                    'date' => date('Y-m-d H:i:s', filemtime($file)),
+                ];
+            }
+        }
+
+        require '../../app/views/admin/backup.view.php';
+    }
+
+    // ── Run Backup ────────────────────────────────────────────
+    public function runBackup()
+    {
+        header('Content-Type: application/json');
+
+        $dir = $this->backupDir;
+
+        // Create directory if it doesn't exist
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $filename = 'HMS_backup_' . date('Y-m-d_H-i-s') . '.sql';
+        $filepath = $dir . $filename;
+
+        $host = 'localhost';
+        $user = 'root';
+        $db   = 'HMS';
+
+        // Use proc_open so stdout goes directly to file, stderr captured separately
+        $cmd = '/opt/lampp/bin/mysqldump --no-tablespaces'
+            . ' -h ' . escapeshellarg($host)
+            . ' -u ' . escapeshellarg($user)
+            . ' '    . escapeshellarg($db);
+
+        $descriptors = [
+            0 => ['pipe', 'r'],
+            1 => ['file', $filepath, 'w'],  // stdout → file
+            2 => ['pipe', 'w'],             // stderr → captured
+        ];
+
+        $proc = proc_open($cmd, $descriptors, $pipes);
+
+        if (!is_resource($proc)) {
+            echo json_encode(['success' => false, 'message' => 'Failed to start mysqldump process']);
+            return;
+        }
+
+        fclose($pipes[0]);
+        $stderr     = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+        $returnCode = proc_close($proc);
+
+        if ($returnCode !== 0 || !file_exists($filepath) || filesize($filepath) === 0) {
+            if (file_exists($filepath)) unlink($filepath);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Backup failed: ' . trim($stderr),
+            ]);
+            return;
+        }
+
+        echo json_encode([
+            'success'  => true,
+            'filename' => $filename,
+            'message'  => 'Backup created successfully',
+        ]);
+    }
+
+    // ── Restore Backup ────────────────────────────────────────
+    public function restoreBackup()
+    {
+        header('Content-Type: application/json');
+
+        $filename = basename($_POST['filename'] ?? '');
+
+        if (!$filename || pathinfo($filename, PATHINFO_EXTENSION) !== 'sql') {
+            echo json_encode(['success' => false, 'message' => 'Invalid filename']);
+            return;
+        }
+
+        $filepath = $this->backupDir . $filename;
+
+        if (!file_exists($filepath)) {
+            echo json_encode(['success' => false, 'message' => 'Backup file not found']);
+            return;
+        }
+
+        $host = 'localhost';
+        $user = 'root';
+        $db   = 'HMS';
+
+        // Use proc_open so we can feed the file to stdin and capture stderr
+        $cmd = '/opt/lampp/bin/mysql'
+            . ' -h ' . escapeshellarg($host)
+            . ' -u ' . escapeshellarg($user)
+            . ' '    . escapeshellarg($db);
+
+        $descriptors = [
+            0 => ['file', $filepath, 'r'],  // stdin ← backup file
+            1 => ['pipe', 'w'],             // stdout (ignored)
+            2 => ['pipe', 'w'],             // stderr → captured
+        ];
+
+        $proc = proc_open($cmd, $descriptors, $pipes);
+
+        if (!is_resource($proc)) {
+            echo json_encode(['success' => false, 'message' => 'Failed to start mysql process']);
+            return;
+        }
+
+        $stderr     = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $returnCode = proc_close($proc);
+
+        if ($returnCode !== 0) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Restore failed: ' . trim($stderr),
+            ]);
+            return;
+        }
+
+        echo json_encode(['success' => true, 'message' => 'Database restored successfully']);
+    }
+
+    // ── Delete Backup ─────────────────────────────────────────
+    public function deleteBackup()
+    {
+        header('Content-Type: application/json');
+
+        $filename = basename($_POST['filename'] ?? '');
+
+        if (!$filename || pathinfo($filename, PATHINFO_EXTENSION) !== 'sql') {
+            echo json_encode(['success' => false, 'message' => 'Invalid filename']);
+            return;
+        }
+
+        $filepath = $this->backupDir . $filename;
+
+        if (!file_exists($filepath)) {
+            echo json_encode(['success' => false, 'message' => 'File not found']);
+            return;
+        }
+
+        unlink($filepath);
+        echo json_encode(['success' => true]);
+    }
+
+    // ── Helper ────────────────────────────────────────────────
+    private function formatBytes(int $bytes): string
+    {
+        if ($bytes >= 1048576) return round($bytes / 1048576, 2) . ' MB';
+        if ($bytes >= 1024)    return round($bytes / 1024, 2)    . ' KB';
+        return $bytes . ' B';
+    }
 }

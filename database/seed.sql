@@ -1,8 +1,6 @@
 USE HMS;
 
-INSERT INTO Roles (RoleName) VALUES
-('admin'),
-('guest');
+INSERT INTO Roles (RoleName) VALUES ('admin'), ('guest'), ('receptionist');
 
 INSERT INTO BedTypes (BedName) VALUES
 ('Single'),
@@ -26,7 +24,15 @@ INSERT INTO Guests (Email, FirstName, LastName, PhoneContact, BirthDate) VALUES
 ('admin@hotel.com', 'Admin', 'Admin', '+630000000000', '2005-11-28');
 
 INSERT INTO Users (GuestID, RoleID, Email, PasswordHash) VALUES
-(1, 1, 'admin@hotel.com', '$2y$10$44eM8DEp1PQZAU1cpOwtGu1HBFrDOXXR4XfjXbBCoBS6iZNk2bwQ2');
+(1, 1, 'admin@hotel.com', '$2y$10$zL5JmHmi0PALf5/1/sACZOgd4LU4PsQQkGePVDYOMXHSGwOP4s8KK');
+
+-- =========================
+-- Receptionist User  (password: same as admin)
+-- =========================
+INSERT INTO Guests (Email, FirstName, LastName, PhoneContact, BirthDate) VALUES
+('receptionist@hotel.com', 'Front', 'Desk', '+630000000001', '1995-06-15');
+INSERT INTO Users (GuestID, RoleID, Email, PasswordHash) VALUES
+(2, 3, 'receptionist@hotel.com', '$2y$10$zL5JmHmi0PALf5/1/sACZOgd4LU4PsQQkGePVDYOMXHSGwOP4s8KK');
 
 -- =========================
 -- Hotel Layout
