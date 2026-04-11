@@ -243,8 +243,8 @@ class AdminController
                     exit;
                 }
 
-                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-                $userModel->updatePassword($userId, $hashedPassword);
+                // updatePasswordAdmin handles hashing internally
+                $userModel->updatePasswordAdmin($userId, $newPassword);
 
                 echo json_encode(['success' => true, 'message' => 'Password updated successfully']);
                 exit;

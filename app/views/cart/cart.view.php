@@ -394,8 +394,8 @@
     <?php require_once __DIR__ . '/../components/footer.view.php'; ?>
     <script>
         const discountRates = {
-            'Senior': 20, // 20% for senior
-            'PWD': 15     // 15% for PWD
+            'Senior': 20,
+            'PWD': 15
         };
         $(document).ready(function () {
 
@@ -423,6 +423,15 @@
                 arrow.toggleClass('rotate-270');
             });
 
+            // ==================== PHONE: only allow digits ====================
+            // BUG 1 FIX: strip non-numeric on input, strip leading zero to prevent
+            // +63091... instead of +639...
+            $(document).on('input', 'input[name="phone"]', function () {
+                let val = this.value.replace(/\D/g, '');
+                if (val.startsWith('0')) val = val.slice(1);
+                this.value = val;
+            });
+
             // ==================== CART TOTAL CALCULATION ====================
             function getNights(checkIn, checkOut) {
                 const d1 = new Date(checkIn);
@@ -447,12 +456,11 @@
                 }
 
                 const subtotal = roomCost - nightDiscount - guestDiscount + guestCharge;
-                const total = subtotal * 1.12; // tax included
+                const total = subtotal * 1.12;
 
                 return { roomCost, nightDiscount, guestCharge, guestDiscount, subtotal, total };
             }
 
-            // ==================== CART TOTAL CALCULATION ====================
             function calculateCartSummary(carts) {
                 let totalRoomCost = 0, totalNightDiscount = 0, totalGuestCharge = 0, totalGuestDiscount = 0, subtotalRooms = 0;
 
@@ -474,8 +482,6 @@
                 });
 
                 const totalWithTax = subtotalRooms * 1.12;
-
-                // Add total before discount for payment
                 const totalBeforeDiscount = subtotalRooms + totalGuestDiscount;
 
                 return {
@@ -485,7 +491,7 @@
                     totalGuestDiscount,
                     subtotalRooms,
                     totalWithTax,
-                    totalBeforeDiscount // NEW: send amount before discount
+                    totalBeforeDiscount
                 };
             }
 
@@ -558,18 +564,17 @@
                                 if (response.cartCount > 0) $('#cart-count').text(response.cartCount).show();
                                 else $('#cart-count').hide();
 
-                                // Remove from JS carts array
                                 carts = carts.filter(c => c.CartRoomID != cartRoomID);
                                 renderPriceBreakdown(carts);
 
                                 if (response.cartCount === 0) {
                                     $('#cart-summary-section').remove();
                                     $('.flex-1').append(`
-                            <div class="flex flex-col border rounded p-4 shadow w-full max-w-xl gap-2">
-                                <h1 class="font-bold">No booking found in cart</h1>
-                                <p class="italic">You have not added any rooms or products to your cart yet.</p>
-                            </div>
-                        `);
+                                        <div class="flex flex-col border rounded p-4 shadow w-full max-w-xl gap-2">
+                                            <h1 class="font-bold">No booking found in cart</h1>
+                                            <p class="italic">You have not added any rooms or products to your cart yet.</p>
+                                        </div>
+                                    `);
                                 }
                             });
                         } else showToast(response.error);
@@ -579,7 +584,6 @@
             });
 
             // ==================== SENIOR PWD CARD ====================
-            // Enable/disable dropdown and input
             $('#apply-discount').change(function () {
                 const checked = this.checked;
                 $('#discount-type-dropdown').prop('disabled', !checked).val('');
@@ -591,7 +595,6 @@
                 }
             });
 
-            // Assign discount type to cart when dropdown changes
             $('#discount-type-dropdown').change(function () {
                 const selectedType = $(this).val();
                 if (selectedType) {
@@ -603,9 +606,6 @@
             // ==================== USE ACCOUNT DETAILS ====================
             $('#use-account-details').change(function () {
                 if (this.checked) {
-                    const userID = $(this).data('user-id');
-                    if (!userID) return;
-
                     $.ajax({
                         url: '/get-profile',
                         type: 'POST',
@@ -619,15 +619,13 @@
                                 $('input[name="email"]').val(data.Email || '');
                                 $('#birthDate').flatpickr().setDate(data.BirthDate || '', true);
 
-                                // ================== PHONE ==================
-                                let fullPhone = data.PhoneContact || '';
-                                fullPhone = fullPhone.replace(/[^0-9+]/g, ''); // clean input
+                                // BUG 4 FIX: strip country code then strip any leading zero
+                                let fullPhone = (data.PhoneContact || '').replace(/[^0-9+]/g, '');
 
-                                let countryCode = '+63'; // default
+                                const countryOptions = ['+63', '+1', '+44', '+61'];
+                                let countryCode = '+63';
                                 let localNumber = fullPhone;
 
-                                // Match country codes exactly from your dropdown
-                                const countryOptions = ['+63', '+1', '+44', '+61'];
                                 for (let code of countryOptions) {
                                     if (fullPhone.startsWith(code)) {
                                         countryCode = code;
@@ -635,6 +633,9 @@
                                         break;
                                     }
                                 }
+
+                                // Strip leading zero from local number (safety net)
+                                if (localNumber.startsWith('0')) localNumber = localNumber.slice(1);
 
                                 $('select[name="country_code"]').val(countryCode);
                                 $('input[name="phone"]').val(localNumber);
@@ -646,10 +647,9 @@
                         }
                     });
                 } else {
-                    // clear inputs
                     $('input[name="fname"], input[name="lname"], input[name="phone"], input[name="email"]').val('');
                     $('#birthDate').flatpickr().clear();
-                    $('select[name="country_code"]').val('+63'); // reset default
+                    $('select[name="country_code"]').val('+63');
                 }
             });
 
@@ -707,7 +707,6 @@
                 }
             }
 
-            // Open modal
             // ==================== OPEN PAYMENT MODAL ====================
             $('#to-checkout').click(function () {
                 const selectedPayment = $('input[name="payment"]:checked').val();
@@ -718,25 +717,23 @@
 
                 const summary = calculateCartSummary(carts);
 
-                const totalAmount = summary.totalBeforeDiscount.toFixed(2); // BEFORE discount
-                const discountAmount = summary.totalGuestDiscount.toFixed(2); // discount value
+                const totalAmount = summary.totalBeforeDiscount.toFixed(2);
+                const discountAmount = summary.totalGuestDiscount.toFixed(2);
 
                 $('#payment-modal-title').text(selectedPayment + ' Payment');
                 $('#payment-modal-content').html(getPaymentContent(selectedPayment, totalAmount));
 
-                // Optionally store both values in modal data
-                $('#payment-modal-content').data({
-                    totalAmount,
-                    discountAmount
-                });
+                $('#payment-modal-content').data({ totalAmount, discountAmount });
 
-                // Show modal
                 $('#payment-modal').removeClass('opacity-0 pointer-events-none').addClass('opacity-100');
             });
 
             $('#modal-close').click(function () {
                 $('#payment-modal').removeClass('opacity-100').addClass('opacity-0 pointer-events-none');
             });
+
+            // BUG 2 + 3 FIX: modal stays open until server confirms success;
+            // Pay button re-enabled on error so user can retry
             $('#modal-pay').click(function () {
                 const applyDiscount = $('#apply-discount').is(':checked');
                 const discountCardNumber = $('#discount-card-number').val().trim();
@@ -744,7 +741,7 @@
                 if (applyDiscount && discountCardNumber === '') {
                     showToast('Please enter your PWD or Senior card number to apply discount.', 'error');
                     $('#discount-card-number').focus();
-                    return; // do not hide the modal
+                    return;
                 }
 
                 const inputs = $('#payment-modal-content').find('input');
@@ -764,18 +761,12 @@
                     return;
                 }
 
-                // Submit form
+                // Trigger form submit — modal stays open until AJAX resolves
                 $('#reservation-form').submit();
-
-                // Fade out modal
-                $('#payment-modal').fadeTo(300, 0, function () {
-                    $(this).addClass('pointer-events-none').hide();
-                    $(this).css('opacity', '');
-                });
             });
+
             // ==================== RESERVATION SUBMIT ====================
-            // Form submission validation
-            $("#reservation-form").submit(function (e) {
+            $('#reservation-form').submit(function (e) {
                 e.preventDefault();
 
                 const applyDiscount = $('#apply-discount').is(':checked');
@@ -784,59 +775,86 @@
 
                 if (applyDiscount) {
                     if (!discountType) {
-                        showToast("Please select the discount type (Senior/PWD).", "error");
+                        showToast('Please select the discount type (Senior/PWD).', 'error');
                         $('#discount-type-dropdown').focus();
                         return;
                     }
-
                     if (discountCardNumber === '') {
-                        showToast("Please enter your PWD or Senior card number.", "error");
+                        showToast('Please enter your PWD or Senior card number.', 'error');
                         $('#discount-card-number').focus();
                         return;
                     }
                 }
 
-                // proceed with payment submission
-                const phoneFull = $("#country_code").val() + $("#phone").val();
+                // BUG 1 + 4 FIX: strip non-digits and leading zero before concatenating country code
+                let rawPhone = $('#phone').val().replace(/\D/g, '');
+                if (rawPhone.startsWith('0')) rawPhone = rawPhone.slice(1);
+                const phoneFull = $('#country_code').val() + rawPhone;
+
                 const guestData = {
-                    fname: $("#fname").val(),
-                    lname: $("#lname").val(),
-                    email: $("#email").val(),
+                    fname: $('#fname').val().trim(),
+                    lname: $('#lname').val().trim(),
+                    email: $('#email').val().trim(),
                     phone: phoneFull,
-                    birthDate: $("#birthDate").val()
+                    birthDate: $('#birthDate').val()
                 };
 
-                const selectedPayment = $('input[name="payment"]:checked').val();
-                if (!selectedPayment) {
-                    showToast("Please select a payment method.", "error");
+                // Client-side guard — keeps modal open so user can fix fields
+                if (!guestData.fname || !guestData.lname || !guestData.email ||
+                    !rawPhone || !guestData.birthDate) {
+                    showToast('Please fill in all guest information fields.', 'error');
                     return;
                 }
 
-                showToast("Please wait...");
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(guestData.email)) {
+                    showToast('Please enter a valid email address.', 'error');
+                    return;
+                }
+
+                const selectedPayment = $('input[name="payment"]:checked').val();
+                if (!selectedPayment) {
+                    showToast('Please select a payment method.', 'error');
+                    return;
+                }
+
+                // Disable Pay button to prevent double-submit
+                const $payBtn = $('#modal-pay');
+                $payBtn.prop('disabled', true).text('Processing...');
+
+                showToast('Please wait...');
 
                 const summary = calculateCartSummary(carts);
 
                 $.ajax({
-                    url: "/reservation-submit",
-                    type: "POST",
-                    contentType: "application/json",
+                    url: '/reservation-submit',
+                    type: 'POST',
+                    contentType: 'application/json',
                     data: JSON.stringify({
                         guest: guestData,
                         paymentMethod: selectedPayment,
-                        totalAmount: summary.totalWithTax.toFixed(2),        // final total (optional)
-                        totalBeforeDiscount: summary.totalBeforeDiscount.toFixed(2), // new field
-                        discountAmount: summary.totalGuestDiscount.toFixed(2),       // new field
+                        totalAmount: summary.totalWithTax.toFixed(2),
+                        totalBeforeDiscount: summary.totalBeforeDiscount.toFixed(2),
+                        discountAmount: summary.totalGuestDiscount.toFixed(2),
                         discountCardNumber: applyDiscount ? discountCardNumber : null,
                         discountType: applyDiscount ? discountType : null
                     }),
-                    dataType: "json",
+                    dataType: 'json',
                     success: function (response) {
                         if (response.success) {
-                            showToast(response.message, "success");
-                            setTimeout(() => window.location.href = "/bookings", 1000);
+                            // Only close modal and redirect on actual success
+                            $('#payment-modal').removeClass('opacity-100').addClass('opacity-0 pointer-events-none');
+                            showToast(response.message, 'success');
+                            setTimeout(() => window.location.href = '/bookings', 1200);
                         } else {
-                            showToast(response.error || "Failed to reserve.", "error");
+                            // BUG 2 + 3 FIX: keep modal open, re-enable Pay button
+                            showToast(response.error || 'Failed to reserve.', 'error');
+                            $payBtn.prop('disabled', false).text('Pay Now');
                         }
+                    },
+                    error: function () {
+                        showToast('A network error occurred. Please try again.', 'error');
+                        $payBtn.prop('disabled', false).text('Pay Now');
                     }
                 });
             });

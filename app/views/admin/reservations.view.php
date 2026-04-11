@@ -29,7 +29,9 @@
       <div class="flex flex-wrap gap-3">
         <input type="text" id="searchGuest" placeholder="Guest Name"
           class="border border-gray-300 p-2 rounded w-48">
-        <input type="date" id="searchDate"
+        <input type="date" id="searchDateFrom" title="Check-in from"
+          class="border border-gray-300 p-2 rounded">
+        <input type="date" id="searchDateTo" title="Check-out to"
           class="border border-gray-300 p-2 rounded">
         <select id="searchStatus" class="border border-gray-300 p-2 rounded">
           <option value="">All Statuses</option>
@@ -91,6 +93,7 @@
               <tr class="border-b"
                 data-guest="<?= strtolower(htmlspecialchars($guestName)) ?>"
                 data-checkin="<?= $checkIn ?>"
+                data-checkout="<?= $checkOut ?>"
                 data-resstatus="<?= $resStatus ?>">
 
                 <td class="p-2 text-center"><?= htmlspecialchars($res['BookingToken']) ?></td>
@@ -176,21 +179,27 @@
   <script>
     // ── Filter ────────────────────────────────────────────────
     function applyFilter() {
-      const name   = $('#searchGuest').val().toLowerCase();
-      const date   = $('#searchDate').val();
-      const status = $('#searchStatus').val().toLowerCase();
+      const name     = $('#searchGuest').val().toLowerCase();
+      const dateFrom = $('#searchDateFrom').val();   // filter: checkin >= dateFrom
+      const dateTo   = $('#searchDateTo').val();     // filter: checkout <= dateTo
+      const status   = $('#searchStatus').val().toLowerCase();
 
       $('#reservationTable tr').each(function () {
-        const matchName   = !name   || $(this).data('guest').includes(name);
-        const matchDate   = !date   || $(this).data('checkin') === date;
-        const matchStatus = !status || $(this).data('resstatus') === status;
-        $(this).toggle(matchName && matchDate && matchStatus);
+        const checkin  = $(this).data('checkin')  || '';
+        const checkout = $(this).data('checkout') || '';
+
+        const matchName   = !name     || $(this).data('guest').includes(name);
+        const matchFrom   = !dateFrom || checkin  >= dateFrom;
+        const matchTo     = !dateTo   || checkout <= dateTo;
+        const matchStatus = !status   || $(this).data('resstatus') === status;
+        $(this).toggle(matchName && matchFrom && matchTo && matchStatus);
       });
     }
 
     function resetFilter() {
       $('#searchGuest').val('');
-      $('#searchDate').val('');
+      $('#searchDateFrom').val('');
+      $('#searchDateTo').val('');
       $('#searchStatus').val('');
       $('#reservationTable tr').show();
     }

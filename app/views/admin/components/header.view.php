@@ -113,4 +113,3 @@ $admin_username = "Admin";
 
 <!-- Scripts -->
 <script src="/admin/js/settings.js"></script>
-<script src="/admin/js/logout.js"></script>

@@ -124,17 +124,36 @@ class User
 
     public function updatePassword($newPassword)
     {
-        // Check if user is logged in
+        // For guest profile updates — reads userID from guest session
         if (!isset($_SESSION['logged_in_user_id'])) {
             throw new Exception("Unauthorized: User not logged in.");
         }
 
         $userID = $_SESSION['logged_in_user_id'];
 
-        // Update password in users table
+        // Hash if not already hashed (safety net)
+        $hash = (strlen($newPassword) < 60) ? password_hash($newPassword, PASSWORD_DEFAULT) : $newPassword;
+
         $result = $this->conn->execute_query(
             "UPDATE Users SET PasswordHash = ? WHERE UserID = ?",
-            [$newPassword, $userID]
+            [$hash, $userID]
+        );
+
+        if (!$result) {
+            throw new Exception("Failed to update password: " . $this->conn->error);
+        }
+
+        return true;
+    }
+
+    public function updatePasswordAdmin(int $userID, string $newPassword): bool
+    {
+        // For admin settings — userID passed explicitly, password hashed here
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        $result = $this->conn->execute_query(
+            "UPDATE Users SET PasswordHash = ? WHERE UserID = ?",
+            [$hash, $userID]
         );
 
         if (!$result) {
@@ -328,6 +347,36 @@ class User
         if (!$result) {
             throw new Exception("Failed to update password: " . $this->conn->error);
         }
+    }
+
+    public function updateUsername(int $userID, string $newUsername): bool
+    {
+        // Get the GuestID for this user
+        $result = $this->conn->execute_query(
+            "SELECT GuestID FROM Users WHERE UserID = ?",
+            [$userID]
+        );
+
+        if (!$result || $result->num_rows === 0) {
+            throw new Exception("User not found.");
+        }
+
+        $guestID = $result->fetch_assoc()['GuestID'];
+
+        // Update FirstName in Guests (this is what the admin header displays)
+        $update = $this->conn->execute_query(
+            "UPDATE Guests SET FirstName = ? WHERE GuestID = ?",
+            [$newUsername, $guestID]
+        );
+
+        if (!$update) {
+            throw new Exception("Failed to update username: " . $this->conn->error);
+        }
+
+        // Keep session in sync
+        $_SESSION['logged_in_user_name'] = $newUsername;
+
+        return true;
     }
 
     public function createPasswordResetToken($userID)

@@ -557,7 +557,32 @@ switch ($adminPath) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
         break;
-
+ 
+    case '/username-change':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit();
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit();
+        }
+        $admin->usernameChange();
+        break;
+ 
+    case '/password-change':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit();
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit();
+        }
+        $admin->passwordChange();
+        break;
 
     case '/checkOutRoom':
         header('Content-Type: application/json');
