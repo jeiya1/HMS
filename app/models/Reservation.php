@@ -519,7 +519,7 @@ class Reservation
             JOIN RoomTypes rt ON rooms.RoomTypeID = rt.RoomTypeID
             LEFT JOIN Payments p ON p.ReservationID = r.ReservationID
             LEFT JOIN PaymentMethods pm ON p.MethodID = pm.MethodID
-            WHERE r.Status = 'confirmed'
+            WHERE r.Status IN ('pending', 'confirmed')
             ORDER BY r.CreatedAt DESC, rr.CheckInDate ASC"
             );
 

@@ -831,6 +831,9 @@
   .w-\[300px\] {
     width: 300px;
   }
+  .w-\[320px\] {
+    width: 320px;
+  }
   .w-\[400px\] {
     width: 400px;
   }
@@ -1086,6 +1089,13 @@
   }
   .gap-30 {
     gap: calc(var(--spacing) * 30);
+  }
+  .space-y-1 {
+    :where(& > :not(:last-child)) {
+      --tw-space-y-reverse: 0;
+      margin-block-start: calc(calc(var(--spacing) * 1) * var(--tw-space-y-reverse));
+      margin-block-end: calc(calc(var(--spacing) * 1) * calc(1 - var(--tw-space-y-reverse)));
+    }
   }
   .space-y-2 {
     :where(& > :not(:last-child)) {

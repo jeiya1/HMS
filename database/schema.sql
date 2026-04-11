@@ -1,6 +1,15 @@
 CREATE DATABASE IF NOT EXISTS HMS;
 USE HMS;
 
+-- Example
+CREATE USER 'hms_admin'@'localhost' IDENTIFIED BY 'password';
+CREATE USER 'hms_app'@'localhost' IDENTIFIED BY 'password';
+
+GRANT ALL PRIVILEGES ON HMS.* TO 'hms_admin'@'localhost';
+GRANT SELECT, INSERT, UPDATE ON HMS.* TO 'hms_app'@'localhost';
+
+FLUSH PRIVILEGES;
+
 -- =========================
 -- LOGS
 -- =========================

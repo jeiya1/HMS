@@ -1,5 +1,5 @@
 USE HMS;
-
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 -- =========================
 -- USERS
 -- =========================

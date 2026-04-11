@@ -1,20 +1,29 @@
 <?php
-// DEBUG LINES
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-// echo "<script>alert('$var');</script>";
+
 session_start();
 require_once '../../config/connect.php';
 require_once '../../app/controllers/AdminController.php';
+require_once '../../app/models/Reservation.php';
 
 $admin = new AdminController();
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$reservationModel = new Reservation($GLOBALS['conn']);
 
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $adminPath = preg_replace('#^/admin#', '', $uri);
 
 switch ($adminPath) {
+
+    /*
+    |--------------------------------------------------------------------------
+    | PAGES
+    |--------------------------------------------------------------------------
+    */
+
     case '/':
+    case '/dashboard':
         if (!isset($_SESSION['admin_logged_in'])) {
             header('Location: /admin/login');
             exit();
@@ -28,10 +37,8 @@ switch ($adminPath) {
         } else {
             if (!isset($_SESSION['admin_logged_in'])) {
                 $admin->loginForm();
-                exit();
             } else {
                 header('Location: /admin/dashboard');
-                exit();
             }
         }
         break;
@@ -40,19 +47,7 @@ switch ($adminPath) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $admin->logout();
         }
-        $admin->adminDashboard();
-        break;
-
-    case '/password-change':
-        $admin->passwordChange();
-        break;
-
-    case '/dashboard':
-        if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /admin/login');
-            exit();
-        }
-        $admin->adminDashboard();
+        header('Location: /admin/login');
         break;
 
     case '/reservations':
@@ -63,6 +58,14 @@ switch ($adminPath) {
         $admin->adminReservations();
         break;
 
+    case '/payments':
+        if (!isset($_SESSION['admin_logged_in'])) {
+            header('Location: /admin/login');
+            exit();
+        }
+        $admin->adminPayments();
+        break;
+
     case '/rooms':
         if (!isset($_SESSION['admin_logged_in'])) {
             header('Location: /admin/login');
@@ -71,13 +74,6 @@ switch ($adminPath) {
         $admin->adminRooms();
         break;
 
-    case '/payments':
-        if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /admin/login');
-            exit();
-        }
-        $admin->adminPayments();
-        break;
     case '/calendar':
         if (!isset($_SESSION['admin_logged_in'])) {
             header('Location: /admin/login');
@@ -85,6 +81,7 @@ switch ($adminPath) {
         }
         $admin->adminCalendar();
         break;
+
     case '/logs':
         if (!isset($_SESSION['admin_logged_in'])) {
             header('Location: /admin/login');
@@ -93,39 +90,173 @@ switch ($adminPath) {
         $admin->adminLogs();
         break;
 
-    // ENDPOINTS
-    case '/getConfirmedReservations':
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESERVATION ENDPOINTS (NEW)
+    |--------------------------------------------------------------------------
+    */
+
+    // Get all reservations (grouped by booking)
+    case '/getReservations':
+        header('Content-Type: application/json');
+
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('HTTP/1.1 401 Unauthorized');
+            http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
             exit();
         }
-        $reservationModel = new Reservation($GLOBALS['conn']);
-        $reservations = $reservationModel->getAllConfirmedReservations();
-        header('Content-Type: application/json');
-        echo json_encode($reservations);
+
+        try {
+            // reuse confirmed + pending logic (you can expand later)
+            $data = $reservationModel->getAllConfirmedReservations();
+            echo json_encode($data);
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
         break;
 
-    case '/live-reservations':
+
+    // Get full reservation details (like payment modal)
+    case '/getReservationDetails':
+        header('Content-Type: application/json');
+
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('HTTP/1.1 401 Unauthorized');
+            http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
             exit();
         }
-        $reservationModel = new Reservation($GLOBALS['conn']);
-        $reservations = $reservationModel->getLiveReservations();
-        header('Content-Type: application/json');
-        echo json_encode($reservations);
+
+        $token = $_GET['bookingToken'] ?? null;
+
+        if (!$token) {
+            echo json_encode([]);
+            exit();
+        }
+
+        try {
+            $details = $reservationModel->getReservationWithGuest($token);
+            echo json_encode($details);
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
         break;
+
+
+    // APPROVE FULL BOOKING (multi-room safe)
+    case '/approveReservation':
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false]);
+            exit();
+        }
+
+        $bookingToken = $_POST['bookingToken'] ?? null;
+
+        if (!$bookingToken) {
+            echo json_encode(['success' => false, 'message' => 'Missing booking token']);
+            exit();
+        }
+
+        try {
+            // 1. Update reservation status FIRST
+            $GLOBALS['conn']->execute_query(
+                "UPDATE Reservations SET Status = 'confirmed' WHERE BookingToken = ?",
+                [$bookingToken]
+            );
+
+            // 2. Update payment
+            $GLOBALS['conn']->execute_query(
+                "UPDATE Payments SET PaymentStatus = 'completed'
+             WHERE ReservationID = (
+                SELECT ReservationID FROM Reservations WHERE BookingToken = ?
+             )",
+                [$bookingToken]
+            );
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Reservation approved'
+            ]);
+            exit;
+
+        } catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+            exit;
+        }
+
+    // CANCEL RESERVATION (and refund if paid)
+    case '/cancelReservationAdmin':
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            exit();
+        }
+
+        $bookingToken = $_POST['bookingToken'] ?? null;
+
+        if (!$bookingToken) {
+            echo json_encode(['success' => false, 'message' => 'Missing booking token']);
+            exit();
+        }
+
+        try {
+            // get reservation
+            $reservation = $reservationModel->findByToken($bookingToken);
+
+            if (!$reservation) {
+                echo json_encode(['success' => false, 'message' => 'Reservation not found']);
+                exit();
+            }
+
+            // check payment
+            $payment = $reservationModel->getReservationPayment($reservation['ReservationID']);
+
+            // cancel reservation
+            $reservationModel->cancelReservationGuest($bookingToken);
+
+            // auto-refund if completed
+            if ($payment && strtolower($payment['PaymentStatus']) === 'completed') {
+                $_POST['bookingCode'] = $bookingToken;
+                $admin->refundPayment();
+                return;
+            }
+
+            echo json_encode(['success' => true]);
+
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PAYMENT (UNCHANGED - REUSED)
+    |--------------------------------------------------------------------------
+    */
 
     case '/getPaymentRooms':
+        header('Content-Type: application/json');
+
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('HTTP/1.1 401 Unauthorized');
+            http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
             exit();
         }
-
-        require_once '../../app/models/Reservation.php';
 
         $paymentID = $_GET['paymentID'] ?? null;
 
@@ -134,36 +265,29 @@ switch ($adminPath) {
             exit();
         }
 
-        $reservationModel = new Reservation($GLOBALS['conn']);
         $rooms = $reservationModel->getPaymentRooms($paymentID);
-
-        header('Content-Type: application/json');
         echo json_encode($rooms);
         break;
+
 
     case '/confirmPayment':
         header('Content-Type: application/json');
 
         if (!isset($_SESSION['admin_logged_in'])) {
             http_response_code(401);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Unauthorized'
-            ]);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
             exit;
         }
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Method not allowed'
-            ]);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
             exit;
         }
 
         $admin->confirmPayment();
         break;
+
 
     case '/refundPayment':
         header('Content-Type: application/json');
@@ -181,7 +305,7 @@ switch ($adminPath) {
         }
 
         $admin->refundPayment();
-        exit;
+        break;
 
     default:
         echo "404 Admin Page Not Found";
