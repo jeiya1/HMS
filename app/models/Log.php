@@ -1,47 +1,63 @@
 <?php
 
-class Log {
-
-private $conn;
-
-public function __construct()
+class Log
 {
-$this->conn = new mysqli("localhost","root","","hotel");
-}
+    private $conn;
 
-public function getAdminLogs()
-{
+    public function __construct($conn)
+    {
+        $this->conn = $conn;
+    }
 
-$sql = "SELECT date, action FROM admin_logs ORDER BY date DESC LIMIT 10";
+    public function getAllLogs(): array
+    {
+        $result = $this->conn->execute_query(
+            "SELECT * FROM Logs ORDER BY CreatedAt DESC"
+        );
 
-$result = $this->conn->query($sql);
+        if ($result) {
+            return $result->fetch_all(MYSQLI_ASSOC);
+        }
 
-return $result->fetch_all(MYSQLI_ASSOC);
+        return [];
+    }
 
-}
+    public function getLogByID(int $id): ?array
+    {
+        $result = $this->conn->execute_query(
+            "SELECT * FROM Logs WHERE LogID = ?",
+            [$id]
+        );
 
-public function getUserLogs()
-{
+        if ($result && $result->num_rows > 0) {
+            return $result->fetch_assoc();
+        }
 
-$sql = "SELECT date, action FROM user_logs ORDER BY date DESC LIMIT 10";
+        return null;
+    }
 
-$result = $this->conn->query($sql);
+    public function deleteLog(int $id): bool
+    {
+        $result = $this->conn->execute_query(
+            "DELETE FROM Logs WHERE LogID = ?",
+            [$id]
+        );
 
-return $result->fetch_all(MYSQLI_ASSOC);
+        if (!$result) {
+            throw new Exception("Failed to delete log: " . $this->conn->error);
+        }
 
-}
+        return true;
+    }
 
-public function addLog($action)
-{
+    public function clearAllLogs(): bool
+    {
+        $result = $this->conn->execute_query("DELETE FROM Logs");
 
-$stmt = $this->conn->prepare(
-"INSERT INTO admin_logs(action,date) VALUES (?,NOW())"
-);
+        if (!$result) {
+            throw new Exception("Failed to clear logs: " . $this->conn->error);
+        }
 
-$stmt->bind_param("s",$action);
-
-$stmt->execute();
-
-}
-
+        return true;
+    }
 }

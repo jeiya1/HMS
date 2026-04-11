@@ -7,10 +7,11 @@ session_start();
 require_once '../../config/connect.php';
 require_once '../../app/controllers/AdminController.php';
 require_once '../../app/models/Reservation.php';
+require_once '../../app/models/Log.php';
+
 
 $admin = new AdminController();
 $reservationModel = new Reservation($GLOBALS['conn']);
-
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $adminPath = preg_replace('#^/admin#', '', $uri);
 
@@ -305,6 +306,80 @@ switch ($adminPath) {
         }
 
         $admin->refundPayment();
+        break;
+
+    case '/getLogs':
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized']);
+            exit();
+        }
+
+        try {
+            $logModel = new Log($GLOBALS['conn']);
+            echo json_encode($logModel->getAllLogs());
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        break;
+
+
+    case '/deleteLog':
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            exit();
+        }
+
+        $logID = intval($_POST['logID'] ?? 0);
+
+        if (!$logID) {
+            echo json_encode(['success' => false, 'message' => 'Missing log ID']);
+            exit();
+        }
+
+        try {
+            $logModel = new Log($GLOBALS['conn']);
+            $logModel->deleteLog($logID);
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+
+    case '/clearLogs':
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['admin_logged_in'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            exit();
+        }
+
+        try {
+            $logModel = new Log($GLOBALS['conn']);
+            $logModel->clearAllLogs();
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
         break;
 
     default:

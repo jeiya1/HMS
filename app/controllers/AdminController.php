@@ -102,9 +102,6 @@ class AdminController
             header("Location: /admin/login");
             exit();
         }
-        // $logModel = new Log($GLOBALS['conn']);
-        // $adminLogs = $logModel->getAdminLogs();
-        // $userLogs = $logModel->getUserLogs();
         require "../../app/views/admin/activityLogs.view.php";
     }
 

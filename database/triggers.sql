@@ -1,3 +1,5 @@
+USE HMS;
+
 DELIMITER $$
 
 CREATE TRIGGER trg_Guests_Insert
@@ -243,10 +245,7 @@ AFTER INSERT ON Reservations
 FOR EACH ROW
 BEGIN
     INSERT INTO Logs(TableName, OperationType, RecordID, NewData)
-    VALUES(
-        'Reservations',
-        'INSERT',
-        NEW.ReservationID,
+    VALUES('Reservations', 'INSERT', NEW.ReservationID,
         JSON_OBJECT(
             'GuestID', NEW.GuestID,
             'Status', NEW.Status,
@@ -256,40 +255,7 @@ BEGIN
     );
 END$$
 
-CREATE TRIGGER trg_Reservations_Update
-AFTER UPDATE ON Reservations
-FOR EACH ROW
-BEGIN
-    INSERT INTO Logs(TableName, OperationType, RecordID, OldData, NewData)
-    VALUES(
-        'Reservations',
-        'UPDATE',
-        OLD.ReservationID,
-        JSON_OBJECT(
-            'GuestID', OLD.GuestID,
-            'Status', OLD.Status,
-            'BookingToken', OLD.BookingToken,
-            'CreatedAt', OLD.CreatedAt
-        ),
-        JSON_OBJECT(
-            'GuestID', NEW.GuestID,
-            'Status', NEW.Status,
-            'BookingToken', NEW.BookingToken,
-            'CreatedAt', NEW.CreatedAt
-        )
-    );
-END$$
-
-CREATE TRIGGER trg_Reservations_Update
-AFTER UPDATE ON Reservations
-FOR EACH ROW
-BEGIN
-    INSERT INTO Logs(TableName, OperationType, RecordID, OldData, NewData)
-    VALUES('Reservations','UPDATE', OLD.ReservationID,
-        JSON_OBJECT('GuestID', OLD.GuestID,'StatusID', OLD.StatusID,'CheckInDate', OLD.CheckInDate,'CheckOutDate', OLD.CheckOutDate,'NumAdults', OLD.NumAdults,'BookingToken', OLD.BookingToken),
-        JSON_OBJECT('GuestID', NEW.GuestID,'StatusID', NEW.StatusID,'CheckInDate', NEW.CheckInDate,'CheckOutDate', NEW.CheckOutDate,'NumAdults', NEW.NumAdults,'BookingToken', NEW.BookingToken)
-    );
-END$$
+DELIMITER ;
 
 DELIMITER $$
 
