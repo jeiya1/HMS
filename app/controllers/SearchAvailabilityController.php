@@ -28,11 +28,13 @@ class SearchAvailabilityController
      */
     public function available(): void
     {
+        $logged_in = $this->getAuthState();
+        $cartCount = $this->getCartCount();
         header('Content-Type: application/json');
         header('Cache-Control: no-store');
 
         // ── Parse dates ──────────────────────────────────────────────────
-        $checkinStr  = $_GET['checkin']  ?? null;
+        $checkinStr = $_GET['checkin'] ?? null;
         $checkoutStr = $_GET['checkout'] ?? null;
 
         [$checkin, $checkout] = $this->parseCheckinCheckout($checkinStr, $checkoutStr);
@@ -43,15 +45,15 @@ class SearchAvailabilityController
         }
 
         // ── Other filters ────────────────────────────────────────────────
-        $adults   = isset($_GET['adults'])   ? max(0, (int) $_GET['adults'])   : null;
+        $adults = isset($_GET['adults']) ? max(0, (int) $_GET['adults']) : null;
         $children = isset($_GET['children']) ? max(0, (int) $_GET['children']) : null;
 
         if ($adults !== null && $children !== null && ($adults + $children) === 0) {
             $adults = $children = null;
         }
 
-        $cartID   = isset($_GET['cartID']) ? (int) $_GET['cartID'] : ($_SESSION['cart_id'] ?? null);
-        $room     = $_GET['room']      ?? null;
+        $cartID = isset($_GET['cartID']) ? (int) $_GET['cartID'] : ($_SESSION['cart_id'] ?? null);
+        $room = $_GET['room'] ?? null;
         $roomType = $_GET['room_type'] ?? null;
 
         // ── Rooms currently displayed (sent by JS) ───────────────────────
@@ -64,13 +66,13 @@ class SearchAvailabilityController
         $roomModel = new Room($GLOBALS['conn']);
 
         $filters = [
-            'checkin'   => $checkin,
-            'checkout'  => $checkout,
-            'adults'    => $adults,
-            'children'  => $children,
-            'room'      => $room,
+            'checkin' => $checkin,
+            'checkout' => $checkout,
+            'adults' => $adults,
+            'children' => $children,
+            'room' => $room,
             'room_type' => $roomType,
-            'cartID'    => $cartID,
+            'cartID' => $cartID,
         ];
 
         $availableRooms = $roomModel->searchAvailable($filters);
@@ -97,10 +99,10 @@ class SearchAvailabilityController
         }
 
         echo json_encode([
-            'available'  => $result,           // { "101": true, "102": false, … }
-            'checkin'    => $checkin,
-            'checkout'   => $checkout,
-            'polled_at'  => date('c'),
+            'available' => $result,           // { "101": true, "102": false, … }
+            'checkin' => $checkin,
+            'checkout' => $checkout,
+            'polled_at' => date('c'),
         ]);
     }
 
@@ -108,7 +110,8 @@ class SearchAvailabilityController
 
     private function parseCheckinCheckout(?string $checkinStr, ?string $checkoutStr = null): array
     {
-        if (!$checkinStr) return [null, null];
+        if (!$checkinStr)
+            return [null, null];
 
         // Range format: "YYYY/MM/DD to YYYY/MM/DD"  or  "YYYY-MM-DD to YYYY-MM-DD"
         if (str_contains($checkinStr, ' to ')) {
@@ -127,11 +130,26 @@ class SearchAvailabilityController
 
     private function normalizeDate(string $raw): ?string
     {
-        if (!$raw) return null;
+        if (!$raw)
+            return null;
         foreach (['Y/m/d', 'Y-m-d', 'd/m/Y'] as $fmt) {
             $d = DateTime::createFromFormat($fmt, $raw);
-            if ($d) return $d->format('Y-m-d');
+            if ($d)
+                return $d->format('Y-m-d');
         }
         return null;
+    }
+
+    // Check if user session is active
+    public function getAuthState()
+    {
+        return isset($_SESSION['logged_in_user_id']);
+    }
+
+    // get current cart count
+    private function getCartCount()
+    {
+        $cartModel = new Cart($GLOBALS['conn']);
+        return $cartModel->getCartAmount();
     }
 }

@@ -8,6 +8,7 @@ class SearchController
     {
         // Check authentication and get room data
         $logged_in = $this->getAuthState();
+        $cartCount = $this->getCartCount();
 
         $roomModel = new Room($GLOBALS['conn']);
         $roomTypeModel = new RoomType($GLOBALS['conn']);
