@@ -138,7 +138,9 @@
                             $roomRoute = 'standard'; // fallback
                         }
                         ?>
-                        <div class="room-item" data-price="<?= htmlspecialchars($room['BasePrice']) ?>">
+                        <div class="room-item" data-price="<?= htmlspecialchars($room['BasePrice']) ?>"
+                            data-room="<?= htmlspecialchars($room['RoomNumber']) ?>">
+
                             <div class="mx-auto h-0.5 w-full bg-yellow-900/60 rounded-lg mb-7"></div>
                             <div class="flex gap-3 my-2">
                                 <div class="flex-1">
@@ -220,6 +222,7 @@
             });
         });
     </script>
+    <script src="/js/Roomavailability.js"></script>
 </body>
 
 </html>

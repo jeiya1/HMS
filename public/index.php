@@ -22,6 +22,7 @@ require_once '../app/controllers/AuthController.php';
 require_once '../app/controllers/PagesController.php';
 require_once '../app/controllers/ReservationController.php';
 require_once '../app/controllers/SearchController.php';
+require_once '../app/controllers/SearchAvailabilityController.php';
 require_once '../app/controllers/CartController.php';
 require_once '../app/models/SessionGuest.php';
 require_once '../app/models/ReservationCart.php';
@@ -193,6 +194,17 @@ switch ($uri) {
         }
         $reservation->cancelGuest(); // you need to create this method
         break;
+
+    case '/search-available':
+        // AJAX-only endpoint — returns JSON availability status for shown rooms
+        if (!isset($_SESSION['session_token'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'No session']);
+            exit;
+        }
+        $searchAvail = new SearchAvailabilityController();
+        $searchAvail->available();
+        exit;
 
     default:
         // Router example
