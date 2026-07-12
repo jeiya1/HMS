@@ -1,0 +1,64 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hms-app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - vendor-data:/var/www/html/vendor
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - hms-net
+
+  db:
+    image: mariadb:11
+    container_name: hms-db
+    restart: unless-stopped
+    environment:
+      # Must be exactly "HMS" (uppercase) — matches `CREATE DATABASE HMS`
+      # in database/schema.sql and the default in config/connect.php.
+      MYSQL_DATABASE: HMS
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./docker/initdb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - hms-net
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: hms-pma
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    networks:
+      - hms-net
+
+volumes:
+  db-data:
+  vendor-data:
+
+networks:
+  hms-net:
+    driver: bridge

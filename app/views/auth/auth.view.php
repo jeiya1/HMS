@@ -26,11 +26,11 @@
 
             <a href="/registration"
                 class="flex items-center border border-neutral-300 border-l-0 px-4 py-1 bg-[#F6F6F6]">
-                Authentication
+                Welcome
             </a>
         </div>
 
-        <h1 class="font-crimson font-bold text-3xl">AUTHENTICATION</h1>
+        <h1 class="font-crimson font-bold text-3xl">WELCOME</h1>
 
         <div class="mx-auto h-1 w-full bg-yellow-900/60 rounded-lg"></div>
 
